@@ -72,59 +72,134 @@ async function fetchBlockchainData() {
     const hashEl = document.getElementById("btc-hash");
     const marketCapEl = document.getElementById("btc-mcap");
 
-    // Fetch BTC USD Price & 24hr Stats
+    let priceFetched = false;
+    let blockFetched = false;
+
+    // 1. Fetch BTC USD Price using Coinbase (highly stable, CORS-friendly, real-time)
     try {
-        const priceRes = await fetch("https://api.coingecko.com/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_market_cap=true&include_24hr_change=true");
-        if (priceRes.ok) {
-            const data = await priceRes.json();
-            const btc = data.bitcoin;
-            state.currentBtcPrice = btc.usd;
-            
-            // Format price and market cap
-            priceEl.textContent = `$${btc.usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            if (marketCapEl) {
-                marketCapEl.textContent = `$${Math.round(btc.usd_market_cap).toLocaleString('en-US')}`;
-            }
+        const coinbaseRes = await fetch("https://api.coinbase.com/v2/prices/BTC-USD/spot");
+        if (coinbaseRes.ok) {
+            const data = await coinbaseRes.json();
+            state.currentBtcPrice = parseFloat(data.data.amount);
+            priceFetched = true;
         }
     } catch (err) {
-        console.warn("CoinGecko price fetch failed, using fallback/mempool price.", err);
-        // Fallback to CoinDesk if CoinGecko rate limited
+        console.warn("Coinbase price fetch failed, trying Blockchain.info...", err);
+    }
+
+    // Fallback 1: Blockchain.info Ticker
+    if (!priceFetched) {
         try {
-            const coindeskRes = await fetch("https://api.coindesk.com/v1/bpi/currentprice.json");
-            if (coindeskRes.ok) {
-                const data = await coindeskRes.json();
-                state.currentBtcPrice = data.bpi.USD.rate_float;
-                priceEl.textContent = `$${state.currentBtcPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+            const bcRes = await fetch("https://blockchain.info/ticker");
+            if (bcRes.ok) {
+                const data = await bcRes.json();
+                state.currentBtcPrice = data.USD.last;
+                priceFetched = true;
             }
-        } catch (e) {
-            console.error("All price APIs failed.", e);
+        } catch (err) {
+            console.warn("Blockchain.info price fetch failed, trying Mempool.space...", err);
         }
     }
 
-    // Fetch Block Height & Tip Hash (via Mempool.space API)
+    // Fallback 2: Mempool.space prices
+    if (!priceFetched) {
+        try {
+            const mempoolPriceRes = await fetch("https://mempool.space/api/v1/prices");
+            if (mempoolPriceRes.ok) {
+                const data = await mempoolPriceRes.json();
+                state.currentBtcPrice = data.USD;
+                priceFetched = true;
+            }
+        } catch (err) {
+            console.error("All price APIs failed.", err);
+        }
+    }
+
+    // Format and display the price
+    priceEl.textContent = `$${state.currentBtcPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    // 2. Fetch Circulating Supply & Calculate Market Cap
+    let supply = 19705000; // sensible fallback
+    try {
+        // Blockchain.info total satoshis in circulation
+        const supplyRes = await fetch("https://blockchain.info/q/totalbc");
+        if (supplyRes.ok) {
+            const satoshis = await supplyRes.text();
+            supply = parseInt(satoshis) / 100000000;
+        }
+    } catch (err) {
+        console.warn("Circulating supply fetch failed, using fallback estimate.", err);
+    }
+
+    const calculatedMcap = supply * state.currentBtcPrice;
+    if (marketCapEl) {
+        marketCapEl.textContent = `$${Math.round(calculatedMcap).toLocaleString('en-US')}`;
+    }
+
+    // 3. Fetch Block Height & Tip Hash (via Mempool.space API)
     try {
         const heightRes = await fetch("https://mempool.space/api/blocks/tip/height");
         if (heightRes.ok) {
             const height = await heightRes.json();
             state.blockHeight = parseInt(height);
             blockEl.textContent = `#${state.blockHeight.toLocaleString('en-US')}`;
-            
-            // Fetch Tip Hash
-            const hashRes = await fetch("https://mempool.space/api/blocks/tip/hash");
-            if (hashRes.ok) {
-                const hash = await hashRes.text();
-                state.blockHash = hash;
-                hashEl.textContent = hash.substring(0, 8) + "..." + hash.substring(hash.length - 8);
-                hashEl.title = hash; // Show full hash on hover
-            }
+            blockFetched = true;
         }
     } catch (err) {
-        console.error("Mempool.space block details fetch failed. Using fallback simulation.", err);
-        // Generate a beautiful simulated block height matching real-time estimate
-        const estimatedHeight = Math.floor(845000 + (Date.now() - 1716940800000) / 600000); // approx 10 mins per block
-        state.blockHeight = estimatedHeight;
-        blockEl.textContent = `#${estimatedHeight.toLocaleString('en-US')}`;
+        console.warn("Mempool.space block height fetch failed, trying Blockchain.info...", err);
     }
+
+    // Fallback block height via Blockchain.info query API
+    if (!blockFetched) {
+        try {
+            const bcBlockRes = await fetch("https://blockchain.info/q/getblockcount");
+            if (bcBlockRes.ok) {
+                const heightText = await bcBlockRes.text();
+                state.blockHeight = parseInt(heightText);
+                blockEl.textContent = `#${state.blockHeight.toLocaleString('en-US')}`;
+                blockFetched = true;
+            }
+        } catch (err) {
+            console.error("All block height APIs failed. Using simulation.", err);
+            // Fallback block height calculation based on Genesis block time
+            const estimatedHeight = Math.floor(845000 + (Date.now() - 1716940800000) / 600000);
+            state.blockHeight = estimatedHeight;
+            blockEl.textContent = `#${estimatedHeight.toLocaleString('en-US')}`;
+        }
+    }
+
+    // 4. Fetch Block Tip Hash
+    let hashFetched = false;
+    try {
+        const hashRes = await fetch("https://mempool.space/api/blocks/tip/hash");
+        if (hashRes.ok) {
+            const hash = await hashRes.text();
+            state.blockHash = hash;
+            hashFetched = true;
+        }
+    } catch (err) {
+        console.warn("Mempool.space block hash fetch failed.", err);
+    }
+
+    if (!hashFetched) {
+        // Fallback: fetch block details for current height via block count
+        try {
+            const blockIndexRes = await fetch(`https://blockchain.info/block-height/${state.blockHeight}?format=json`);
+            if (blockIndexRes.ok) {
+                const data = await blockIndexRes.json();
+                if (data.blocks && data.blocks[0]) {
+                    state.blockHash = data.blocks[0].hash;
+                    hashFetched = true;
+                }
+            }
+        } catch (err) {
+            console.error("All hash APIs failed. Using fallback.", err);
+        }
+    }
+
+    // Display block hash
+    hashEl.textContent = state.blockHash.substring(0, 8) + "..." + state.blockHash.substring(state.blockHash.length - 8);
+    hashEl.title = state.blockHash;
 }
 
 /* --- DYNAMIC COUNDOWN TO HALVING / YEARS ACTIVE --- */
