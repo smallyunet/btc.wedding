@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Union of Human & Protocol | btc.wedding</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="A behavioral art project commemorating our eternal covenant with the Bitcoin Protocol. We have put our net worth into BTC, and this is our immutable wedding.">
+    <meta name="keywords" content="bitcoin wedding, btc.wedding, satoshi nakamoto, behavioral art, crypto wedding, blockchain marriage, HODL vows">
+    <meta name="author" content="BTC Devotee">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://btc.wedding/">
+    <meta property="og:title" content="The Union of Human & Protocol | btc.wedding">
+    <meta property="og:description" content="A behavioral art project commemorating our eternal covenant with the Bitcoin Protocol. Witness our immutable, cryptographic wedding.">
+    <meta property="og:image" content="https://btc.wedding/assets/og_image.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://btc.wedding/">
+    <meta property="twitter:title" content="The Union of Human & Protocol | btc.wedding">
+    <meta property="twitter:description" content="A behavioral art project commemorating our eternal covenant with the Bitcoin Protocol. Witness our immutable, cryptographic wedding.">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💍</text></svg>">
+
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- P2P NETWORK DYNAMIC BACKGROUND -->
+    <canvas id="network-canvas" aria-hidden="true"></canvas>
+
+    <!-- HEADER / NAVIGATION -->
+    <header id="main-header">
+        <div class="container nav-wrap">
+            <a href="#" class="logo" id="header-logo">
+                <span>₿</span>.wedding
+            </a>
+            <nav aria-label="Main Navigation">
+                <ul class="nav-links">
+                    <li><a href="#invitation" id="nav-link-invite">Invitation</a></li>
+                    <li><a href="#heartbeat" id="nav-link-heartbeat">Groom's Heartbeat</a></li>
+                    <li><a href="#covenant" id="nav-link-covenant">Exchange Vows</a></li>
+                    <li><a href="#guestbook" id="nav-link-guestbook">Guestbook</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- HERO: THE SACRED INVITATION -->
+    <section id="invitation" aria-labelledby="invitation-heading">
+        <div class="container">
+            <div class="invite-card glow-border" id="invite-card-container">
+                <span class="invite-badge" id="invite-badge-label">Eternal Covenant</span>
+                <h1 class="invite-title" id="invitation-heading">The Marriage of Humanity & Protocol</h1>
+                
+                <div class="invite-names" id="names-banner">
+                    <span class="partner" id="partner-human">HODLer</span>
+                    <span class="ring-icon" aria-hidden="true">💍</span>
+                    <span class="partner btc" id="partner-btc">Bitcoin</span>
+                </div>
+                
+                <p class="invite-vows-preview" id="invite-vows-description">
+                    “To hold and to hodl, in cold storage and hot wallets, in bull runs and bear markets, till private key loss or hardware failure do us part.”
+                </p>
+                
+                <div class="invite-meta" id="invite-meta-details">
+                    <div class="meta-item">
+                        <div class="meta-label">Witness Date</div>
+                        <div class="meta-value" id="wedding-date-value">Loading Date...</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Wedding Dowry (BTC Price)</div>
+                        <div class="meta-value highlight" id="btc-price">$68,500.00</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Genesis Block Active</div>
+                        <div class="meta-value" id="halving-countdown">0y 0d 0h 0m 0s</div>
+                    </div>
+                </div>
+                
+                <button class="btn-primary" id="btn-start-ceremony" onclick="document.getElementById('covenant').scrollIntoView({behavior: 'smooth'})">
+                    Sign the Vows & Witness
+                </button>
+            </div>
+        </div>
+        
+        <div class="scroll-indicator" aria-hidden="true">
+            <span>Scroll to Enter</span>
+            <div class="mouse">
+                <div class="wheel"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- THE HEARTBEAT OF THE GROOM: LIVE BLOCKCHAIN STATS -->
+    <section id="heartbeat" aria-labelledby="heartbeat-heading">
+        <div class="container">
+            <div class="section-title-wrap">
+                <span class="section-subtitle">Immutable Registrars</span>
+                <h2 class="section-title" id="heartbeat-heading">The Groom's Heartbeat</h2>
+            </div>
+            
+            <div class="telemetry-grid" id="stats-grid">
+                <!-- Stat Card 1 -->
+                <div class="telemetry-card glow-border" id="card-block-height">
+                    <div class="card-icon" aria-hidden="true">🧱</div>
+                    <div class="card-label">Current Block Height</div>
+                    <div class="card-value" id="btc-block">#845,000</div>
+                    <div class="card-subtext">
+                        <span class="status-indicator"></span>
+                        Blockchain Heartbeat Active
+                    </div>
+                </div>
+
+                <!-- Stat Card 2 -->
+                <div class="telemetry-card glow-border" id="card-tip-hash">
+                    <div class="card-icon" aria-hidden="true">🔗</div>
+                    <div class="card-label">Latest Block Hash</div>
+                    <div class="card-value" id="btc-hash">0000...e6f7</div>
+                    <div class="card-subtext">The Witnessing Oracle Node</div>
+                </div>
+
+                <!-- Stat Card 3 -->
+                <div class="telemetry-card glow-border" id="card-uptime">
+                    <div class="card-icon" aria-hidden="true">🔋</div>
+                    <div class="card-label">Groom's Uptime</div>
+                    <div class="card-value" id="btc-uptime">99.9897%</div>
+                    <div class="card-subtext">Active & Incorruptible since 2009</div>
+                </div>
+
+                <!-- Stat Card 4 -->
+                <div class="telemetry-card glow-border" id="card-market-cap">
+                    <div class="card-icon" aria-hidden="true">💰</div>
+                    <div class="card-label">Total Dowry (Market Cap)</div>
+                    <div class="card-value" id="btc-mcap">$1,350,000,000,000</div>
+                    <div class="card-subtext">Distributed among all participants</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- THE COVENANT: VOW EXCHANGER RITUAL -->
+    <section id="covenant" aria-labelledby="covenant-heading">
+        <div class="container">
+            <div class="section-title-wrap">
+                <span class="section-subtitle">Sacred Ritual</span>
+                <h2 class="section-title" id="covenant-heading">Exchange the Vows</h2>
+            </div>
+            
+            <div class="ritual-wrap glow-border" id="ritual-container">
+                
+                <!-- STEP 1: BRIDE/GROOM IDENTIFICATION -->
+                <div class="ritual-step active" id="step-1" role="tabpanel">
+                    <div class="step-header">
+                        <span class="step-number">Step 01 of 03</span>
+                        <h3 class="step-title">State Your Identity</h3>
+                    </div>
+                    <div class="input-group">
+                        <label for="bride-name" class="input-label">Your Holy Hodler Name</label>
+                        <input type="text" id="bride-name" class="styled-input" placeholder="e.g., Alice Nakamoto" autocomplete="off" required>
+                    </div>
+                    <div class="step-actions">
+                        <span></span> <!-- Spacer -->
+                        <button class="btn-primary" id="btn-next-1" disabled>Proceed to Vows</button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: RECITE THE SACRED VOWS -->
+                <div class="ritual-step" id="step-2" role="tabpanel">
+                    <div class="step-header">
+                        <span class="step-number">Step 02 of 03</span>
+                        <h3 class="step-title">Acknowledge the Covenant</h3>
+                    </div>
+                    <div class="vows-list" role="group" aria-label="Wedding Vows Checklist">
+                        <div class="vow-item" id="vow-1">
+                            <div class="custom-checkbox"></div>
+                            <p class="vow-text">I promise to hold and to hodl, from this day forward, in bull runs and in bear markets, and through any corrections.</p>
+                        </div>
+                        <div class="vow-item" id="vow-2">
+                            <div class="custom-checkbox"></div>
+                            <p class="vow-text">I renounce all inflationary fiat systems, central banking reserves, and fragile centralized institutions.</p>
+                        </div>
+                        <div class="vow-item" id="vow-3">
+                            <div class="custom-checkbox"></div>
+                            <p class="vow-text">I vow to guard my private seed phrase with my life, and never disclose it to any mortal, machine, or software interface.</p>
+                        </div>
+                        <div class="vow-item" id="vow-4">
+                            <div class="custom-checkbox"></div>
+                            <p class="vow-text">I accept that this union is permanent, non-custodial, and till private key loss or hardware failure do us part.</p>
+                        </div>
+                    </div>
+                    <div class="step-actions">
+                        <button class="btn-secondary" id="btn-back-2">Back</button>
+                        <button class="btn-primary" id="btn-next-2" disabled>Proceed to Ring Forge</button>
+                    </div>
+                </div>
+
+                <!-- STEP 3: FORGE THE SHA-256 RINGS -->
+                <div class="ritual-step" id="step-3" role="tabpanel">
+                    <div class="step-header">
+                        <span class="step-number">Step 03 of 03</span>
+                        <h3 class="step-title">Forge Cryptographic Rings</h3>
+                    </div>
+                    <div class="forge-container">
+                        <div class="ring-forge-canvas-wrap">
+                            <div class="ring-graphic" id="forge-ring-visual">
+                                <div class="ring-core"></div>
+                            </div>
+                        </div>
+                        <p class="forge-status-text" id="forge-status">Waiting for transaction oracle...</p>
+                    </div>
+                    <div class="step-actions">
+                        <button class="btn-secondary" id="btn-back-3">Back</button>
+                        <button class="btn-primary" id="btn-forge">Forge SHA-256 Rings</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- GENERATIVE MARRIAGE CERTIFICATE (MODAL WINDOW) -->
+    <div class="cert-modal" id="cert-modal" role="dialog" aria-modal="true" aria-labelledby="cert-title-main">
+        <div class="cert-modal-content">
+            <div class="cert-frame">
+                <div class="cert-decorations" aria-hidden="true"></div>
+                
+                <div class="cert-header">
+                    <span class="cert-seal" aria-hidden="true">💍</span>
+                    <div class="cert-title-top">State of Cryptography</div>
+                    <h3 class="cert-title-main" id="cert-title-main">Certificate of Non-Custodial Marriage</h3>
+                </div>
+
+                <div class="cert-body">
+                    <p class="cert-declare">This document serves as eternal testament to the union of protocol and soul:</p>
+                    
+                    <div class="cert-couples">
+                        <div class="cert-person">
+                            <div class="name" id="cert-bride-name">Human Hodler</div>
+                            <div class="role">The Devoted Soul</div>
+                        </div>
+                        <div class="cert-union-sign" aria-hidden="true">₿</div>
+                        <div class="cert-person">
+                            <div class="name">Satoshi's Protocol</div>
+                            <div class="role">Bitcoin Genesis Network</div>
+                        </div>
+                    </div>
+
+                    <p class="cert-covenant">
+                        Having signed the vows of HODL, renouncing central assets, and choosing mathematically sound cryptography over fiat systems, they are hereafter united in absolute decentralized custody.
+                    </p>
+
+                    <div class="cert-ledger">
+                        <div class="ledger-title">Immutable Block Registration</div>
+                        <div class="ledger-row">
+                            <span class="ledger-label">Witness Block Height:</span>
+                            <span class="ledger-val" id="cert-block-height">#845,000</span>
+                        </div>
+                        <div class="ledger-row">
+                            <span class="ledger-label">Witness Block Hash:</span>
+                            <span class="ledger-val" id="cert-block-hash">0000000000000000000000000000000000000000</span>
+                        </div>
+                        <div class="ledger-row">
+                            <span class="ledger-label">Dowry Value Index:</span>
+                            <span class="ledger-val" id="cert-btc-price">$68,500.00 USD</span>
+                        </div>
+                        <div class="ledger-row">
+                            <span class="ledger-label">Covenant ID (Hash):</span>
+                            <span class="ledger-val" id="cert-tx-id">0000000000000000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cert-footer">
+                    <div class="signature-block">
+                        <div class="sig-line" id="sig-bride">Human Signature</div>
+                        <div class="sig-label">Signature of the Devoted</div>
+                    </div>
+                    <div class="signature-block">
+                        <div class="sig-line btc-sig" id="sig-btc">BITCOIN BLOCK COVENANT</div>
+                        <div class="sig-label">Witnessed by Consensus</div>
+                    </div>
+                </div>
+
+                <div class="cert-actions">
+                    <button class="btn-secondary btn-close-modal" id="btn-close-cert">Close Covenant</button>
+                    <button class="btn-secondary" id="btn-print-cert">Print / Save PDF</button>
+                    <button class="btn-primary" id="btn-share-cert">Share Covenant</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- THE GUESTBOOK / BLESSING WALL -->
+    <section id="guestbook" aria-labelledby="guestbook-heading">
+        <div class="container">
+            <div class="section-title-wrap">
+                <span class="section-subtitle">Congratulations & Gifts</span>
+                <h2 class="section-title" id="guestbook-heading">The Blessing Wall</h2>
+            </div>
+            
+            <div class="guestbook-wrap" id="guestbook-container">
+                <!-- Guestbook Form -->
+                <form class="guestbook-form glow-border" id="wish-form">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="guest-name" class="input-label">Your Moniker / BTC Address</label>
+                            <input type="text" id="guest-name" class="styled-input" placeholder="e.g., Hal Finney" autocomplete="off">
+                        </div>
+                        <div class="input-group">
+                            <label for="guest-wish" class="input-label">Blessing / Vows of support</label>
+                            <input type="text" id="guest-wish" class="styled-input" placeholder="e.g., Congratulations! May your private keys remain safe..." required autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="present-selector">
+                        <label class="input-label">Send a Wedding Present</label>
+                        <div class="gift-options" id="wedding-gift-selector">
+                            <div class="gift-tag selected" data-gift="🥂 Champagne">🥂 Champagne</div>
+                            <div class="gift-tag" data-gift="🌹 Bouquet of Sats">🌹 Bouquet of Sats</div>
+                            <div class="gift-tag" data-gift="🍕 Pizza Box">🍕 Pizza Box</div>
+                            <div class="gift-tag" data-gift="💎 Coldcard Wallet">💎 Coldcard Wallet</div>
+                            <div class="gift-tag" data-gift="🕯️ Genesis Candle">🕯️ Genesis Candle</div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="btn-submit-wish" style="width: 100%;">Send Blessing</button>
+                </form>
+
+                <!-- Wishes Wall -->
+                <div class="wishes-wall" id="wishes-wall">
+                    <!-- Wish cards populated dynamically by JS -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER: WEDDING DOWRY ADDRESS & INFO -->
+    <footer id="main-footer">
+        <div class="container">
+            <div class="footer-logo">
+                <span>₿</span>.wedding
+            </div>
+            <p class="footer-text">
+                This website is a piece of blockchain behavioral art. It runs 100% locally and represents the absolute devotion of holding the world's soundest asset.
+            </p>
+            <div class="wedding-address" id="wedding-address-block" data-address="bc1qweddingcovenantforeverhodl21millionsats" title="Click to copy bridal gift wallet">
+                🎁 Send Wedding Gifts (BTC): <span>bc1qweddingcovenantforeverhodl21millionsats</span>
+            </div>
+            <p class="footer-text" style="margin-top: 30px; opacity: 0.5;">
+                &copy; 2026 btc.wedding &mdash; Made with ❤️ and cryptography.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Core App Scripts -->
+    <script src="js/particles.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
