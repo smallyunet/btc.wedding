@@ -15,11 +15,11 @@ class P2PNetworkBackground {
         
         this.config = {
             particleCount: 80,
-            maxDistance: 120,
-            nodeColor: 'rgba(247, 147, 26, 0.4)', // Bitcoin orange with opacity
-            lineColor: 'rgba(212, 175, 55, 0.08)',  // Gold with very low opacity
-            blockColor: 'rgba(247, 147, 26, 0.7)',
-            mouseLineColor: 'rgba(247, 147, 26, 0.2)'
+            maxDistance: 130,
+            nodeColor: 'rgba(197, 163, 88, 0.25)', // Antique gold with low opacity
+            lineColor: 'rgba(197, 163, 88, 0.05)',  // Champagne gold with very low opacity
+            blockColor: 'rgba(197, 163, 88, 0.6)',
+            mouseLineColor: 'rgba(197, 163, 88, 0.15)'
         };
 
         this.init();
@@ -37,8 +37,8 @@ class P2PNetworkBackground {
             this.particles.push(this.createParticle());
         }
 
-        // Generate slow-moving gold blocks
-        for (let i = 0; i < 5; i++) {
+        // Generate slow-moving golden consensus stars
+        for (let i = 0; i < 4; i++) {
             this.blockParticles.push(this.createBlockParticle());
         }
     }
@@ -47,13 +47,13 @@ class P2PNetworkBackground {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
         
-        // Adjust particle count based on screen size
+        // Adjust particle count based on screen size for premium performance
         if (window.innerWidth < 768) {
-            this.config.particleCount = 40;
-            this.config.maxDistance = 80;
+            this.config.particleCount = 35;
+            this.config.maxDistance = 90;
         } else {
-            this.config.particleCount = 80;
-            this.config.maxDistance = 120;
+            this.config.particleCount = 75;
+            this.config.maxDistance = 130;
         }
     }
 
@@ -61,10 +61,10 @@ class P2PNetworkBackground {
         return {
             x: Math.random() * this.canvas.width,
             y: Math.random() * this.canvas.height,
-            vx: (Math.random() - 0.5) * 0.35,
-            vy: (Math.random() - 0.5) * 0.35,
-            radius: Math.random() * 2 + 1,
-            pulseSpeed: 0.02 + Math.random() * 0.03,
+            vx: (Math.random() - 0.5) * 0.08, // 4x slower for high stability
+            vy: (Math.random() - 0.5) * 0.08, // 4x slower for high stability
+            radius: Math.random() * 1.5 + 0.8,
+            pulseSpeed: 0.005 + Math.random() * 0.01, // slow breathing
             pulseValue: Math.random() * Math.PI
         };
     }
@@ -73,12 +73,13 @@ class P2PNetworkBackground {
         return {
             x: Math.random() * this.canvas.width,
             y: Math.random() * this.canvas.height,
-            vx: (Math.random() - 0.5) * 0.15,
-            vy: (Math.random() - 0.5) * 0.15,
-            radius: Math.random() * 6 + 4,
-            pulseSpeed: 0.01 + Math.random() * 0.01,
+            vx: (Math.random() - 0.5) * 0.03, // imperceptible drift
+            vy: (Math.random() - 0.5) * 0.03,
+            radius: Math.random() * 12 + 8,
+            pulseSpeed: 0.003 + Math.random() * 0.005, // very slow breath
             pulseValue: Math.random() * Math.PI,
-            label: '#' + Math.floor(Math.random() * 1000000)
+            rotation: Math.random() * Math.PI * 2,
+            rotationSpeed: (Math.random() - 0.5) * 0.001 // slow orbit rotation
         };
     }
 
@@ -98,20 +99,22 @@ class P2PNetworkBackground {
 
     drawMesh() {
         const len = this.particles.length;
+        this.ctx.shadowBlur = 0; // Ensure no default glowing filters that slow performance
+        
         for (let i = 0; i < len; i++) {
             const p1 = this.particles[i];
             
             // Pulse particle opacity and size for shimmering effect
             p1.pulseValue += p1.pulseSpeed;
-            const sizePulse = p1.radius + Math.sin(p1.pulseValue) * 0.5;
-            const opacity = 0.2 + Math.sin(p1.pulseValue) * 0.15;
+            const sizePulse = p1.radius + Math.sin(p1.pulseValue) * 0.3;
+            const opacity = 0.12 + Math.sin(p1.pulseValue) * 0.08;
             
             this.ctx.beginPath();
             this.ctx.arc(p1.x, p1.y, sizePulse, 0, Math.PI * 2);
-            this.ctx.fillStyle = `rgba(247, 147, 26, ${opacity})`;
+            this.ctx.fillStyle = `rgba(197, 163, 88, ${opacity})`;
             this.ctx.fill();
 
-            // Connect to other nodes
+            // Connect to other nodes in network
             for (let j = i + 1; j < len; j++) {
                 const p2 = this.particles[j];
                 const dx = p1.x - p2.x;
@@ -119,28 +122,28 @@ class P2PNetworkBackground {
                 const dist = Math.sqrt(dx * dx + dy * dy);
 
                 if (dist < this.config.maxDistance) {
-                    const alpha = (1 - dist / this.config.maxDistance) * 0.12;
+                    const alpha = (1 - dist / this.config.maxDistance) * 0.06;
                     this.ctx.beginPath();
                     this.ctx.moveTo(p1.x, p1.y);
                     this.ctx.lineTo(p2.x, p2.y);
-                    this.ctx.strokeStyle = `rgba(212, 175, 55, ${alpha})`;
-                    this.ctx.lineWidth = 0.6;
+                    this.ctx.strokeStyle = `rgba(197, 163, 88, ${alpha})`;
+                    this.ctx.lineWidth = 0.5;
                     this.ctx.stroke();
                 }
             }
 
-            // Connect to mouse
+            // Subtle interaction with mouse hover (draws fine lines to nearby nodes)
             if (this.mouse.x !== null) {
                 const dx = p1.x - this.mouse.x;
                 const dy = p1.y - this.mouse.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < this.mouse.radius) {
-                    const alpha = (1 - dist / this.mouse.radius) * 0.25;
+                    const alpha = (1 - dist / this.mouse.radius) * 0.15;
                     this.ctx.beginPath();
                     this.ctx.moveTo(p1.x, p1.y);
                     this.ctx.lineTo(this.mouse.x, this.mouse.y);
-                    this.ctx.strokeStyle = `rgba(247, 147, 26, ${alpha})`;
-                    this.ctx.lineWidth = 0.8;
+                    this.ctx.strokeStyle = `rgba(224, 122, 21, ${alpha})`; // Soft amber interactive trace
+                    this.ctx.lineWidth = 0.6;
                     this.ctx.stroke();
                 }
             }
@@ -152,41 +155,47 @@ class P2PNetworkBackground {
         for (let i = 0; i < len; i++) {
             const b = this.blockParticles[i];
             b.pulseValue += b.pulseSpeed;
-            const sizePulse = b.radius + Math.sin(b.pulseValue) * 1.5;
+            b.rotation += b.rotationSpeed;
+            const sizePulse = b.radius + Math.sin(b.pulseValue) * 2;
             
-            // Draw a glowing block representation (outer glow)
+            // 1. Soft radial background glow (represents local block node field)
             const glowGradient = this.ctx.createRadialGradient(
-                b.x, b.y, sizePulse * 0.2,
-                b.x, b.y, sizePulse * 2
+                b.x, b.y, sizePulse * 0.1,
+                b.x, b.y, sizePulse * 3
             );
-            glowGradient.addColorStop(0, 'rgba(247, 147, 26, 0.4)');
-            glowGradient.addColorStop(0.5, 'rgba(212, 175, 55, 0.08)');
-            glowGradient.addColorStop(1, 'rgba(7, 7, 9, 0)');
+            glowGradient.addColorStop(0, 'rgba(197, 163, 88, 0.15)');
+            glowGradient.addColorStop(0.5, 'rgba(224, 122, 21, 0.03)');
+            glowGradient.addColorStop(1, 'rgba(8, 8, 10, 0)');
 
             this.ctx.beginPath();
-            this.ctx.arc(b.x, b.y, sizePulse * 2, 0, Math.PI * 2);
+            this.ctx.arc(b.x, b.y, sizePulse * 3, 0, Math.PI * 2);
             this.ctx.fillStyle = glowGradient;
             this.ctx.fill();
 
-            // Inner solid block core (square representing a bitcoin block)
+            // 2. High-end orbit graphic: Slow-rotating dotted delicate ring (Gold)
             this.ctx.save();
             this.ctx.translate(b.x, b.y);
-            this.ctx.rotate(b.pulseValue * 0.1);
+            this.ctx.rotate(b.rotation);
             
             this.ctx.beginPath();
-            const side = sizePulse;
-            this.ctx.rect(-side / 2, -side / 2, side, side);
-            this.ctx.fillStyle = 'rgba(247, 147, 26, 0.85)';
-            this.ctx.shadowBlur = 15;
-            this.ctx.shadowColor = '#f7931a';
-            this.ctx.fill();
-            
-            // Gold border
-            this.ctx.strokeStyle = '#d4af37';
-            this.ctx.lineWidth = 1.5;
+            this.ctx.arc(0, 0, sizePulse * 1.6, 0, Math.PI * 2);
+            this.ctx.strokeStyle = 'rgba(197, 163, 88, 0.2)';
+            this.ctx.lineWidth = 0.75;
+            this.ctx.setLineDash([2, 5]); // Delicate dotted circular orbit
             this.ctx.stroke();
             this.ctx.restore();
+
+            // 3. Central solid star node: Small golden dot with soft high-contrast core
+            this.ctx.beginPath();
+            this.ctx.arc(b.x, b.y, 2, 0, Math.PI * 2);
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            this.ctx.shadowBlur = 8;
+            this.ctx.shadowColor = '#c5a358';
+            this.ctx.fill();
         }
+        
+        // Reset shadow configuration for main drawings
+        this.ctx.shadowBlur = 0;
     }
 
     update() {
@@ -200,15 +209,15 @@ class P2PNetworkBackground {
             if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
         }
 
-        // Update block nodes
+        // Update consensus star nodes (extremely gentle drift wrapping around screen edges)
         for (let b of this.blockParticles) {
             b.x += b.vx;
             b.y += b.vy;
 
-            if (b.x < -20) b.x = this.canvas.width + 20;
-            if (b.x > this.canvas.width + 20) b.x = -20;
-            if (b.y < -20) b.y = this.canvas.height + 20;
-            if (b.y > this.canvas.height + 20) b.y = -20;
+            if (b.x < -100) b.x = this.canvas.width + 100;
+            if (b.x > this.canvas.width + 100) b.x = -100;
+            if (b.y < -100) b.y = this.canvas.height + 100;
+            if (b.y > this.canvas.height + 100) b.y = -100;
         }
     }
 
@@ -218,7 +227,7 @@ class P2PNetworkBackground {
         // Render network mesh
         this.drawMesh();
         
-        // Render block nodes
+        // Render consensus star nodes
         this.drawBlocks();
         
         // Update positions
