@@ -75,11 +75,11 @@
                     </div>
                     <div class="meta-item">
                         <div class="meta-label">Wedding Dowry (BTC Price)</div>
-                        <div class="meta-value highlight" id="btc-price">$68,500.00</div>
+                        <div class="meta-value highlight" id="btc-price">Loading live data...</div>
                     </div>
                     <div class="meta-item">
-                        <div class="meta-label">Genesis Block Active</div>
-                        <div class="meta-value" id="halving-countdown">0y 0d 0h 0m 0s</div>
+                        <div class="meta-label">Genesis Block Age</div>
+                        <div class="meta-value" id="halving-countdown">Calculating...</div>
                     </div>
                 </div>
                 
@@ -110,7 +110,7 @@
                 <div class="telemetry-card glow-border" id="card-block-height">
                     <div class="card-icon" aria-hidden="true">🧱</div>
                     <div class="card-label">Current Block Height</div>
-                    <div class="card-value" id="btc-block">#845,000</div>
+                    <div class="card-value" id="btc-block">Loading...</div>
                     <div class="card-subtext">
                         <span class="status-indicator"></span>
                         Blockchain Heartbeat Active
@@ -121,23 +121,23 @@
                 <div class="telemetry-card glow-border" id="card-tip-hash">
                     <div class="card-icon" aria-hidden="true">🔗</div>
                     <div class="card-label">Latest Block Hash</div>
-                    <div class="card-value" id="btc-hash">0000...e6f7</div>
+                    <div class="card-value" id="btc-hash">Waiting for latest tip...</div>
                     <div class="card-subtext">The Witnessing Oracle Node</div>
                 </div>
 
                 <!-- Stat Card 3 -->
                 <div class="telemetry-card glow-border" id="card-uptime">
                     <div class="card-icon" aria-hidden="true">🔋</div>
-                    <div class="card-label">Groom's Uptime</div>
-                    <div class="card-value" id="btc-uptime">99.9897%</div>
-                    <div class="card-subtext">Active & Incorruptible since 2009</div>
+                    <div class="card-label">Protocol Age</div>
+                    <div class="card-value" id="btc-uptime">Calculating...</div>
+                    <div class="card-subtext">Measured from the Genesis block timestamp</div>
                 </div>
 
                 <!-- Stat Card 4 -->
                 <div class="telemetry-card glow-border" id="card-market-cap">
                     <div class="card-icon" aria-hidden="true">💰</div>
                     <div class="card-label">Total Dowry (Market Cap)</div>
-                    <div class="card-value" id="btc-mcap">$1,350,000,000,000</div>
+                    <div class="card-value" id="btc-mcap">Loading...</div>
                     <div class="card-subtext">Distributed among all participants</div>
                 </div>
             </div>
@@ -259,18 +259,18 @@
                         <div class="ledger-title">Immutable Block Registration</div>
                         <div class="ledger-row">
                             <span class="ledger-label">Witness Block Height:</span>
-                            <span class="ledger-val" id="cert-block-height">#845,000</span>
+                            <span class="ledger-val" id="cert-block-height">Unavailable</span>
                         </div>
                         <div class="ledger-row">
                             <span class="ledger-label">Witness Block Hash:</span>
-                            <span class="ledger-val" id="cert-block-hash">0000000000000000000000000000000000000000</span>
+                            <span class="ledger-val" id="cert-block-hash">Unavailable</span>
                         </div>
                         <div class="ledger-row">
                             <span class="ledger-label">Dowry Value Index:</span>
-                            <span class="ledger-val" id="cert-btc-price">$68,500.00 USD</span>
+                            <span class="ledger-val" id="cert-btc-price">Unavailable</span>
                         </div>
                         <div class="ledger-row">
-                            <span class="ledger-label">Covenant ID (Hash):</span>
+                            <span class="ledger-label">Local Certificate ID:</span>
                             <span class="ledger-val" id="cert-tx-id">0000000000000000</span>
                         </div>
                     </div>
@@ -310,7 +310,7 @@
                     <div class="form-grid">
                         <div class="input-group">
                             <label for="guest-name" class="input-label">Your Moniker / BTC Address</label>
-                            <input type="text" id="guest-name" class="styled-input" placeholder="e.g., Hal Finney" autocomplete="off">
+                            <input type="text" id="guest-name" class="styled-input" placeholder="e.g., your name or BTC address" autocomplete="off">
                         </div>
                         <div class="input-group">
                             <label for="guest-wish" class="input-label">Blessing / Vows of support</label>
@@ -349,8 +349,8 @@
             <p class="footer-text">
                 This website is a piece of blockchain behavioral art. It runs 100% locally and represents the absolute devotion of holding the world's soundest asset.
             </p>
-            <div class="wedding-address" id="wedding-address-block" data-address="bc1qweddingcovenantforeverhodl21millionsats" title="Click to copy bridal gift wallet">
-                🎁 Send Wedding Gifts (BTC): <span>bc1qweddingcovenantforeverhodl21millionsats</span>
+            <div class="wedding-address" id="wedding-address-block" data-address="" title="Set a real BTC address before enabling copy">
+                🎁 Send Wedding Gifts (BTC): <span>Address not configured</span>
             </div>
             <p class="footer-text" style="margin-top: 30px; opacity: 0.5;">
                 &copy; 2026 btc.wedding &mdash; Made with ❤️ and cryptography.

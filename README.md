@@ -17,12 +17,12 @@ For those of us who hold Bitcoin as our primary store of value, we have effectiv
 ## ✨ Features
 
 * **🌌 P2P Network Particle Background**: A high-performance canvas particle system that visually simulates active Bitcoin network nodes connecting and propagating newly mined blocks in real-time.
-* **💓 The Groom's Heartbeat (Live Telemetry)**: Connects directly to production APIs (CoinGecko & Mempool.space) to stream the current Bitcoin USD price, total market capitalization, exact latest block height, block hash, and protocol uptime since the Genesis block.
+* **💓 The Groom's Heartbeat (Live Telemetry)**: Connects directly to public APIs to stream the current Bitcoin USD price, latest block height, block hash, circulating-supply-derived market cap when available, and protocol age since the Genesis block.
 * **✍️ Non-Custodial Vow Ritual**: An interactive multi-step ceremony where you state your name, pledge allegiance to the holy HODL vows (renouncing central banks and guarding your private keys), and forge cryptographic rings.
 * **🔨 SHA-256 Ring Forge**: A beautiful interactive terminal sequence that simulates mining a new block to "forge" a mathematical wedding ring.
-* **📜 Generative Marriage Certificate**: Upon completing the vows, the site dynamically generates a gorgeous, printable marriage certificate. It is stamped with your name, the exact timestamp, the witnessing block height/hash, and a unique cryptographic *Covenant ID*.
+* **📜 Generative Marriage Certificate**: Upon completing the vows, the site dynamically generates a gorgeous, printable marriage certificate. It is stamped with your name, the exact timestamp, the witnessing block height/hash, and a unique local cryptographic certificate ID.
 * **🖨️ Tailored Print Mode**: Pressing "Print/Save PDF" triggers a custom `@media print` style sheet that strips away all website interfaces, background particles, and buttons, formatting the certificate into a pristine, gold-bordered white parchment document suitable for framing.
-* **🥂 The HODL Blessing Wall**: A persistent digital guestbook where guests can sign their name, leave blessings, and select virtual wedding gifts (e.g., *Satoshi Roses*, *Champagne*, *Pizza Box*). It comes preloaded with historical congratulations from Satoshi Nakamoto, Hal Finney, and Laszlo Hanyecz.
+* **🥂 The HODL Blessing Wall**: A persistent digital guestbook where guests can sign their name, leave blessings, and select virtual wedding gifts. It is preloaded with factual Bitcoin history references instead of fabricated celebrity messages.
 
 ---
 

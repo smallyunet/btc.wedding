@@ -9,30 +9,36 @@ const state = {
     partnerName: "",
     vowsChecked: 0,
     ringsForged: false,
-    currentBtcPrice: 68500,
-    blockHeight: 845000,
-    blockHash: "00000000000000000001a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3",
+    currentBtcPrice: null,
+    blockHeight: null,
+    blockHash: "",
     timestamp: ""
 };
 
 // Seed blessings for Guestbook
 const SEED_WISHES = [
     {
-        author: "Satoshi Nakamoto",
-        text: "If you don't believe me or don't get it, I don't have time to try to convince you, sorry. But for this wedding, I offer my blessings. HODL forever.",
-        gift: "🌹 21M Roses"
+        author: "Bitcoin Genesis Block",
+        text: "\"The Times 03/Jan/2009 Chancellor on brink of second bailout for banks\"",
+        gift: "🧱 Block 0"
     },
     {
         author: "Hal Finney",
-        text: "Running bitcoin. What a beautiful wedding. Ultimately, the power of Bitcoin is the power of the people who commit their lives to it.",
-        gift: "💍 Genesis Ring"
+        text: "Running bitcoin",
+        gift: "🖥️ Node Online"
     },
     {
-        author: "Laszlo Hanyecz",
-        text: "Congratulations! I wanted to send a wedding cake, but I could only find someone to trade it for 10,000 BTC. Best wishes to the couple!",
+        author: "Bitcoin Pizza Day",
+        text: "10,000 BTC exchanged for two pizzas on 2010-05-22",
         gift: "🍕 2 Pizzas"
     }
 ];
+
+const LEGACY_FAKE_WISH_AUTHORS = new Set([
+    "Satoshi Nakamoto",
+    "Hal Finney",
+    "Laszlo Hanyecz"
+]);
 
 document.addEventListener("DOMContentLoaded", () => {
     initApp();
@@ -51,6 +57,68 @@ function initApp() {
     document.getElementById("wedding-date-value").textContent = today.toLocaleDateString('en-US', {
         year: 'numeric', month: 'long', day: 'numeric'
     });
+}
+
+function formatCurrency(value) {
+    if (!Number.isFinite(value)) {
+        return "Unavailable";
+    }
+
+    return `$${value.toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    })}`;
+}
+
+function formatBlockHeight(value) {
+    if (!Number.isInteger(value)) {
+        return "Unavailable";
+    }
+
+    return `#${value.toLocaleString("en-US")}`;
+}
+
+function formatShortHash(value) {
+    if (!value || value.length < 16) {
+        return "Unavailable";
+    }
+
+    return `${value.substring(0, 8)}...${value.substring(value.length - 8)}`;
+}
+
+async function fetchWithTimeout(url, timeoutMs = 4000) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        return await fetch(url, { signal: controller.signal });
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
+function isSameWish(left, right) {
+    return left.author === right.author && left.text === right.text && left.gift === right.gift;
+}
+
+function isLegacyFabricatedWish(wish) {
+    if (!wish || !LEGACY_FAKE_WISH_AUTHORS.has(wish.author)) {
+        return false;
+    }
+
+    return /(beautiful wedding|offer my blessings|best wishes|hodl forever)/i.test(wish.text || "");
+}
+
+function normalizeStoredWishes(storedWishes) {
+    const existingWishes = Array.isArray(storedWishes) ? storedWishes : [];
+    const withoutLegacySeeds = existingWishes.filter(wish => (
+        !isLegacyFabricatedWish(wish)
+    ));
+    const withoutDuplicateSeeds = withoutLegacySeeds.filter(wish => (
+        !SEED_WISHES.some(seed => isSameWish(seed, wish))
+    ));
+
+    return [...SEED_WISHES, ...withoutDuplicateSeeds];
 }
 
 /* --- HEADER AND SCROLL EFFECTS --- */
@@ -74,10 +142,11 @@ async function fetchBlockchainData() {
 
     let priceFetched = false;
     let blockFetched = false;
+    let supplyFetched = false;
 
     // 1. Fetch BTC USD Price using Coinbase (highly stable, CORS-friendly, real-time)
     try {
-        const coinbaseRes = await fetch("https://api.coinbase.com/v2/prices/BTC-USD/spot");
+        const coinbaseRes = await fetchWithTimeout("https://api.coinbase.com/v2/prices/BTC-USD/spot");
         if (coinbaseRes.ok) {
             const data = await coinbaseRes.json();
             state.currentBtcPrice = parseFloat(data.data.amount);
@@ -90,7 +159,7 @@ async function fetchBlockchainData() {
     // Fallback 1: Blockchain.info Ticker
     if (!priceFetched) {
         try {
-            const bcRes = await fetch("https://blockchain.info/ticker");
+            const bcRes = await fetchWithTimeout("https://blockchain.info/ticker");
             if (bcRes.ok) {
                 const data = await bcRes.json();
                 state.currentBtcPrice = data.USD.last;
@@ -104,7 +173,7 @@ async function fetchBlockchainData() {
     // Fallback 2: Mempool.space prices
     if (!priceFetched) {
         try {
-            const mempoolPriceRes = await fetch("https://mempool.space/api/v1/prices");
+            const mempoolPriceRes = await fetchWithTimeout("https://mempool.space/api/v1/prices");
             if (mempoolPriceRes.ok) {
                 const data = await mempoolPriceRes.json();
                 state.currentBtcPrice = data.USD;
@@ -115,30 +184,34 @@ async function fetchBlockchainData() {
         }
     }
 
-    // Format and display the price
-    priceEl.textContent = `$${state.currentBtcPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    priceEl.textContent = formatCurrency(state.currentBtcPrice);
 
     // 2. Fetch Circulating Supply & Calculate Market Cap
-    let supply = 19705000; // sensible fallback
+    let supply = null;
     try {
         // Blockchain.info total satoshis in circulation
-        const supplyRes = await fetch("https://blockchain.info/q/totalbc");
+        const supplyRes = await fetchWithTimeout("https://blockchain.info/q/totalbc");
         if (supplyRes.ok) {
             const satoshis = await supplyRes.text();
             supply = parseInt(satoshis) / 100000000;
+            supplyFetched = Number.isFinite(supply);
         }
     } catch (err) {
-        console.warn("Circulating supply fetch failed, using fallback estimate.", err);
+        console.warn("Circulating supply fetch failed.", err);
     }
 
-    const calculatedMcap = supply * state.currentBtcPrice;
     if (marketCapEl) {
-        marketCapEl.textContent = `$${Math.round(calculatedMcap).toLocaleString('en-US')}`;
+        if (priceFetched && supplyFetched) {
+            const calculatedMcap = supply * state.currentBtcPrice;
+            marketCapEl.textContent = `$${Math.round(calculatedMcap).toLocaleString("en-US")}`;
+        } else {
+            marketCapEl.textContent = "Unavailable";
+        }
     }
 
-    // 3. Fetch Block Height & Tip Hash (via Mempool.space API)
+    // 3. Fetch Block Height & Tip Hash using browser-reachable public APIs.
     try {
-        const heightRes = await fetch("https://mempool.space/api/blocks/tip/height");
+        const heightRes = await fetchWithTimeout("https://blockstream.info/api/blocks/tip/height");
         if (heightRes.ok) {
             const height = await heightRes.json();
             state.blockHeight = parseInt(height);
@@ -146,13 +219,13 @@ async function fetchBlockchainData() {
             blockFetched = true;
         }
     } catch (err) {
-        console.warn("Mempool.space block height fetch failed, trying Blockchain.info...", err);
+        console.warn("Blockstream block height fetch failed, trying Blockchain.info...", err);
     }
 
     // Fallback block height via Blockchain.info query API
     if (!blockFetched) {
         try {
-            const bcBlockRes = await fetch("https://blockchain.info/q/getblockcount");
+            const bcBlockRes = await fetchWithTimeout("https://blockchain.info/q/getblockcount");
             if (bcBlockRes.ok) {
                 const heightText = await bcBlockRes.text();
                 state.blockHeight = parseInt(heightText);
@@ -160,31 +233,29 @@ async function fetchBlockchainData() {
                 blockFetched = true;
             }
         } catch (err) {
-            console.error("All block height APIs failed. Using simulation.", err);
-            // Fallback block height calculation based on Genesis block time
-            const estimatedHeight = Math.floor(845000 + (Date.now() - 1716940800000) / 600000);
-            state.blockHeight = estimatedHeight;
-            blockEl.textContent = `#${estimatedHeight.toLocaleString('en-US')}`;
+            console.error("All block height APIs failed.", err);
         }
     }
+
+    blockEl.textContent = formatBlockHeight(state.blockHeight);
 
     // 4. Fetch Block Tip Hash
     let hashFetched = false;
     try {
-        const hashRes = await fetch("https://mempool.space/api/blocks/tip/hash");
+        const hashRes = await fetchWithTimeout("https://blockstream.info/api/blocks/tip/hash");
         if (hashRes.ok) {
             const hash = await hashRes.text();
             state.blockHash = hash;
             hashFetched = true;
         }
     } catch (err) {
-        console.warn("Mempool.space block hash fetch failed.", err);
+        console.warn("Blockstream block hash fetch failed.", err);
     }
 
     if (!hashFetched) {
         // Fallback: fetch block details for current height via block count
         try {
-            const blockIndexRes = await fetch(`https://blockchain.info/block-height/${state.blockHeight}?format=json`);
+            const blockIndexRes = await fetchWithTimeout(`https://blockchain.info/block-height/${state.blockHeight}?format=json`);
             if (blockIndexRes.ok) {
                 const data = await blockIndexRes.json();
                 if (data.blocks && data.blocks[0]) {
@@ -197,14 +268,14 @@ async function fetchBlockchainData() {
         }
     }
 
-    // Display block hash
-    hashEl.textContent = state.blockHash.substring(0, 8) + "..." + state.blockHash.substring(state.blockHash.length - 8);
-    hashEl.title = state.blockHash;
+    hashEl.textContent = formatShortHash(state.blockHash);
+    hashEl.title = state.blockHash || "Latest block hash unavailable";
 }
 
 /* --- DYNAMIC COUNDOWN TO HALVING / YEARS ACTIVE --- */
 function setupCountdown() {
     const countdownEl = document.getElementById("halving-countdown");
+    const uptimeEl = document.getElementById("btc-uptime");
     if (!countdownEl) return;
 
     // Standard BTC Genesis: Jan 3, 2009
@@ -221,6 +292,10 @@ function setupCountdown() {
         const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
 
         countdownEl.innerHTML = `${years}y ${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+        if (uptimeEl) {
+            uptimeEl.textContent = `${years}y ${days}d`;
+        }
     };
 
     updateTimer();
@@ -292,11 +367,11 @@ function setupVowsRitual() {
         
         const logs = [
             "CONNECTING TO THE MEMPOOL NETWORK...",
-            "RETRIEVING SATOSHI COVENANT BLOCKS...",
-            "COMPILING PRIVATE KEY RING ORACLE...",
-            "MINING BLOCKS WITH SHA-256 CONGRUENCY...",
-            "BROADCASTING MARRIAGE TRANSACTION TO PEERS...",
-            "SUCCESS! PROTOCOL COVENANT SEALED AT BLOCK HEIGHT #" + state.blockHeight
+            "READING THE LATEST BITCOIN TIP...",
+            "DERIVING A LOCAL CERTIFICATE HASH...",
+            "FORGING CEREMONIAL SHA-256 RINGS...",
+            "ATTACHING CURRENT MARKET AND BLOCK WITNESS DATA...",
+            `SUCCESS! CEREMONY PREPARED WITH BLOCK ${formatBlockHeight(state.blockHeight)}`
         ];
 
         // Animated typewriter for fake blockchain transaction logs
@@ -347,17 +422,17 @@ function openCertificate() {
     document.getElementById("cert-date").textContent = state.timestamp;
     
     // Blockchain details
-    document.getElementById("cert-block-height").textContent = state.blockHeight.toLocaleString();
-    document.getElementById("cert-block-hash").textContent = state.blockHash;
-    document.getElementById("cert-btc-price").textContent = `$${state.currentBtcPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    document.getElementById("cert-block-height").textContent = formatBlockHeight(state.blockHeight);
+    document.getElementById("cert-block-hash").textContent = state.blockHash || "Unavailable";
+    document.getElementById("cert-btc-price").textContent = formatCurrency(state.currentBtcPrice);
     
-    // Mock Transaction ID representing covenant
-    const mockTxID = sha256(state.partnerName + today.getTime() + state.blockHash);
-    document.getElementById("cert-tx-id").textContent = mockTxID;
+    // Local certificate fingerprint for this ceremony.
+    const certificateId = sha256(state.partnerName + today.getTime() + (state.blockHash || "no-block-hash"));
+    document.getElementById("cert-tx-id").textContent = certificateId;
     
     // Signatures
     document.getElementById("sig-bride").textContent = state.partnerName;
-    document.getElementById("sig-btc").textContent = state.blockHash.substring(0, 16).toUpperCase();
+    document.getElementById("sig-btc").textContent = state.blockHash ? state.blockHash.substring(0, 16).toUpperCase() : "DATA UNAVAILABLE";
     
     modal.classList.add("active");
     document.body.style.overflow = "hidden"; // disable scrolling underlying page
@@ -368,7 +443,7 @@ function openCertificate() {
     };
 
     document.getElementById("btn-share-cert").onclick = () => {
-        const shareText = `💍 I am officially "married" to Bitcoin! Verified on-chain at Block Height #${state.blockHeight} (Price: $${state.currentBtcPrice.toLocaleString()}). Witness my covenant at btc.wedding!`;
+        const shareText = `💍 I completed the btc.wedding ceremony using Bitcoin witness data from ${formatBlockHeight(state.blockHeight)} at ${formatCurrency(state.currentBtcPrice)}.`;
         navigator.clipboard.writeText(shareText).then(() => {
             const btn = document.getElementById("btn-share-cert");
             const originalText = btn.textContent;
@@ -415,11 +490,9 @@ function setupGuestbook() {
     };
 
     // Load existing items or seed them
-    let storedWishes = JSON.parse(localStorage.getItem("btc_wedding_wishes"));
-    if (!storedWishes || storedWishes.length === 0) {
-        storedWishes = SEED_WISHES;
-        localStorage.setItem("btc_wedding_wishes", JSON.stringify(storedWishes));
-    }
+    const parsedStoredWishes = JSON.parse(localStorage.getItem("btc_wedding_wishes"));
+    const storedWishes = normalizeStoredWishes(parsedStoredWishes);
+    localStorage.setItem("btc_wedding_wishes", JSON.stringify(storedWishes));
 
     // Render loaded wishes
     storedWishes.forEach(w => {
@@ -453,7 +526,7 @@ function setupGuestbook() {
         // Show success animation or toast
         const btnSubmit = form.querySelector("button[type='submit']");
         const originalText = btnSubmit.textContent;
-        btnSubmit.textContent = "BLESSING SENT ON-CHAIN! ✓";
+        btnSubmit.textContent = "BLESSING SAVED LOCALLY! ✓";
         btnSubmit.style.background = "#2ECC71";
         btnSubmit.style.boxShadow = "0 0 15px rgba(46, 204, 113, 0.4)";
         
@@ -470,11 +543,16 @@ function setupAddressCopy() {
     const addressBlock = document.getElementById("wedding-address-block");
     if (!addressBlock) return;
 
+    if (!addressBlock.dataset.address) {
+        addressBlock.classList.add("disabled");
+        return;
+    }
+
     addressBlock.addEventListener("click", () => {
         const addressText = addressBlock.dataset.address;
         navigator.clipboard.writeText(addressText).then(() => {
             const originalHtml = addressBlock.innerHTML;
-            addressBlock.innerHTML = `<span>SATOSHI RECEIVED! WALLET COPIED ✓</span>`;
+            addressBlock.innerHTML = `<span>ADDRESS COPIED ✓</span>`;
             addressBlock.style.borderColor = "#2ECC71";
             addressBlock.style.color = "#2ECC71";
             
