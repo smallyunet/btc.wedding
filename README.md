@@ -22,7 +22,7 @@ For those of us who hold Bitcoin as our primary store of value, we have effectiv
 * **🔨 SHA-256 Ring Forge**: A beautiful interactive terminal sequence that simulates mining a new block to "forge" a mathematical wedding ring.
 * **📜 Generative Marriage Certificate**: Upon completing the vows, the site dynamically generates a gorgeous, printable marriage certificate. It is stamped with your name, the exact timestamp, the witnessing block height/hash, and a unique local cryptographic certificate ID.
 * **🖨️ Tailored Print Mode**: Pressing "Print/Save PDF" triggers a custom `@media print` style sheet that strips away all website interfaces, background particles, and buttons, formatting the certificate into a pristine, gold-bordered white parchment document suitable for framing.
-* **🥂 The HODL Blessing Wall**: A persistent digital guestbook where guests can sign their name, leave blessings, and select virtual wedding gifts. It is preloaded with factual Bitcoin history references instead of fabricated celebrity messages.
+* **🥂 The HODL Blessing Wall**: A Nostr-backed guestbook that reads signed blessings from public relays and lets visitors publish new blessings with a NIP-07 browser signer. When relays are empty or unavailable, the wall falls back to factual Bitcoin history references.
 
 ---
 
@@ -31,7 +31,7 @@ For those of us who hold Bitcoin as our primary store of value, we have effectiv
 This application is built with **zero external dependencies** and no complex build pipelines, ensuring extreme speed, privacy, and absolute security:
 * **Core**: Modern semantic HTML5.
 * **Styling**: Vanilla CSS3 featuring custom properties, neon glows, glassmorphism, responsive grids, and print overrides.
-* **Interactivity**: Pure, lightweight Vanilla ES6 JavaScript.
+* **Interactivity**: Pure, lightweight Vanilla ES6 JavaScript with browser-native ESM imports.
 * **Graphics**: HTML5 `<canvas>` API for smooth, resource-efficient background animations.
 
 ---
@@ -40,6 +40,8 @@ This application is built with **zero external dependencies** and no complex bui
 
 ### 1. Run Locally
 Because this project uses static assets, you do not need `npm` or any compile steps. You can preview it locally using any simple web server.
+
+If you want to publish Blessing Wall notes instead of only reading them, install a NIP-07 compatible browser signer before opening the site locally.
 
 **Using Python (Pre-installed on macOS/Linux):**
 1. Open your terminal in the project directory:

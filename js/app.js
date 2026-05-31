@@ -4,6 +4,20 @@
  * ring-forging logic, certificate generation, and guestbook storage.
  */
 
+const { SimplePool, verifyEvent, nip19 } = window.NostrTools;
+
+const NOSTR_RELAYS = [
+    "wss://relay.damus.io",
+    "wss://relay.primal.net",
+    "wss://nos.lol"
+];
+const NOSTR_WISH_KIND = 1;
+const NOSTR_WISH_TAG = "btc-wedding";
+const NOSTR_WISH_LIMIT = 50;
+const NOSTR_MAX_AUTHOR_LENGTH = 48;
+const NOSTR_MAX_WISH_LENGTH = 280;
+const nostrPool = new SimplePool({ enablePing: true, enableReconnect: true });
+
 // Global State
 const state = {
     partnerName: "",
@@ -33,12 +47,6 @@ const SEED_WISHES = [
         gift: "🍕 2 Pizzas"
     }
 ];
-
-const LEGACY_FAKE_WISH_AUTHORS = new Set([
-    "Satoshi Nakamoto",
-    "Hal Finney",
-    "Laszlo Hanyecz"
-]);
 
 document.addEventListener("DOMContentLoaded", () => {
     initApp();
@@ -95,30 +103,6 @@ async function fetchWithTimeout(url, timeoutMs = 4000) {
     } finally {
         clearTimeout(timeoutId);
     }
-}
-
-function isSameWish(left, right) {
-    return left.author === right.author && left.text === right.text && left.gift === right.gift;
-}
-
-function isLegacyFabricatedWish(wish) {
-    if (!wish || !LEGACY_FAKE_WISH_AUTHORS.has(wish.author)) {
-        return false;
-    }
-
-    return /(beautiful wedding|offer my blessings|best wishes|hodl forever)/i.test(wish.text || "");
-}
-
-function normalizeStoredWishes(storedWishes) {
-    const existingWishes = Array.isArray(storedWishes) ? storedWishes : [];
-    const withoutLegacySeeds = existingWishes.filter(wish => (
-        !isLegacyFabricatedWish(wish)
-    ));
-    const withoutDuplicateSeeds = withoutLegacySeeds.filter(wish => (
-        !SEED_WISHES.some(seed => isSameWish(seed, wish))
-    ));
-
-    return [...SEED_WISHES, ...withoutDuplicateSeeds];
 }
 
 /* --- HEADER AND SCROLL EFFECTS --- */
@@ -463,7 +447,12 @@ function setupGuestbook() {
     const form = document.getElementById("wish-form");
     const wishesWall = document.getElementById("wishes-wall");
     const giftTags = document.querySelectorAll(".gift-tag");
+    const statusEl = document.getElementById("nostr-status");
+    const sourceEl = document.getElementById("nostr-source");
+    const btnSubmit = document.getElementById("btn-submit-wish");
     let selectedGift = "🥂 Champagne";
+    let syncInFlight = false;
+    const renderedWishIds = new Set();
 
     // Set gift select tag interaction
     giftTags.forEach(tag => {
@@ -474,67 +463,272 @@ function setupGuestbook() {
         });
     });
 
-    // Helper to render a wish card
-    const renderWish = (author, text, gift) => {
-        const card = document.createElement("div");
-        card.className = "wish-card glow-border";
-        
-        card.innerHTML = `
-            <p class="wish-text">“${escapeHtml(text)}”</p>
-            <div class="wish-meta">
-                <span class="wish-author">${escapeHtml(author)}</span>
-                <span class="wish-gift">${escapeHtml(gift)}</span>
-            </div>
-        `;
-        wishesWall.prepend(card);
+    const setStatus = (message, tone = "loading") => {
+        statusEl.textContent = message;
+        statusEl.dataset.tone = tone;
     };
 
-    // Load existing items or seed them
-    const parsedStoredWishes = JSON.parse(localStorage.getItem("btc_wedding_wishes"));
-    const storedWishes = normalizeStoredWishes(parsedStoredWishes);
-    localStorage.setItem("btc_wedding_wishes", JSON.stringify(storedWishes));
+    const setSubmitMode = (enabled, label) => {
+        btnSubmit.disabled = !enabled;
+        btnSubmit.textContent = label;
+    };
 
-    // Render loaded wishes
-    storedWishes.forEach(w => {
-        renderWish(w.author, w.text, w.gift);
-    });
+    const renderWish = (wish, { prepend = false } = {}) => {
+        if (wish.id && renderedWishIds.has(wish.id)) {
+            return;
+        }
+
+        if (wish.id) {
+            renderedWishIds.add(wish.id);
+        }
+
+        const card = document.createElement("div");
+        card.className = "wish-card glow-border";
+        card.innerHTML = `
+            <p class="wish-text">“${escapeHtml(wish.text)}”</p>
+            <div class="wish-footer">
+                <div class="wish-proof">${escapeHtml(wish.proof)}</div>
+                <div class="wish-meta">
+                    <span class="wish-author">${escapeHtml(wish.author)}</span>
+                    <span class="wish-gift">${escapeHtml(wish.gift)}</span>
+                </div>
+            </div>
+        `;
+
+        if (prepend) {
+            wishesWall.prepend(card);
+        } else {
+            wishesWall.append(card);
+        }
+    };
+
+    const renderWishCollection = (wishes) => {
+        wishesWall.innerHTML = "";
+        renderedWishIds.clear();
+        wishes.forEach(wish => renderWish(wish));
+    };
+
+    const showFallbackWishes = (message, tone = "warning") => {
+        const fallbackWishes = SEED_WISHES.map((wish, index) => ({
+            id: `seed-${index}`,
+            author: wish.author,
+            text: wish.text,
+            gift: wish.gift,
+            proof: "Historical Bitcoin reference"
+        }));
+
+        renderWishCollection(fallbackWishes);
+        setStatus(message, tone);
+    };
+
+    const toNpub = (pubkey) => {
+        try {
+            return nip19.npubEncode(pubkey);
+        } catch (error) {
+            return pubkey;
+        }
+    };
+
+    const shortenNpub = (npub) => {
+        if (!npub || npub.length < 16) {
+            return npub || "unknown signer";
+        }
+
+        return `${npub.slice(0, 10)}...${npub.slice(-6)}`;
+    };
+
+    const formatWishAge = (createdAtSeconds) => {
+        if (!Number.isFinite(createdAtSeconds)) {
+            return "unknown time";
+        }
+
+        const diffSeconds = Math.max(0, Math.floor(Date.now() / 1000) - createdAtSeconds);
+        if (diffSeconds < 60) {
+            return `${diffSeconds}s ago`;
+        }
+
+        if (diffSeconds < 3600) {
+            return `${Math.floor(diffSeconds / 60)}m ago`;
+        }
+
+        if (diffSeconds < 86400) {
+            return `${Math.floor(diffSeconds / 3600)}h ago`;
+        }
+
+        return `${Math.floor(diffSeconds / 86400)}d ago`;
+    };
+
+    const parseWishEvent = (event) => {
+        try {
+            if (!event || event.kind !== NOSTR_WISH_KIND || !verifyEvent(event)) {
+                return null;
+            }
+
+            const hasWishTag = event.tags.some(tag => tag[0] === "t" && tag[1] === NOSTR_WISH_TAG);
+            if (!hasWishTag) {
+                return null;
+            }
+
+            const payload = JSON.parse(event.content);
+            const text = typeof payload.text === "string" ? payload.text.trim().slice(0, NOSTR_MAX_WISH_LENGTH) : "";
+            if (!text) {
+                return null;
+            }
+
+            const author = typeof payload.author === "string"
+                ? payload.author.trim().slice(0, NOSTR_MAX_AUTHOR_LENGTH)
+                : "";
+            const gift = typeof payload.gift === "string" && payload.gift.trim()
+                ? payload.gift.trim()
+                : (event.tags.find(tag => tag[0] === "gift")?.[1] || "⚡ Signed via Nostr");
+            const npub = toNpub(event.pubkey);
+
+            return {
+                id: event.id,
+                author: author || `Anon ${shortenNpub(npub)}`,
+                text,
+                gift,
+                proof: `Signed by ${shortenNpub(npub)} via Nostr • ${formatWishAge(event.created_at)}`,
+                createdAt: event.created_at
+            };
+        } catch (error) {
+            console.warn("Unable to parse guestbook event.", error);
+            return null;
+        }
+    };
+
+    const loadRelayWishes = async ({ silent = false } = {}) => {
+        if (syncInFlight) {
+            return;
+        }
+
+        syncInFlight = true;
+        if (!silent) {
+            setStatus("Loading signed blessings from Nostr relays...", "loading");
+        }
+
+        try {
+            const events = await Promise.resolve(nostrPool.querySync(
+                NOSTR_RELAYS,
+                {
+                    kinds: [NOSTR_WISH_KIND],
+                    "#t": [NOSTR_WISH_TAG],
+                    limit: NOSTR_WISH_LIMIT
+                }
+            ));
+
+            const wishes = (events || [])
+                .map(parseWishEvent)
+                .filter(Boolean)
+                .sort((left, right) => right.createdAt - left.createdAt);
+
+            if (wishes.length === 0) {
+                showFallbackWishes("No signed blessings yet. Showing historical Bitcoin references until the first Nostr note arrives.", "warning");
+                return;
+            }
+
+            renderWishCollection(wishes);
+            setStatus(`Loaded ${wishes.length} signed blessings from Nostr.`, "success");
+        } catch (error) {
+            console.error("Unable to load blessings from relays.", error);
+            showFallbackWishes("Nostr relays are unavailable right now. Showing historical fallback cards.", "error");
+        } finally {
+            syncInFlight = false;
+        }
+    };
+
+    const hasNostrSigner = () => {
+        return Boolean(window.nostr && typeof window.nostr.getPublicKey === "function" && typeof window.nostr.signEvent === "function");
+    };
+
+    const refreshComposeAvailability = () => {
+        if (hasNostrSigner()) {
+            setSubmitMode(true, "Send Signed Blessing");
+            sourceEl.textContent = `Publishing to ${NOSTR_RELAYS.length} public relays with a NIP-07 signer. Reading remains public and unsigned relays may mirror your note.`;
+        } else {
+            setSubmitMode(false, "Nostr Extension Required");
+            sourceEl.textContent = "Read-only mode: install a NIP-07 browser signer to publish a blessing. The wall still reads live public relay data.";
+        }
+    };
+
+    refreshComposeAvailability();
+    loadRelayWishes();
+    setInterval(() => {
+        loadRelayWishes({ silent: true });
+    }, 45000);
 
     // Handle Form Submission
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
         e.preventDefault();
+
+        if (!hasNostrSigner()) {
+            setStatus("Read-only mode active. Install a NIP-07 signer to publish your blessing.", "warning");
+            return;
+        }
         
         const authorInput = document.getElementById("guest-name");
         const wishInput = document.getElementById("guest-wish");
         
-        const author = authorInput.value.trim() || "Anonymous Hodler";
-        const wishText = wishInput.value.trim();
+        const author = (authorInput.value.trim() || "Anonymous Hodler").slice(0, NOSTR_MAX_AUTHOR_LENGTH);
+        const wishText = wishInput.value.trim().slice(0, NOSTR_MAX_WISH_LENGTH);
         
-        if (!wishText) return;
+        if (!wishText) {
+            setStatus("Your blessing cannot be empty.", "warning");
+            return;
+        }
 
-        // Render card instantly
-        renderWish(author, wishText, selectedGift);
+        const originalLabel = btnSubmit.textContent;
+        setSubmitMode(false, "Signing Blessing...");
+        setStatus("Requesting a Nostr signature from your browser signer...", "loading");
 
-        // Save to LocalStorage
-        const currentWishes = JSON.parse(localStorage.getItem("btc_wedding_wishes")) || [];
-        currentWishes.push({ author, text: wishText, gift: selectedGift });
-        localStorage.setItem("btc_wedding_wishes", JSON.stringify(currentWishes));
+        try {
+            const pubkey = await window.nostr.getPublicKey();
+            const eventTemplate = {
+                kind: NOSTR_WISH_KIND,
+                created_at: Math.floor(Date.now() / 1000),
+                tags: [
+                    ["t", NOSTR_WISH_TAG],
+                    ["client", "btc.wedding"],
+                    ["gift", selectedGift]
+                ],
+                content: JSON.stringify({
+                    site: "btc.wedding",
+                    version: 1,
+                    author,
+                    text: wishText,
+                    gift: selectedGift,
+                    pubkey
+                })
+            };
 
-        // Reset fields
-        wishInput.value = "";
-        authorInput.value = "";
-        
-        // Show success animation or toast
-        const btnSubmit = form.querySelector("button[type='submit']");
-        const originalText = btnSubmit.textContent;
-        btnSubmit.textContent = "BLESSING SAVED LOCALLY! ✓";
-        btnSubmit.style.background = "#2ECC71";
-        btnSubmit.style.boxShadow = "0 0 15px rgba(46, 204, 113, 0.4)";
-        
-        setTimeout(() => {
-            btnSubmit.textContent = originalText;
-            btnSubmit.style.background = "";
-            btnSubmit.style.boxShadow = "";
-        }, 3000);
+            const signedEvent = await window.nostr.signEvent(eventTemplate);
+            if (!verifyEvent(signedEvent)) {
+                throw new Error("Signer returned an invalid Nostr event.");
+            }
+
+            await Promise.any(nostrPool.publish(NOSTR_RELAYS, signedEvent));
+
+            const parsedWish = parseWishEvent(signedEvent);
+            if (parsedWish) {
+                const existingCards = wishesWall.querySelectorAll(".wish-card").length;
+                const onlyFallbackVisible = existingCards === SEED_WISHES.length && Array.from(renderedWishIds).every(id => String(id).startsWith("seed-"));
+                if (onlyFallbackVisible) {
+                    renderWishCollection([parsedWish]);
+                } else {
+                    renderWish(parsedWish, { prepend: true });
+                }
+            }
+
+            wishInput.value = "";
+            authorInput.value = "";
+            setStatus("Signed blessing published to Nostr relays.", "success");
+        } catch (error) {
+            console.error("Unable to publish blessing.", error);
+            setStatus("Publishing failed. Check your signer approval and relay connectivity, then try again.", "error");
+        } finally {
+            setSubmitMode(true, originalLabel === "Nostr Extension Required" ? "Send Signed Blessing" : originalLabel);
+            refreshComposeAvailability();
+        }
     });
 }
 

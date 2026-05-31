@@ -332,6 +332,12 @@ header.scrolled {
 .btn-primary:active {
     transform: translateY(-1px);
 }
+.btn-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
 
 .scroll-indicator {
     position: absolute;
@@ -941,6 +947,37 @@ section {
 .present-selector {
     margin-bottom: 20px;
 }
+.guestbook-status {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+.guestbook-status[data-tone="loading"] {
+    border-color: rgba(247, 147, 26, 0.25);
+    color: var(--gold);
+}
+.guestbook-status[data-tone="success"] {
+    border-color: rgba(46, 204, 113, 0.35);
+    color: #8ce7ae;
+}
+.guestbook-status[data-tone="warning"] {
+    border-color: rgba(241, 196, 15, 0.35);
+    color: #f4d35e;
+}
+.guestbook-status[data-tone="error"] {
+    border-color: rgba(231, 76, 60, 0.35);
+    color: #ff9f8f;
+}
+.guestbook-note {
+    margin: 0 0 22px;
+    font-size: 0.84rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+}
 .gift-options {
     display: flex;
     gap: 12px;
@@ -1000,6 +1037,15 @@ section {
     line-height: 1.6;
     margin-bottom: 20px;
 }
+.wish-footer {
+    margin-top: auto;
+}
+.wish-proof {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    letter-spacing: 0.4px;
+}
 .wish-meta {
     display: flex;
     justify-content: space-between;
@@ -1018,6 +1064,14 @@ section {
     background: rgba(212, 175, 55, 0.08);
     padding: 4px 10px;
     border-radius: 50px;
+}
+
+@media (max-width: 640px) {
+    .wish-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
 }
 
 /* --- FOOTER --- */
