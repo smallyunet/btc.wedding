@@ -11,15 +11,14 @@ class P2PNetworkBackground {
         this.ctx = this.canvas.getContext('2d');
         this.particles = [];
         this.blockParticles = [];
-        this.mouse = { x: null, y: null, radius: 150 };
+        this.mouse = { x: null, y: null, radius: 180 };
         
         this.config = {
             particleCount: 80,
-            maxDistance: 130,
-            nodeColor: 'rgba(197, 163, 88, 0.25)', // Antique gold with low opacity
-            lineColor: 'rgba(197, 163, 88, 0.05)',  // Champagne gold with very low opacity
-            blockColor: 'rgba(197, 163, 88, 0.6)',
-            mouseLineColor: 'rgba(197, 163, 88, 0.15)'
+            maxDistance: 125,
+            orangeNode: 'rgba(247, 147, 26, ', // Bitcoin Amber
+            blueNode: 'rgba(56, 189, 248, ',    // Electric Sky Blue
+            blockColor: 'rgba(247, 147, 26, 0.6)'
         };
 
         this.init();
@@ -47,25 +46,28 @@ class P2PNetworkBackground {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
         
-        // Adjust particle count based on screen size for premium performance
+        // Adjust particle count based on screen size for performance
         if (window.innerWidth < 768) {
             this.config.particleCount = 35;
-            this.config.maxDistance = 90;
+            this.config.maxDistance = 85;
         } else {
             this.config.particleCount = 75;
-            this.config.maxDistance = 130;
+            this.config.maxDistance = 125;
         }
     }
 
     createParticle() {
+        const isBlue = Math.random() < 0.22; // 22% electric blue nodes for a high-end dual-tone effect
         return {
             x: Math.random() * this.canvas.width,
             y: Math.random() * this.canvas.height,
-            vx: (Math.random() - 0.5) * 0.08, // 4x slower for high stability
-            vy: (Math.random() - 0.5) * 0.08, // 4x slower for high stability
+            vx: (Math.random() - 0.5) * 0.08, // slow drift
+            vy: (Math.random() - 0.5) * 0.08,
             radius: Math.random() * 1.5 + 0.8,
-            pulseSpeed: 0.005 + Math.random() * 0.01, // slow breathing
-            pulseValue: Math.random() * Math.PI
+            pulseSpeed: 0.005 + Math.random() * 0.01,
+            pulseValue: Math.random() * Math.PI,
+            color: isBlue ? this.config.blueNode : this.config.orangeNode,
+            isBlue: isBlue
         };
     }
 
@@ -76,10 +78,10 @@ class P2PNetworkBackground {
             vx: (Math.random() - 0.5) * 0.03, // imperceptible drift
             vy: (Math.random() - 0.5) * 0.03,
             radius: Math.random() * 12 + 8,
-            pulseSpeed: 0.003 + Math.random() * 0.005, // very slow breath
+            pulseSpeed: 0.003 + Math.random() * 0.005,
             pulseValue: Math.random() * Math.PI,
             rotation: Math.random() * Math.PI * 2,
-            rotationSpeed: (Math.random() - 0.5) * 0.001 // slow orbit rotation
+            rotationSpeed: (Math.random() - 0.5) * 0.001
         };
     }
 
@@ -87,8 +89,8 @@ class P2PNetworkBackground {
         window.addEventListener('resize', () => this.init());
         
         window.addEventListener('mousemove', (e) => {
-            this.mouse.x = e.x;
-            this.mouse.y = e.y;
+            this.mouse.x = e.clientX;
+            this.mouse.y = e.clientY;
         });
 
         window.addEventListener('mouseout', () => {
@@ -99,7 +101,7 @@ class P2PNetworkBackground {
 
     drawMesh() {
         const len = this.particles.length;
-        this.ctx.shadowBlur = 0; // Ensure no default glowing filters that slow performance
+        this.ctx.shadowBlur = 0; // Disable slow glowing filters
         
         for (let i = 0; i < len; i++) {
             const p1 = this.particles[i];
@@ -111,7 +113,7 @@ class P2PNetworkBackground {
             
             this.ctx.beginPath();
             this.ctx.arc(p1.x, p1.y, sizePulse, 0, Math.PI * 2);
-            this.ctx.fillStyle = `rgba(197, 163, 88, ${opacity})`;
+            this.ctx.fillStyle = `${p1.color}${opacity})`;
             this.ctx.fill();
 
             // Connect to other nodes in network
@@ -126,23 +128,35 @@ class P2PNetworkBackground {
                     this.ctx.beginPath();
                     this.ctx.moveTo(p1.x, p1.y);
                     this.ctx.lineTo(p2.x, p2.y);
-                    this.ctx.strokeStyle = `rgba(197, 163, 88, ${alpha})`;
-                    this.ctx.lineWidth = 0.5;
+                    
+                    // Style connection lines based on node colors
+                    if (p1.isBlue && p2.isBlue) {
+                        this.ctx.strokeStyle = `rgba(56, 189, 248, ${alpha})`;
+                    } else {
+                        this.ctx.strokeStyle = `rgba(247, 147, 26, ${alpha})`;
+                    }
+                    
+                    this.ctx.lineWidth = 0.55;
                     this.ctx.stroke();
                 }
             }
 
-            // Subtle interaction with mouse hover (draws fine lines to nearby nodes)
+            // Subtle interaction with mouse hover
             if (this.mouse.x !== null) {
                 const dx = p1.x - this.mouse.x;
                 const dy = p1.y - this.mouse.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < this.mouse.radius) {
-                    const alpha = (1 - dist / this.mouse.radius) * 0.15;
+                    const alpha = (1 - dist / this.mouse.radius) * 0.12;
                     this.ctx.beginPath();
                     this.ctx.moveTo(p1.x, p1.y);
                     this.ctx.lineTo(this.mouse.x, this.mouse.y);
-                    this.ctx.strokeStyle = `rgba(224, 122, 21, ${alpha})`; // Soft amber interactive trace
+                    
+                    // Match interactive trace to the node's native theme
+                    this.ctx.strokeStyle = p1.isBlue 
+                        ? `rgba(56, 189, 248, ${alpha})`
+                        : `rgba(247, 147, 26, ${alpha})`;
+                        
                     this.ctx.lineWidth = 0.6;
                     this.ctx.stroke();
                 }
@@ -163,23 +177,23 @@ class P2PNetworkBackground {
                 b.x, b.y, sizePulse * 0.1,
                 b.x, b.y, sizePulse * 3
             );
-            glowGradient.addColorStop(0, 'rgba(197, 163, 88, 0.15)');
-            glowGradient.addColorStop(0.5, 'rgba(224, 122, 21, 0.03)');
-            glowGradient.addColorStop(1, 'rgba(8, 8, 10, 0)');
+            glowGradient.addColorStop(0, 'rgba(247, 147, 26, 0.12)');
+            glowGradient.addColorStop(0.5, 'rgba(247, 147, 26, 0.02)');
+            glowGradient.addColorStop(1, 'rgba(4, 6, 10, 0)');
 
             this.ctx.beginPath();
             this.ctx.arc(b.x, b.y, sizePulse * 3, 0, Math.PI * 2);
             this.ctx.fillStyle = glowGradient;
             this.ctx.fill();
 
-            // 2. High-end orbit graphic: Slow-rotating dotted delicate ring (Gold)
+            // 2. Slow-rotating dotted delicate ring (Gold)
             this.ctx.save();
             this.ctx.translate(b.x, b.y);
             this.ctx.rotate(b.rotation);
             
             this.ctx.beginPath();
             this.ctx.arc(0, 0, sizePulse * 1.6, 0, Math.PI * 2);
-            this.ctx.strokeStyle = 'rgba(197, 163, 88, 0.2)';
+            this.ctx.strokeStyle = 'rgba(247, 147, 26, 0.18)';
             this.ctx.lineWidth = 0.75;
             this.ctx.setLineDash([2, 5]); // Delicate dotted circular orbit
             this.ctx.stroke();
@@ -190,7 +204,7 @@ class P2PNetworkBackground {
             this.ctx.arc(b.x, b.y, 2, 0, Math.PI * 2);
             this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
             this.ctx.shadowBlur = 8;
-            this.ctx.shadowColor = '#c5a358';
+            this.ctx.shadowColor = '#f7931a';
             this.ctx.fill();
         }
         

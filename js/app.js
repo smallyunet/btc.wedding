@@ -1,7 +1,18 @@
 const state = {
     currentBtcPrice: null,
     blockHeight: null,
-    blockHash: ""
+    blockHash: "",
+    prevValues: {
+        "storage-score": 0,
+        "projected-btc": 0,
+        "total-invested": 0,
+        "future-value": 0,
+        "estimated-return": 0,
+        "scenario-50": 0,
+        "scenario-100": 0,
+        "scenario-250": 0,
+        "scenario-1000": 0
+    }
 };
 
 const DCA_INPUT_IDS = [
@@ -27,30 +38,41 @@ const STORAGE_PRIORITIES = [
     "Set an annual custody review date."
 ];
 
+// Active animation frames store
+const activeAnimations = {};
+
 document.addEventListener("DOMContentLoaded", () => {
     setupHeaderState();
     setupDcaPlanner();
     setupStorageChecklist();
     setupSummaryActions();
+    setupMarketRefresh();
     fetchBitcoinSnapshot();
 });
 
 function setupHeaderState() {
     const header = document.querySelector(".site-header");
     window.addEventListener("scroll", () => {
-        header.style.boxShadow = window.scrollY > 20 ? "0 12px 40px rgba(0, 0, 0, 0.28)" : "none";
+        if (header) {
+            header.style.boxShadow = window.scrollY > 20 ? "0 10px 30px rgba(0, 0, 0, 0.25)" : "none";
+        }
     });
 }
 
 function setupDcaPlanner() {
     DCA_INPUT_IDS.forEach((id) => {
         const input = document.getElementById(id);
-        input.addEventListener("input", calculateDca);
-        input.addEventListener("change", calculateDca);
+        if (input) {
+            input.addEventListener("input", calculateDca);
+            input.addEventListener("change", calculateDca);
+        }
     });
 
     if (state.currentBtcPrice) {
-        document.getElementById("avg-price").value = Math.round(state.currentBtcPrice);
+        const avgPrice = document.getElementById("avg-price");
+        if (avgPrice) {
+            avgPrice.value = Math.round(state.currentBtcPrice);
+        }
     }
 
     calculateDca();
@@ -65,21 +87,46 @@ function setupStorageChecklist() {
 }
 
 function setupSummaryActions() {
-    document.getElementById("copy-summary").addEventListener("click", async () => {
-        const summary = buildSummaryText();
+    const copyBtn = document.getElementById("copy-summary");
+    if (copyBtn) {
+        copyBtn.addEventListener("click", async () => {
+            const summary = buildSummaryText();
 
-        try {
-            await navigator.clipboard.writeText(summary);
-            flashButton("copy-summary", "Copied");
-        } catch (err) {
-            console.warn("Clipboard unavailable", err);
-            flashButton("copy-summary", "Copy failed");
-        }
-    });
+            try {
+                await navigator.clipboard.writeText(summary);
+                flashButton("copy-summary", "Copied");
+            } catch (err) {
+                console.warn("Clipboard unavailable", err);
+                flashButton("copy-summary", "Copy failed");
+            }
+        });
+    }
 
-    document.getElementById("print-summary").addEventListener("click", () => {
-        window.print();
-    });
+    const printBtn = document.getElementById("print-summary");
+    if (printBtn) {
+        printBtn.addEventListener("click", () => {
+            window.print();
+        });
+    }
+}
+
+function setupMarketRefresh() {
+    const refreshBtn = document.getElementById("refresh-market");
+    if (refreshBtn) {
+        refreshBtn.addEventListener("click", async () => {
+            const icon = refreshBtn.querySelector(".refresh-icon");
+            if (icon) icon.classList.add("spinning");
+            refreshBtn.disabled = true;
+
+            await fetchBitcoinSnapshot();
+
+            // Retain satisfying spinner visual for 800ms
+            setTimeout(() => {
+                if (icon) icon.classList.remove("spinning");
+                refreshBtn.disabled = false;
+            }, 800);
+        });
+    }
 }
 
 async function fetchBitcoinSnapshot() {
@@ -87,11 +134,16 @@ async function fetchBitcoinSnapshot() {
     const blockEl = document.getElementById("btc-block");
     const hashEl = document.getElementById("btc-hash");
     const statusEl = document.getElementById("market-status");
+    const statusDot = document.getElementById("status-dot");
+
+    let priceSuccess = false;
+    let blockSuccess = false;
 
     try {
         const price = await fetchPrice();
         state.currentBtcPrice = price;
         priceEl.textContent = formatCurrency(price);
+        priceSuccess = true;
 
         const avgPrice = document.getElementById("avg-price");
         if (avgPrice && Number(avgPrice.value) === 100000) {
@@ -109,10 +161,19 @@ async function fetchBitcoinSnapshot() {
         state.blockHash = hash;
         blockEl.textContent = `#${height.toLocaleString("en-US")}`;
         hashEl.textContent = shortenHash(hash);
+        blockSuccess = true;
     } catch (err) {
         console.warn("Block data fetch failed", err);
         blockEl.textContent = "Unavailable";
         hashEl.textContent = "Unavailable";
+    }
+
+    if (statusDot) {
+        if (priceSuccess && blockSuccess) {
+            statusDot.className = "status-dot pulsing";
+        } else {
+            statusDot.className = "status-dot error";
+        }
     }
 
     statusEl.textContent = state.currentBtcPrice
@@ -161,6 +222,42 @@ async function fetchWithTimeout(url, timeoutMs = 4500) {
     }
 }
 
+// Numerical interpolation animator (Ease out quad)
+function animateValue(elementId, start, end, duration, formatFn) {
+    if (activeAnimations[elementId]) {
+        cancelAnimationFrame(activeAnimations[elementId]);
+    }
+
+    if (start === end) {
+        const el = document.getElementById(elementId);
+        if (el) el.textContent = formatFn(end);
+        return;
+    }
+
+    const startTime = performance.now();
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = progress * (2 - progress); // easeOutQuad
+        const current = start + (end - start) * ease;
+
+        const el = document.getElementById(elementId);
+        if (el) {
+            el.textContent = formatFn(current);
+        }
+
+        if (progress < 1) {
+            activeAnimations[elementId] = requestAnimationFrame(update);
+        } else {
+            if (el) el.textContent = formatFn(end);
+            delete activeAnimations[elementId];
+        }
+    }
+
+    activeAnimations[elementId] = requestAnimationFrame(update);
+}
+
 function calculateDca() {
     const amount = readNumber("dca-amount");
     const frequency = readNumber("dca-frequency");
@@ -180,27 +277,46 @@ function calculateDca() {
     const estimatedReturn = futureValue - totalCostBasis;
     const progress = targetBtc > 0 ? Math.min(100, (projectedBtc / targetBtc) * 100) : 0;
 
-    document.getElementById("future-price-label").textContent = formatCurrency(futurePrice, 0);
-    document.getElementById("projected-btc").textContent = `${formatBtc(projectedBtc)} BTC`;
-    document.getElementById("total-invested").textContent = formatCurrency(recurringInvested, 0);
-    document.getElementById("future-value").textContent = formatCurrency(futureValue, 0);
+    const futurePriceLabel = document.getElementById("future-price-label");
+    if (futurePriceLabel) {
+        futurePriceLabel.textContent = formatCurrency(futurePrice, 0);
+    }
+
+    // Smooth value counters
+    const prev = state.prevValues;
+    animateValue("projected-btc", prev["projected-btc"], projectedBtc, 450, (v) => `${formatBtc(v)} BTC`);
+    animateValue("total-invested", prev["total-invested"], recurringInvested, 450, (v) => formatCurrency(v, 0));
+    animateValue("future-value", prev["future-value"], futureValue, 450, (v) => formatCurrency(v, 0));
+    animateValue("estimated-return", prev["estimated-return"], estimatedReturn, 450, (v) => formatSignedCurrency(v));
+
+    prev["projected-btc"] = projectedBtc;
+    prev["total-invested"] = recurringInvested;
+    prev["future-value"] = futureValue;
+    prev["estimated-return"] = estimatedReturn;
 
     const returnEl = document.getElementById("estimated-return");
-    returnEl.textContent = formatSignedCurrency(estimatedReturn);
-    returnEl.classList.toggle("positive", estimatedReturn >= 0);
-    returnEl.classList.toggle("negative", estimatedReturn < 0);
+    if (returnEl) {
+        returnEl.classList.toggle("positive", estimatedReturn >= 0);
+        returnEl.classList.toggle("negative", estimatedReturn < 0);
+    }
 
-    document.getElementById("target-status").textContent = targetBtc > 0
-        ? `${progress.toFixed(1)}% of your ${formatBtc(targetBtc)} BTC target.`
-        : "Set a target to see progress.";
+    const statusEl = document.getElementById("target-status");
+    if (statusEl) {
+        statusEl.textContent = targetBtc > 0
+            ? `${progress.toFixed(1)}% of your ${formatBtc(targetBtc)} BTC target.`
+            : "Set a target to see progress.";
+    }
 
-    document.getElementById("time-to-target").textContent = estimateTimeToTarget({
-        amount,
-        frequency,
-        avgPrice,
-        startingBtc,
-        targetBtc
-    });
+    const timeEl = document.getElementById("time-to-target");
+    if (timeEl) {
+        timeEl.textContent = estimateTimeToTarget({
+            amount,
+            frequency,
+            avgPrice,
+            startingBtc,
+            targetBtc
+        });
+    }
 
     updateScenario("50", projectedBtc, totalCostBasis, 50000);
     updateScenario("100", projectedBtc, totalCostBasis, 100000);
@@ -212,8 +328,17 @@ function calculateDca() {
 function updateScenario(id, btc, costBasis, price) {
     const value = btc * price;
     const multiple = costBasis > 0 ? value / costBasis : 0;
-    document.getElementById(`scenario-${id}`).textContent = formatCurrency(value, 0);
-    document.getElementById(`multiple-${id}`).textContent = `${multiple.toFixed(1)}x`;
+    
+    const key = `scenario-${id}`;
+    const prevVal = state.prevValues[key] || 0;
+    state.prevValues[key] = value;
+
+    animateValue(key, prevVal, value, 450, (v) => formatCurrency(v, 0));
+
+    const multEl = document.getElementById(`multiple-${id}`);
+    if (multEl) {
+        multEl.textContent = `${multiple.toFixed(1)}x`;
+    }
 }
 
 function estimateTimeToTarget({ amount, frequency, avgPrice, startingBtc, targetBtc }) {
@@ -240,32 +365,57 @@ function updateStorageScore() {
         .filter((item) => !item.checkbox.checked)
         .slice(0, 3);
 
-    document.getElementById("storage-score").textContent = score;
+    const startScore = state.prevValues["storage-score"];
+    state.prevValues["storage-score"] = score;
+    animateValue("storage-score", startScore, score, 500, (v) => Math.round(v).toString());
+
+    // Update SVG Stroke Progress ring
+    const scoreProgress = document.getElementById("score-ring-progress");
+    if (scoreProgress) {
+        const circumference = 534;
+        const offset = circumference - (score / 100) * circumference;
+        scoreProgress.style.strokeDashoffset = offset;
+
+        // Dynamic color shifting rules
+        let strokeColor = "var(--red)";
+        if (score >= 85) {
+            strokeColor = "var(--green)";
+        } else if (score >= 65) {
+            strokeColor = "var(--blue)";
+        } else if (score >= 35) {
+            strokeColor = "var(--orange)";
+        }
+        scoreProgress.style.stroke = strokeColor;
+    }
 
     const gradeEl = document.getElementById("storage-grade");
     const adviceEl = document.getElementById("storage-advice");
 
-    if (score >= 85) {
-        gradeEl.textContent = "Strong custody discipline";
-        adviceEl.textContent = "Your setup covers the major failure modes. Keep the annual review habit and avoid becoming casual with backups.";
-    } else if (score >= 65) {
-        gradeEl.textContent = "Good, with gaps";
-        adviceEl.textContent = "The foundation is there. Focus on recovery testing, physical separation, and emergency instructions.";
-    } else if (score >= 35) {
-        gradeEl.textContent = "Fragile setup";
-        adviceEl.textContent = "Before stacking more, close the biggest custody gaps. Most losses come from basic storage and recovery mistakes.";
-    } else {
-        gradeEl.textContent = "Needs attention";
-        adviceEl.textContent = "Start with offline seed handling and a recovery test. Those two mistakes are expensive to discover late.";
+    if (gradeEl && adviceEl) {
+        if (score >= 85) {
+            gradeEl.textContent = "Strong custody discipline";
+            adviceEl.textContent = "Your setup covers the major failure modes. Keep the annual review habit and avoid becoming casual with backups.";
+        } else if (score >= 65) {
+            gradeEl.textContent = "Good, with gaps";
+            adviceEl.textContent = "The foundation is there. Focus on recovery testing, physical separation, and emergency instructions.";
+        } else if (score >= 35) {
+            gradeEl.textContent = "Fragile setup";
+            adviceEl.textContent = "Before stacking more, close the biggest custody gaps. Most losses come from basic storage and recovery mistakes.";
+        } else {
+            gradeEl.textContent = "Needs attention";
+            adviceEl.textContent = "Start with offline seed handling and a recovery test. Those two mistakes are expensive to discover late.";
+        }
     }
 
     const priorityItems = document.getElementById("priority-items");
-    if (missing.length === 0) {
-        priorityItems.innerHTML = "<li>Schedule the next annual custody review.</li><li>Keep instructions updated when wallets or locations change.</li>";
-    } else {
-        priorityItems.innerHTML = missing
-            .map(({ index }) => `<li>${STORAGE_PRIORITIES[index]}</li>`)
-            .join("");
+    if (priorityItems) {
+        if (missing.length === 0) {
+            priorityItems.innerHTML = "<li>Schedule the next annual custody review.</li><li>Keep instructions updated when wallets or locations change.</li>";
+        } else {
+            priorityItems.innerHTML = missing
+                .map(({ index }) => `<li>${STORAGE_PRIORITIES[index]}</li>`)
+                .join("");
+        }
     }
 
     updateSummary();
@@ -287,7 +437,9 @@ function buildSummaryText() {
     const futurePrice = readNumber("future-price");
     const targetBtc = readNumber("target-btc");
     const storageScore = Number(document.getElementById("storage-score")?.textContent || 0);
-    const frequencyLabel = document.getElementById("dca-frequency").selectedOptions[0].textContent;
+    
+    const freqEl = document.getElementById("dca-frequency");
+    const frequencyLabel = freqEl ? freqEl.selectedOptions[0].textContent : "monthly";
 
     const recurringInvested = amount * frequency * years;
     const projectedBtc = startingBtc + (avgPrice > 0 ? recurringInvested / avgPrice : 0);
@@ -297,7 +449,9 @@ function buildSummaryText() {
 }
 
 function readNumber(id) {
-    const value = Number(document.getElementById(id).value);
+    const el = document.getElementById(id);
+    if (!el) return 0;
+    const value = Number(el.value);
     return Number.isFinite(value) ? value : 0;
 }
 
@@ -331,9 +485,26 @@ function shortenHash(hash) {
 
 function flashButton(id, text) {
     const button = document.getElementById(id);
+    if (!button) return;
     const previous = button.textContent;
-    button.textContent = text;
+    
+    // Check if button has inner SVGs we need to temporarily keep/hide or flash
+    const hasSvg = button.querySelector("svg");
+    
+    if (hasSvg) {
+        button.innerHTML = text;
+    } else {
+        button.textContent = text;
+    }
+
     setTimeout(() => {
-        button.textContent = previous;
+        if (hasSvg) {
+            button.innerHTML = "";
+            button.appendChild(hasSvg);
+            const textNode = document.createTextNode(" " + previous.trim());
+            button.appendChild(textNode);
+        } else {
+            button.textContent = previous;
+        }
     }, 1300);
 }

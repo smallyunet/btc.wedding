@@ -42,27 +42,50 @@
                         no-nonsense cold storage audit. No login, no wallet connection, no custody.
                     </p>
                     <div class="hero-actions">
-                        <a class="btn btn-primary" href="#planner">Build DCA Plan</a>
-                        <a class="btn btn-secondary" href="#storage">Check Storage</a>
+                        <a class="btn btn-primary" href="#planner">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Build DCA Plan
+                        </a>
+                        <a class="btn btn-secondary" href="#storage">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            Check Storage
+                        </a>
                     </div>
                 </div>
 
                 <aside class="market-panel" aria-labelledby="market-heading">
                     <div class="panel-header">
-                        <span class="panel-kicker">Live reference</span>
+                        <div class="panel-header-top">
+                            <span class="panel-kicker">
+                                <span class="status-dot pulsing" id="status-dot"></span>
+                                Live Reference
+                            </span>
+                            <button id="refresh-market" class="btn-refresh" title="Refresh live snapshot" aria-label="Refresh live snapshot">
+                                <svg class="refresh-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                            </button>
+                        </div>
                         <h2 id="market-heading">BTC Snapshot</h2>
                     </div>
                     <div class="market-grid">
                         <div class="metric">
-                            <span>BTC price</span>
+                            <div class="metric-meta">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="metric-icon"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                <span>BTC Price</span>
+                            </div>
                             <strong id="btc-price">Loading...</strong>
                         </div>
                         <div class="metric">
-                            <span>Block height</span>
+                            <div class="metric-meta">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="metric-icon"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                <span>Block Height</span>
+                            </div>
                             <strong id="btc-block">Loading...</strong>
                         </div>
                         <div class="metric wide">
-                            <span>Latest block hash</span>
+                            <div class="metric-meta">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="metric-icon"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path><polyline points="16 16 12 12 8 16"></polyline></svg>
+                                <span>Latest Block Hash</span>
+                            </div>
                             <strong id="btc-hash">Loading...</strong>
                         </div>
                     </div>
@@ -142,38 +165,51 @@
                         </div>
 
                         <p class="small-note">Tip: update the average buy price if you expect BTC to trade higher or lower during your DCA period.</p>
-                    </form>
-
-                    <div class="results-panel">
+                    </form>                    <div class="results-panel">
                         <div class="result-hero">
-                            <span>Projected stack</span>
-                            <strong id="projected-btc">0.00000000 BTC</strong>
-                            <p id="target-status">Set a target to see progress.</p>
+                            <div class="result-hero-bg">₿</div>
+                            <div class="result-hero-content">
+                                <span>Projected Stack</span>
+                                <strong id="projected-btc">0.00000000 BTC</strong>
+                                <p id="target-status">Set a target to see progress.</p>
+                            </div>
                         </div>
 
                         <div class="results-grid">
                             <div class="result-card">
-                                <span>Total invested</span>
+                                <div class="card-header">
+                                    <span>Total Invested</span>
+                                    <svg class="card-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="12" y1="4" x2="12" y2="20"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+                                </div>
                                 <strong id="total-invested">$0</strong>
                             </div>
                             <div class="result-card">
-                                <span>Estimated value</span>
+                                <div class="card-header">
+                                    <span>Estimated Value</span>
+                                    <svg class="card-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                                </div>
                                 <strong id="future-value">$0</strong>
                             </div>
                             <div class="result-card">
-                                <span>Estimated gain/loss</span>
+                                <div class="card-header">
+                                    <span>Est. Gain / Loss</span>
+                                    <svg class="card-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                                </div>
                                 <strong id="estimated-return">$0</strong>
                             </div>
                             <div class="result-card">
-                                <span>Time to target</span>
+                                <div class="card-header">
+                                    <span>Time to Target</span>
+                                    <svg class="card-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                </div>
                                 <strong id="time-to-target">N/A</strong>
                             </div>
                         </div>
 
                         <div class="scenario-table" aria-label="Price scenarios">
                             <div class="scenario-row header">
-                                <span>BTC price</span>
-                                <span>Stack value</span>
+                                <span>BTC Price</span>
+                                <span>Stack Value</span>
                                 <span>Multiple</span>
                             </div>
                             <div class="scenario-row">
@@ -214,55 +250,94 @@
                     <div class="checklist-panel" id="checklist">
                         <label class="check-item">
                             <input type="checkbox" data-points="12">
-                            <span>My seed phrase was generated offline by a reputable hardware wallet.</span>
+                            <span class="custom-checkbox">
+                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span class="check-text">My seed phrase was generated offline by a reputable hardware wallet.</span>
                         </label>
                         <label class="check-item">
                             <input type="checkbox" data-points="12">
-                            <span>I have never photographed, scanned, typed, emailed, or cloud-synced the seed phrase.</span>
+                            <span class="custom-checkbox">
+                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span class="check-text">I have never photographed, scanned, typed, emailed, or cloud-synced the seed phrase.</span>
                         </label>
                         <label class="check-item">
                             <input type="checkbox" data-points="10">
-                            <span>The seed phrase is written or stamped on durable offline material.</span>
+                            <span class="custom-checkbox">
+                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span class="check-text">The seed phrase is written or stamped on durable offline material.</span>
                         </label>
                         <label class="check-item">
                             <input type="checkbox" data-points="10">
-                            <span>I have completed a recovery test with a small wallet or spare device.</span>
+                            <span class="custom-checkbox">
+                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span class="check-text">I have completed a recovery test with a small wallet or spare device.</span>
                         </label>
                         <label class="check-item">
                             <input type="checkbox" data-points="10">
-                            <span>Backups are stored in at least two physically separate locations.</span>
+                            <span class="custom-checkbox">
+                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span class="check-text">Backups are stored in at least two physically separate locations.</span>
                         </label>
                         <label class="check-item">
                             <input type="checkbox" data-points="10">
-                            <span>I understand whether I use a BIP39 passphrase and where it is documented.</span>
+                            <span class="custom-checkbox">
+                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span class="check-text">I understand whether I use a BIP39 passphrase and where it is documented.</span>
                         </label>
                         <label class="check-item">
                             <input type="checkbox" data-points="8">
-                            <span>No single exchange, phone, or laptop controls my long-term BTC.</span>
+                            <span class="custom-checkbox">
+                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span class="check-text">No single exchange, phone, or laptop controls my long-term BTC.</span>
                         </label>
                         <label class="check-item">
                             <input type="checkbox" data-points="8">
-                            <span>I know my wallet derivation path, wallet brand, and recovery steps.</span>
+                            <span class="custom-checkbox">
+                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span class="check-text">I know my wallet derivation path, wallet brand, and recovery steps.</span>
                         </label>
                         <label class="check-item">
                             <input type="checkbox" data-points="10">
-                            <span>A trusted person can find instructions in an emergency without finding the seed alone.</span>
+                            <span class="custom-checkbox">
+                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span class="check-text">A trusted person can find instructions in an emergency without finding the seed alone.</span>
                         </label>
                         <label class="check-item">
                             <input type="checkbox" data-points="10">
-                            <span>I review custody, backups, and inheritance instructions at least once per year.</span>
+                            <span class="custom-checkbox">
+                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span class="check-text">I review custody, backups, and inheritance instructions at least once per year.</span>
                         </label>
                     </div>
 
                     <aside class="score-panel">
-                        <div class="score-ring" aria-live="polite">
-                            <span id="storage-score">0</span>
-                            <small>/ 100</small>
+                        <div class="score-ring-wrapper">
+                            <svg class="score-ring-svg" viewBox="0 0 200 200">
+                                <circle class="score-ring-bg" cx="100" cy="100" r="85" />
+                                <circle id="score-ring-progress" class="score-ring-progress" cx="100" cy="100" r="85" stroke-dasharray="534" stroke-dashoffset="534" />
+                            </svg>
+                            <div class="score-ring-content" aria-live="polite">
+                                <span id="storage-score">0</span>
+                                <small>/ 100</small>
+                            </div>
                         </div>
                         <h3 id="storage-grade">Needs attention</h3>
                         <p id="storage-advice">Start with offline seed handling and a recovery test. Those two mistakes are expensive to discover late.</p>
                         <div class="priority-list">
-                            <h4>Next priority</h4>
+                            <h4>
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="priority-title-icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                Next Priority
+                            </h4>
                             <ul id="priority-items">
                                 <li>Generate and store seed material offline.</li>
                                 <li>Run a small recovery test before adding meaningful funds.</li>
@@ -284,8 +359,14 @@
                         </p>
                     </div>
                     <div class="summary-actions">
-                        <button class="btn btn-secondary" id="copy-summary">Copy Summary</button>
-                        <button class="btn btn-primary" id="print-summary">Print Plan</button>
+                        <button class="btn btn-secondary" id="copy-summary">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            Copy Summary
+                        </button>
+                        <button class="btn btn-primary" id="print-summary">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                            Print Plan
+                        </button>
                     </div>
                 </div>
             </div>
