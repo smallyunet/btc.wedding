@@ -123,10 +123,10 @@ function setupSummaryActions() {
             const summary = buildSummaryText();
 
             try {
-                await navigator.clipboard.writeText(summary);
+                await copyTextToClipboard(summary);
                 flashButton("copy-summary", "Copied");
             } catch (err) {
-                console.warn("Clipboard unavailable", err);
+                console.warn("Clipboard fallback failed", err);
                 flashButton("copy-summary", "Copy failed");
             }
         });
@@ -1016,5 +1016,28 @@ function resetState() {
         fetchBitcoinSnapshot();
     } catch (err) {
         console.warn("Failed to reset tool state", err);
+    }
+}
+
+async function copyTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+    } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        try {
+            const successful = document.execCommand("copy");
+            document.body.removeChild(textarea);
+            if (successful) return Promise.resolve();
+            return Promise.reject(new Error("document.execCommand('copy') returned false"));
+        } catch (err) {
+            document.body.removeChild(textarea);
+            return Promise.reject(err);
+        }
     }
 }
