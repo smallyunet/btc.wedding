@@ -1,0 +1,17 @@
+{
+  "name": "BTC.Wedding DCA & Custody Planner",
+  "short_name": "BTC.Wedding",
+  "description": "A practical static Bitcoin planning tool for long-term holders. Calculate DCA, model future price scenarios, and audit cold storage safety.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#04060a",
+  "theme_color": "#f7931a",
+  "icons": [
+    {
+      "src": "./pwa_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

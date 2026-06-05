@@ -14,6 +14,9 @@
     <meta property="twitter:card" content="summary_large_image">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.85em' font-size='82'%3E%E2%82%BF%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#f7931a">
+    <link rel="apple-touch-icon" href="pwa_icon.png">
 </head>
 <body>
     <canvas id="network-canvas" aria-hidden="true"></canvas>
@@ -81,6 +84,13 @@
                             </div>
                             <strong id="btc-block">Loading...</strong>
                         </div>
+                        <div class="metric">
+                            <div class="metric-meta">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="metric-icon"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 10"></polyline></svg>
+                                <span>Next Halving</span>
+                            </div>
+                            <strong id="btc-halving">Loading...</strong>
+                        </div>
                         <div class="metric wide">
                             <div class="metric-meta">
                                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="metric-icon"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path><polyline points="16 16 12 12 8 16"></polyline></svg>
@@ -88,6 +98,13 @@
                             </div>
                             <strong id="btc-hash">Loading...</strong>
                         </div>
+                    </div>
+                    <div class="air-gap-container">
+                        <label class="toggle-switch" title="Disconnect from public network APIs">
+                            <input type="checkbox" id="air-gap-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label">Air-Gap / Privacy Mode</span>
                     </div>
                     <p id="market-status" class="panel-note">Fetching public market and block data.</p>
                 </aside>
@@ -164,6 +181,14 @@
                             <input id="future-price" type="range" min="25000" max="1000000" step="5000" value="250000">
                         </div>
 
+                        <div class="inflation-container">
+                            <label class="toggle-switch" title="Adjust future values for 2.5% annual inflation">
+                                <input type="checkbox" id="inflation-toggle">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label">Adjust for inflation (2.5%/yr)</span>
+                        </div>
+
                         <p class="small-note">Tip: update the average buy price if you expect BTC to trade higher or lower during your DCA period.</p>
                     </form>                    <div class="results-panel">
                         <div class="result-hero">
@@ -235,6 +260,39 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="chart-panel">
+                    <div class="chart-header">
+                        <div>
+                            <h3>Accumulation Curve</h3>
+                            <p class="chart-subtitle">Projected cost basis versus estimated value over time</p>
+                        </div>
+                        <div class="chart-legend">
+                            <span class="legend-item"><span class="legend-color basis"></span>Cost Basis</span>
+                            <span class="legend-item"><span class="legend-color value"></span>Projected Value</span>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <svg id="projection-chart" viewBox="0 0 600 220" preserveAspectRatio="none">
+                            <defs>
+                                <linearGradient id="chart-glow-basis" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="var(--blue)" stop-opacity="0.15"></stop>
+                                    <stop offset="100%" stop-color="var(--blue)" stop-opacity="0.00"></stop>
+                                </linearGradient>
+                                <linearGradient id="chart-glow-value" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="var(--orange)" stop-opacity="0.20"></stop>
+                                    <stop offset="100%" stop-color="var(--orange)" stop-opacity="0.00"></stop>
+                                </linearGradient>
+                            </defs>
+                            <g id="chart-grid" class="chart-grid"></g>
+                            <path id="chart-area-value" fill="url(#chart-glow-value)" d=""></path>
+                            <path id="chart-area-basis" fill="url(#chart-glow-basis)" d=""></path>
+                            <path id="chart-line-value" class="chart-line value" d="" stroke="var(--orange)" stroke-width="3" fill="none"></path>
+                            <path id="chart-line-basis" class="chart-line basis" d="" stroke="var(--blue)" stroke-width="2.5" fill="none" stroke-dasharray="4 4"></path>
+                            <g id="chart-labels-x" class="chart-labels-x"></g>
+                        </svg>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -246,78 +304,179 @@
                     <p>Answer each item honestly. The score is local to your browser and does not store or transmit anything.</p>
                 </div>
 
+                <div class="checklist-tabs">
+                    <button class="tab-btn active" data-tab="single">Single-Sig</button>
+                    <button class="tab-btn" data-tab="passphrase">BIP39 Passphrase</button>
+                    <button class="tab-btn" data-tab="multisig">Multi-Sig (2-of-3)</button>
+                </div>
+
                 <div class="workspace-grid">
-                    <div class="checklist-panel" id="checklist">
-                        <label class="check-item">
-                            <input type="checkbox" data-points="12">
-                            <span class="custom-checkbox">
-                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            <span class="check-text">My seed phrase was generated offline by a reputable hardware wallet.</span>
-                        </label>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="12">
-                            <span class="custom-checkbox">
-                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            <span class="check-text">I have never photographed, scanned, typed, emailed, or cloud-synced the seed phrase.</span>
-                        </label>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="10">
-                            <span class="custom-checkbox">
-                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            <span class="check-text">The seed phrase is written or stamped on durable offline material.</span>
-                        </label>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="10">
-                            <span class="custom-checkbox">
-                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            <span class="check-text">I have completed a recovery test with a small wallet or spare device.</span>
-                        </label>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="10">
-                            <span class="custom-checkbox">
-                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            <span class="check-text">Backups are stored in at least two physically separate locations.</span>
-                        </label>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="10">
-                            <span class="custom-checkbox">
-                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            <span class="check-text">I understand whether I use a BIP39 passphrase and where it is documented.</span>
-                        </label>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="8">
-                            <span class="custom-checkbox">
-                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            <span class="check-text">No single exchange, phone, or laptop controls my long-term BTC.</span>
-                        </label>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="8">
-                            <span class="custom-checkbox">
-                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            <span class="check-text">I know my wallet derivation path, wallet brand, and recovery steps.</span>
-                        </label>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="10">
-                            <span class="custom-checkbox">
-                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            <span class="check-text">A trusted person can find instructions in an emergency without finding the seed alone.</span>
-                        </label>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="10">
-                            <span class="custom-checkbox">
-                                <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            </span>
-                            <span class="check-text">I review custody, backups, and inheritance instructions at least once per year.</span>
-                        </label>
+                    <div class="checklist-container">
+                        <!-- Tab 1: Single-Sig -->
+                        <div class="checklist-panel active" id="checklist-single">
+                            <label class="check-item">
+                                <input type="checkbox" data-points="12">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">My seed phrase was generated offline by a reputable hardware wallet.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="12">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">I have never photographed, scanned, typed, emailed, or cloud-synced the seed phrase.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="10">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">The seed phrase is written or stamped on durable offline material.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="10">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">I have completed a recovery test with a small wallet or spare device.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="10">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">Backups are stored in at least two physically separate locations.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="10">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">I understand whether I use a BIP39 passphrase and where it is documented.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="8">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">No single exchange, phone, or laptop controls my long-term BTC.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="8">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">I know my wallet derivation path, wallet brand, and recovery steps.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="10">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">A trusted person can find instructions in an emergency without finding the seed alone.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="10">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">I review custody, backups, and inheritance instructions at least once per year.</span>
+                            </label>
+                        </div>
+
+                        <!-- Tab 2: BIP39 Passphrase -->
+                        <div class="checklist-panel" id="checklist-passphrase" style="display: none;">
+                            <label class="check-item">
+                                <input type="checkbox" data-points="20">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">I understand that a BIP39 passphrase acts as a 25th word, creating a completely separate wallet.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="20">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">My passphrase is stored separately from my 24-word seed phrase (never in the same room or safe).</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="15">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">The passphrase is high-entropy (not a dictionary word or simple pin) and is memorized or safely backed up.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="15">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">I have tested recovering the passphrase wallet with a backup hardware wallet or simulator.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="15">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">My emergency instructions guide heirs on how to find the passphrase and the seed phrase separately.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="15">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">I review the safety of my passphrase storage locations at least once per year.</span>
+                            </label>
+                        </div>
+
+                        <!-- Tab 3: Multi-Signature -->
+                        <div class="checklist-panel" id="checklist-multisig" style="display: none;">
+                            <label class="check-item">
+                                <input type="checkbox" data-points="20">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">My multi-signature keys are generated on independent hardware devices from different manufacturers.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="20">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">Each of the 3 seed phrase backups is stored in a physically distinct location (different geographic addresses).</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="15">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">I have safely backed up the multisig configuration file (XPUBs and derivation paths) in multiple offline spots.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="15">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">I have successfully performed a test spend from the multisig setup to verify signature authority.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="15">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">No single keyholder location or backup contains more than 1 key's seed phrase.</span>
+                            </label>
+                            <label class="check-item">
+                                <input type="checkbox" data-points="15">
+                                <span class="custom-checkbox">
+                                    <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="check-text">Heirs have clear instructions on how to locate at least 2 keys and the coordinator configuration file.</span>
+                            </label>
+                        </div>
                     </div>
 
                     <aside class="score-panel">
@@ -363,6 +522,10 @@
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                             Copy Summary
                         </button>
+                        <button class="btn btn-secondary" id="reset-summary" style="border-color: rgba(239, 68, 68, 0.25); color: var(--red); background: rgba(239, 68, 68, 0.02);" title="Wipe all locally stored inputs">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            Reset Data
+                        </button>
                         <button class="btn btn-primary" id="print-summary">
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="btn-icon"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
                             Print Plan
@@ -382,5 +545,14 @@
 
     <script src="js/particles.js"></script>
     <script src="js/app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registered successfully.', reg.scope))
+                    .catch(err => console.warn('Service Worker registration failed.', err));
+            });
+        }
+    </script>
 </body>
 </html>
