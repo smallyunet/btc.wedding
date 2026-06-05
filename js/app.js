@@ -60,6 +60,7 @@ const STORAGE_PRIORITIES_MULTISIG = [
 
 // Active animation frames store
 const activeAnimations = {};
+let dcaChartInstance = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     setupHeaderState();
@@ -527,34 +528,17 @@ function updateScenario(id, btc, costBasis, price, inflationMultiplier) {
 }
 
 function updateChart({ amount, frequency, years, avgPrice, startingBtc, futurePrice, isInflationAdjusted, inflationRate }) {
-    const chart = document.getElementById("projection-chart");
-    const gridG = document.getElementById("chart-grid");
-    const labelsG = document.getElementById("chart-labels-x");
-    const pathBasis = document.getElementById("chart-line-basis");
-    const pathValue = document.getElementById("chart-line-value");
-    const areaBasis = document.getElementById("chart-area-basis");
-    const areaValue = document.getElementById("chart-area-value");
-    
-    if (!chart || !pathBasis || !pathValue || !areaBasis || !areaValue || !gridG || !labelsG) return;
-    
-    // Dynamically calculate width of container to avoid stretch distortion (pixelation)
-    const rect = chart.getBoundingClientRect();
-    const containerWidth = rect.width || 600;
-    chart.setAttribute("viewBox", `0 0 ${containerWidth} 220`);
-    
+    if (typeof Chart === 'undefined') return;
+
+    const canvas = document.getElementById("projection-chart");
+    if (!canvas) return;
+
     // Set parameters
     const steps = 10;
-    const paddingLeft = 50;
-    const paddingRight = 20;
-    const paddingTop = 20;
-    const paddingBottom = 35;
-    const w = containerWidth - paddingLeft - paddingRight;
-    const h = 220 - paddingTop - paddingBottom;
-    const bottomY = 220 - paddingBottom;
-    
-    let basisPoints = [];
-    let valuePoints = [];
-    
+    let labels = [];
+    let basisData = [];
+    let valueData = [];
+
     for (let i = 0; i <= steps; i++) {
         const t = (i / steps) * years;
         const buys = frequency * t;
@@ -569,94 +553,185 @@ function updateChart({ amount, frequency, years, avgPrice, startingBtc, futurePr
             val *= mult;
         }
         
-        basisPoints.push(cost);
-        valuePoints.push(val);
+        basisData.push(cost);
+        valueData.push(val);
+
+        // Populate labels
+        let labelStr = "";
+        if (i === 0) {
+            labelStr = "START";
+        } else if (i === steps) {
+            labelStr = `${years.toFixed(0)} YR`;
+        } else if (i === Math.floor(steps / 2)) {
+            labelStr = `${(years / 2).toFixed(1)} YR`;
+        } else {
+            labelStr = `${t.toFixed(1)} YR`;
+        }
+        labels.push(labelStr);
     }
-    
-    const maxVal = Math.max(...basisPoints, ...valuePoints, 100);
-    
-    // Compute SVG point strings
-    const basisSvgPoints = basisPoints.map((val, idx) => {
-        const x = paddingLeft + (idx / steps) * w;
-        const y = bottomY - (val / maxVal) * h;
-        return { x, y };
-    });
-    
-    const valueSvgPoints = valuePoints.map((val, idx) => {
-        const x = paddingLeft + (idx / steps) * w;
-        const y = bottomY - (val / maxVal) * h;
-        return { x, y };
-    });
-    
-    const basisPathStr = basisSvgPoints.map((pt, idx) => (idx === 0 ? "M" : "L") + ` ${pt.x} ${pt.y}`).join(" ");
-    const valuePathStr = valueSvgPoints.map((pt, idx) => (idx === 0 ? "M" : "L") + ` ${pt.x} ${pt.y}`).join(" ");
-    
-    const basisAreaStr = basisPathStr + ` L ${basisSvgPoints[steps].x} ${bottomY} L ${basisSvgPoints[0].x} ${bottomY} Z`;
-    const valueAreaStr = valuePathStr + ` L ${valueSvgPoints[steps].x} ${bottomY} L ${valueSvgPoints[0].x} ${bottomY} Z`;
-    
-    pathBasis.setAttribute("d", basisPathStr);
-    pathValue.setAttribute("d", valuePathStr);
-    areaBasis.setAttribute("d", basisAreaStr);
-    areaValue.setAttribute("d", valueAreaStr);
-    
-    // Clear and redraw grid lines and labels
-    gridG.innerHTML = "";
-    labelsG.innerHTML = "";
-    
-    // Horizontal grid lines
-    const divisions = 4;
-    for (let i = 1; i <= divisions; i++) {
-        const pct = i / divisions;
-        const y = bottomY - pct * h;
-        
-        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        line.setAttribute("x1", paddingLeft);
-        line.setAttribute("y1", y);
-        line.setAttribute("x2", containerWidth - paddingRight);
-        line.setAttribute("y2", y);
-        line.setAttribute("stroke-dasharray", "4 4");
-        gridG.appendChild(line);
-        
-        // Y Label
-        const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        txt.setAttribute("x", paddingLeft - 10);
-        txt.setAttribute("y", y + 3.5);
-        txt.setAttribute("class", "chart-label");
-        txt.setAttribute("text-anchor", "end");
-        txt.textContent = formatCompactCurrency(pct * maxVal);
-        gridG.appendChild(txt);
+
+    const costBasisDataset = {
+        label: 'Cost Basis',
+        data: basisData,
+        borderColor: '#3b82f6',
+        borderWidth: 2,
+        borderDash: [4, 4],
+        backgroundColor: function(context) {
+            const chart = context.chart;
+            const {ctx, chartArea} = chart;
+            if (!chartArea) return null;
+            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.12)');
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.00)');
+            return gradient;
+        },
+        fill: true,
+        tension: 0.2,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: '#3b82f6',
+        pointHoverBorderColor: '#0a0806',
+        pointHoverBorderWidth: 2
+    };
+
+    const projectedValueDataset = {
+        label: 'Projected Value',
+        data: valueData,
+        borderColor: '#f7931a',
+        borderWidth: 3,
+        backgroundColor: function(context) {
+            const chart = context.chart;
+            const {ctx, chartArea} = chart;
+            if (!chartArea) return null;
+            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+            gradient.addColorStop(0, 'rgba(247, 147, 26, 0.16)');
+            gradient.addColorStop(1, 'rgba(247, 147, 26, 0.00)');
+            return gradient;
+        },
+        fill: true,
+        tension: 0.2,
+        pointRadius: 0,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: '#f7931a',
+        pointHoverBorderColor: '#0a0806',
+        pointHoverBorderWidth: 2
+    };
+
+    if (dcaChartInstance) {
+        dcaChartInstance.data.labels = labels;
+        dcaChartInstance.data.datasets[0] = costBasisDataset;
+        dcaChartInstance.data.datasets[1] = projectedValueDataset;
+        dcaChartInstance.options.scales.x.ticks.callback = function(val, index) {
+            if (index === 0) return 'START';
+            if (index === steps) return `${years.toFixed(0)} YR`;
+            if (index === Math.floor(steps / 2)) return `${(years / 2).toFixed(1)} YR`;
+            return '';
+        };
+        dcaChartInstance.update();
+    } else {
+        const ctx = canvas.getContext('2d');
+        dcaChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [costBasisDataset, projectedValueDataset]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: '#110d0a',
+                        titleColor: '#94a3b8',
+                        titleFont: {
+                            family: 'Inter',
+                            size: 11,
+                            weight: '600'
+                        },
+                        bodyColor: '#f8fafc',
+                        bodyFont: {
+                            family: 'Inter',
+                            size: 12,
+                            weight: '500'
+                        },
+                        borderColor: 'rgba(247, 147, 26, 0.15)',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(context.parsed.y);
+                                }
+                                return label;
+                            },
+                            title: function(tooltipItems) {
+                                const idx = tooltipItems[0].dataIndex;
+                                const t = (idx / steps) * years;
+                                return `Year ${t.toFixed(1)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#64748b',
+                            font: {
+                                family: 'Inter',
+                                size: 10,
+                                weight: '600'
+                            },
+                            callback: function(val, index) {
+                                if (index === 0) return 'START';
+                                if (index === steps) return `${years.toFixed(0)} YR`;
+                                if (index === Math.floor(steps / 2)) return `${(years / 2).toFixed(1)} YR`;
+                                return '';
+                            }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.035)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#64748b',
+                            font: {
+                                family: 'Inter',
+                                size: 10,
+                                weight: '600'
+                            },
+                            callback: function(value) {
+                                return formatCompactCurrency(value);
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                hover: {
+                    mode: 'index',
+                    intersect: false
+                }
+            }
+        });
     }
-    
-    // Baseline axis line
-    const axis = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    axis.setAttribute("x1", paddingLeft);
-    axis.setAttribute("y1", bottomY);
-    axis.setAttribute("x2", containerWidth - paddingRight);
-    axis.setAttribute("y2", bottomY);
-    axis.setAttribute("stroke", "rgba(255,255,255,0.08)");
-    gridG.appendChild(axis);
-    
-    // X ticks & labels (Start, Middle, End)
-    const ticks = [0, 0.5, 1.0];
-    ticks.forEach(f => {
-        const x = paddingLeft + f * w;
-        
-        const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        tick.setAttribute("x1", x);
-        tick.setAttribute("y1", bottomY);
-        tick.setAttribute("x2", x);
-        tick.setAttribute("y2", bottomY + 5);
-        tick.setAttribute("stroke", "rgba(255,255,255,0.08)");
-        gridG.appendChild(tick);
-        
-        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        label.setAttribute("x", x);
-        label.setAttribute("y", bottomY + 20);
-        label.setAttribute("class", "chart-label");
-        label.setAttribute("text-anchor", "middle");
-        label.textContent = f === 0 ? "START" : f === 0.5 ? `${(years / 2).toFixed(1)} YR` : `${years.toFixed(0)} YR`;
-        labelsG.appendChild(label);
-    });
 }
 
 function formatCompactCurrency(value) {

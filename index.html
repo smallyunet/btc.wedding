@@ -273,24 +273,7 @@
                         </div>
                     </div>
                     <div class="chart-wrapper">
-                        <svg id="projection-chart" viewBox="0 0 600 220" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="chart-glow-basis" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="var(--blue)" stop-opacity="0.15"></stop>
-                                    <stop offset="100%" stop-color="var(--blue)" stop-opacity="0.00"></stop>
-                                </linearGradient>
-                                <linearGradient id="chart-glow-value" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="var(--orange)" stop-opacity="0.20"></stop>
-                                    <stop offset="100%" stop-color="var(--orange)" stop-opacity="0.00"></stop>
-                                </linearGradient>
-                            </defs>
-                            <g id="chart-grid" class="chart-grid"></g>
-                            <path id="chart-area-value" fill="url(#chart-glow-value)" d=""></path>
-                            <path id="chart-area-basis" fill="url(#chart-glow-basis)" d=""></path>
-                            <path id="chart-line-value" class="chart-line value" d="" stroke="var(--orange)" stroke-width="3" fill="none"></path>
-                            <path id="chart-line-basis" class="chart-line basis" d="" stroke="var(--blue)" stroke-width="2.5" fill="none" stroke-dasharray="4 4"></path>
-                            <g id="chart-labels-x" class="chart-labels-x"></g>
-                        </svg>
+                        <canvas id="projection-chart"></canvas>
                     </div>
                 </div>
             </div>
@@ -544,6 +527,7 @@
     </footer>
 
     <script src="js/particles.js"></script>
+    <script src="js/chart.js"></script>
     <script src="js/app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
