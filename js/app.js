@@ -76,6 +76,11 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Fetch live market data
     fetchBitcoinSnapshot();
+
+    // Handle chart redraws on window resize
+    window.addEventListener("resize", () => {
+        calculateDca();
+    });
 });
 
 function setupHeaderState() {
@@ -532,13 +537,18 @@ function updateChart({ amount, frequency, years, avgPrice, startingBtc, futurePr
     
     if (!chart || !pathBasis || !pathValue || !areaBasis || !areaValue || !gridG || !labelsG) return;
     
+    // Dynamically calculate width of container to avoid stretch distortion (pixelation)
+    const rect = chart.getBoundingClientRect();
+    const containerWidth = rect.width || 600;
+    chart.setAttribute("viewBox", `0 0 ${containerWidth} 220`);
+    
     // Set parameters
     const steps = 10;
     const paddingLeft = 50;
     const paddingRight = 20;
     const paddingTop = 20;
     const paddingBottom = 35;
-    const w = 600 - paddingLeft - paddingRight;
+    const w = containerWidth - paddingLeft - paddingRight;
     const h = 220 - paddingTop - paddingBottom;
     const bottomY = 220 - paddingBottom;
     
@@ -602,19 +612,17 @@ function updateChart({ amount, frequency, years, avgPrice, startingBtc, futurePr
         const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
         line.setAttribute("x1", paddingLeft);
         line.setAttribute("y1", y);
-        line.setAttribute("x2", 600 - paddingRight);
+        line.setAttribute("x2", containerWidth - paddingRight);
         line.setAttribute("y2", y);
         line.setAttribute("stroke-dasharray", "4 4");
         gridG.appendChild(line);
         
         // Y Label
         const txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        txt.setAttribute("x", paddingLeft - 8);
-        txt.setAttribute("y", y + 3);
-        txt.setAttribute("font-size", "9px");
+        txt.setAttribute("x", paddingLeft - 10);
+        txt.setAttribute("y", y + 3.5);
+        txt.setAttribute("class", "chart-label");
         txt.setAttribute("text-anchor", "end");
-        txt.setAttribute("fill", "var(--faint)");
-        txt.setAttribute("font-family", "var(--mono)");
         txt.textContent = formatCompactCurrency(pct * maxVal);
         gridG.appendChild(txt);
     }
@@ -623,7 +631,7 @@ function updateChart({ amount, frequency, years, avgPrice, startingBtc, futurePr
     const axis = document.createElementNS("http://www.w3.org/2000/svg", "line");
     axis.setAttribute("x1", paddingLeft);
     axis.setAttribute("y1", bottomY);
-    axis.setAttribute("x2", 600 - paddingRight);
+    axis.setAttribute("x2", containerWidth - paddingRight);
     axis.setAttribute("y2", bottomY);
     axis.setAttribute("stroke", "rgba(255,255,255,0.08)");
     gridG.appendChild(axis);
@@ -643,19 +651,17 @@ function updateChart({ amount, frequency, years, avgPrice, startingBtc, futurePr
         
         const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
         label.setAttribute("x", x);
-        label.setAttribute("y", bottomY + 18);
-        label.setAttribute("font-size", "9px");
+        label.setAttribute("y", bottomY + 20);
+        label.setAttribute("class", "chart-label");
         label.setAttribute("text-anchor", "middle");
-        label.setAttribute("fill", "var(--faint)");
-        label.setAttribute("font-family", "var(--sans)");
-        label.textContent = f === 0 ? "Start" : f === 0.5 ? `${(years / 2).toFixed(1)} yr` : `${years.toFixed(0)} yr`;
+        label.textContent = f === 0 ? "START" : f === 0.5 ? `${(years / 2).toFixed(1)} YR` : `${years.toFixed(0)} YR`;
         labelsG.appendChild(label);
     });
 }
 
 function formatCompactCurrency(value) {
     if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
-    if (value >= 1e3) return `$${(value / 1e3).toFixed(0)}k`;
+    if (value >= 1e3) return `$${(value / 1e3).toFixed(0)}K`;
     return `$${Math.round(value)}`;
 }
 

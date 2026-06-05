@@ -218,7 +218,8 @@ a {
 }
 
 #copy-summary {
-    width: 180px;
+    width: 200px;
+    white-space: nowrap;
 }
 
 .btn {
@@ -1244,11 +1245,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
     stroke-width: 1;
 }
 
-.chart-labels-x text {
-    font-family: var(--mono);
-    font-size: 0.72rem;
+.chart-label {
+    font-family: var(--sans);
+    font-size: 0.74rem;
+    font-weight: 600;
     fill: var(--faint);
-    text-anchor: middle;
+    letter-spacing: 0.04em;
 }
 
 .chart-line {
