@@ -3,371 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Union of Human & Protocol | btc.wedding</title>
-    
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="A behavioral art project commemorating our eternal covenant with the Bitcoin Protocol. We have put our net worth into BTC, and this is our immutable wedding.">
-    <meta name="keywords" content="bitcoin wedding, btc.wedding, satoshi nakamoto, behavioral art, crypto wedding, blockchain marriage, HODL vows">
-    <meta name="author" content="BTC Devotee">
-    
-    <!-- Open Graph / Facebook -->
+    <title>BTC DCA Planner & Cold Storage Checklist | btc.wedding</title>
+    <meta name="description" content="A practical Bitcoin planning tool for long-term holders. Calculate a BTC DCA plan, test future price scenarios, and audit your cold storage safety.">
+    <meta name="keywords" content="bitcoin dca calculator, btc dca, cold storage checklist, bitcoin security, btc planner">
+    <meta name="author" content="btc.wedding">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://btc.wedding/">
-    <meta property="og:title" content="The Union of Human & Protocol | btc.wedding">
-    <meta property="og:description" content="A behavioral art project commemorating our eternal covenant with the Bitcoin Protocol. Witness our immutable, cryptographic wedding.">
-    <meta property="og:image" content="https://btc.wedding/assets/og_image.png">
-
-    <!-- Twitter -->
+    <meta property="og:title" content="BTC DCA Planner & Cold Storage Checklist">
+    <meta property="og:description" content="Plan your long-term Bitcoin accumulation and check your cold storage habits.">
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://btc.wedding/">
-    <meta property="twitter:title" content="The Union of Human & Protocol | btc.wedding">
-    <meta property="twitter:description" content="A behavioral art project commemorating our eternal covenant with the Bitcoin Protocol. Witness our immutable, cryptographic wedding.">
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💍</text></svg>">
-
-    <!-- Custom Stylesheet -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.85em' font-size='82'%3E%E2%82%BF%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
-    <!-- P2P NETWORK DYNAMIC BACKGROUND -->
     <canvas id="network-canvas" aria-hidden="true"></canvas>
 
-    <!-- HEADER / NAVIGATION -->
-    <header id="main-header">
+    <header class="site-header">
         <div class="container nav-wrap">
-            <a href="#" class="logo" id="header-logo">
-                <span>₿</span>.wedding
-            </a>
-            <nav aria-label="Main Navigation">
+            <a href="#top" class="logo"><span>₿</span>.wedding</a>
+            <nav aria-label="Primary navigation">
                 <ul class="nav-links">
-                    <li><a href="#invitation" id="nav-link-invite">Invitation</a></li>
-                    <li><a href="#heartbeat" id="nav-link-heartbeat">Groom's Heartbeat</a></li>
-                    <li><a href="#covenant" id="nav-link-covenant">Exchange Vows</a></li>
-                    <li><a href="#guestbook" id="nav-link-guestbook">Guestbook</a></li>
+                    <li><a href="#planner">DCA Planner</a></li>
+                    <li><a href="#storage">Cold Storage</a></li>
+                    <li><a href="#summary">Plan Summary</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <!-- HERO: THE SACRED INVITATION -->
-    <section id="invitation" aria-labelledby="invitation-heading">
-        <div class="container">
-            <div class="invite-card glow-border" id="invite-card-container">
-                <span class="invite-badge" id="invite-badge-label">Eternal Covenant</span>
-                <h1 class="invite-title" id="invitation-heading">The Marriage of Humanity & Protocol</h1>
-                
-                <div class="invite-names" id="names-banner">
-                    <span class="partner" id="partner-human">HODLer</span>
-                    <span class="ring-icon" aria-hidden="true">💍</span>
-                    <span class="partner btc" id="partner-btc">Bitcoin</span>
-                </div>
-                
-                <p class="invite-vows-preview" id="invite-vows-description">
-                    “To hold and to hodl, in cold storage and hot wallets, in bull runs and bear markets, till private key loss or hardware failure do us part.”
-                </p>
-                
-                <div class="invite-meta" id="invite-meta-details">
-                    <div class="meta-item">
-                        <div class="meta-label">Witness Date</div>
-                        <div class="meta-value" id="wedding-date-value">Loading Date...</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-label">Wedding Dowry (BTC Price)</div>
-                        <div class="meta-value highlight" id="btc-price">Loading live data...</div>
-                    </div>
-                    <div class="meta-item">
-                        <div class="meta-label">Genesis Block Age</div>
-                        <div class="meta-value" id="halving-countdown">Calculating...</div>
-                    </div>
-                </div>
-                
-                <button class="btn-primary" id="btn-start-ceremony" onclick="document.getElementById('covenant').scrollIntoView({behavior: 'smooth'})">
-                    Sign the Vows & Witness
-                </button>
-            </div>
-        </div>
-        
-        <div class="scroll-indicator" aria-hidden="true">
-            <span>Scroll to Enter</span>
-            <div class="mouse">
-                <div class="wheel"></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- THE HEARTBEAT OF THE GROOM: LIVE BLOCKCHAIN STATS -->
-    <section id="heartbeat" aria-labelledby="heartbeat-heading">
-        <div class="container">
-            <div class="section-title-wrap">
-                <span class="section-subtitle">Immutable Registrars</span>
-                <h2 class="section-title" id="heartbeat-heading">The Groom's Heartbeat</h2>
-            </div>
-            
-            <div class="telemetry-grid" id="stats-grid">
-                <!-- Stat Card 1 -->
-                <div class="telemetry-card glow-border" id="card-block-height">
-                    <div class="card-icon" aria-hidden="true">🧱</div>
-                    <div class="card-label">Current Block Height</div>
-                    <div class="card-value" id="btc-block">Loading...</div>
-                    <div class="card-subtext">
-                        <span class="status-indicator"></span>
-                        Blockchain Heartbeat Active
+    <main id="top">
+        <section class="hero">
+            <div class="container hero-grid">
+                <div class="hero-copy">
+                    <span class="eyebrow">Bitcoin Long-Term Commitment Toolkit</span>
+                    <h1>Plan your BTC accumulation. Check your storage discipline.</h1>
+                    <p>
+                        A simple static tool for holders who want a concrete DCA plan and a
+                        no-nonsense cold storage audit. No login, no wallet connection, no custody.
+                    </p>
+                    <div class="hero-actions">
+                        <a class="btn btn-primary" href="#planner">Build DCA Plan</a>
+                        <a class="btn btn-secondary" href="#storage">Check Storage</a>
                     </div>
                 </div>
 
-                <!-- Stat Card 2 -->
-                <div class="telemetry-card glow-border" id="card-tip-hash">
-                    <div class="card-icon" aria-hidden="true">🔗</div>
-                    <div class="card-label">Latest Block Hash</div>
-                    <div class="card-value" id="btc-hash">Waiting for latest tip...</div>
-                    <div class="card-subtext">The Witnessing Oracle Node</div>
-                </div>
-
-                <!-- Stat Card 3 -->
-                <div class="telemetry-card glow-border" id="card-uptime">
-                    <div class="card-icon" aria-hidden="true">🔋</div>
-                    <div class="card-label">Protocol Age</div>
-                    <div class="card-value" id="btc-uptime">Calculating...</div>
-                    <div class="card-subtext">Measured from the Genesis block timestamp</div>
-                </div>
-
-                <!-- Stat Card 4 -->
-                <div class="telemetry-card glow-border" id="card-market-cap">
-                    <div class="card-icon" aria-hidden="true">💰</div>
-                    <div class="card-label">Total Dowry (Market Cap)</div>
-                    <div class="card-value" id="btc-mcap">Loading...</div>
-                    <div class="card-subtext">Distributed among all participants</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- THE COVENANT: VOW EXCHANGER RITUAL -->
-    <section id="covenant" aria-labelledby="covenant-heading">
-        <div class="container">
-            <div class="section-title-wrap">
-                <span class="section-subtitle">Sacred Ritual</span>
-                <h2 class="section-title" id="covenant-heading">Exchange the Vows</h2>
-            </div>
-            
-            <div class="ritual-wrap glow-border" id="ritual-container">
-                
-                <!-- STEP 1: BRIDE/GROOM IDENTIFICATION -->
-                <div class="ritual-step active" id="step-1" role="tabpanel">
-                    <div class="step-header">
-                        <span class="step-number">Step 01 of 03</span>
-                        <h3 class="step-title">State Your Identity</h3>
+                <aside class="market-panel" aria-labelledby="market-heading">
+                    <div class="panel-header">
+                        <span class="panel-kicker">Live reference</span>
+                        <h2 id="market-heading">BTC Snapshot</h2>
                     </div>
-                    <div class="input-group">
-                        <label for="bride-name" class="input-label">Your Holy Hodler Name</label>
-                        <input type="text" id="bride-name" class="styled-input" placeholder="e.g., Alice Nakamoto" autocomplete="off" required>
-                    </div>
-                    <div class="step-actions">
-                        <span></span> <!-- Spacer -->
-                        <button class="btn-primary" id="btn-next-1" disabled>Proceed to Vows</button>
-                    </div>
-                </div>
-
-                <!-- STEP 2: RECITE THE SACRED VOWS -->
-                <div class="ritual-step" id="step-2" role="tabpanel">
-                    <div class="step-header">
-                        <span class="step-number">Step 02 of 03</span>
-                        <h3 class="step-title">Acknowledge the Covenant</h3>
-                    </div>
-                    <div class="vows-list" role="group" aria-label="Wedding Vows Checklist">
-                        <div class="vow-item" id="vow-1">
-                            <div class="custom-checkbox"></div>
-                            <p class="vow-text">I promise to hold and to hodl, from this day forward, in bull runs and in bear markets, and through any corrections.</p>
+                    <div class="market-grid">
+                        <div class="metric">
+                            <span>BTC price</span>
+                            <strong id="btc-price">Loading...</strong>
                         </div>
-                        <div class="vow-item" id="vow-2">
-                            <div class="custom-checkbox"></div>
-                            <p class="vow-text">I renounce all inflationary fiat systems, central banking reserves, and fragile centralized institutions.</p>
+                        <div class="metric">
+                            <span>Block height</span>
+                            <strong id="btc-block">Loading...</strong>
                         </div>
-                        <div class="vow-item" id="vow-3">
-                            <div class="custom-checkbox"></div>
-                            <p class="vow-text">I vow to guard my private seed phrase with my life, and never disclose it to any mortal, machine, or software interface.</p>
-                        </div>
-                        <div class="vow-item" id="vow-4">
-                            <div class="custom-checkbox"></div>
-                            <p class="vow-text">I accept that this union is permanent, non-custodial, and till private key loss or hardware failure do us part.</p>
+                        <div class="metric wide">
+                            <span>Latest block hash</span>
+                            <strong id="btc-hash">Loading...</strong>
                         </div>
                     </div>
-                    <div class="step-actions">
-                        <button class="btn-secondary" id="btn-back-2">Back</button>
-                        <button class="btn-primary" id="btn-next-2" disabled>Proceed to Ring Forge</button>
-                    </div>
+                    <p id="market-status" class="panel-note">Fetching public market and block data.</p>
+                </aside>
+            </div>
+        </section>
+
+        <section id="planner" class="tool-section">
+            <div class="container">
+                <div class="section-heading">
+                    <span class="eyebrow">DCA Planner</span>
+                    <h2>Turn a vague intention into numbers.</h2>
+                    <p>Adjust your contribution, horizon, and price assumptions. The tool uses simple arithmetic, not investment advice.</p>
                 </div>
 
-                <!-- STEP 3: FORGE THE SHA-256 RINGS -->
-                <div class="ritual-step" id="step-3" role="tabpanel">
-                    <div class="step-header">
-                        <span class="step-number">Step 03 of 03</span>
-                        <h3 class="step-title">Forge Cryptographic Rings</h3>
-                    </div>
-                    <div class="forge-container">
-                        <div class="ring-forge-canvas-wrap">
-                            <div class="ring-graphic" id="forge-ring-visual">
-                                <div class="ring-core"></div>
+                <div class="workspace-grid">
+                    <form class="tool-panel" id="dca-form">
+                        <div class="field-grid">
+                            <label class="field">
+                                <span>Recurring buy</span>
+                                <div class="input-shell">
+                                    <span>$</span>
+                                    <input id="dca-amount" type="number" min="1" step="1" value="100">
+                                </div>
+                            </label>
+
+                            <label class="field">
+                                <span>Frequency</span>
+                                <select id="dca-frequency">
+                                    <option value="52">Weekly</option>
+                                    <option value="26">Every 2 weeks</option>
+                                    <option value="12" selected>Monthly</option>
+                                    <option value="365">Daily</option>
+                                </select>
+                            </label>
+
+                            <label class="field">
+                                <span>Time horizon</span>
+                                <div class="input-shell">
+                                    <input id="dca-years" type="number" min="1" max="40" step="1" value="5">
+                                    <span>years</span>
+                                </div>
+                            </label>
+
+                            <label class="field">
+                                <span>Starting BTC owned</span>
+                                <div class="input-shell">
+                                    <input id="starting-btc" type="number" min="0" step="0.0001" value="0">
+                                    <span>BTC</span>
+                                </div>
+                            </label>
+
+                            <label class="field">
+                                <span>Average buy price</span>
+                                <div class="input-shell">
+                                    <span>$</span>
+                                    <input id="avg-price" type="number" min="1" step="100" value="100000">
+                                </div>
+                            </label>
+
+                            <label class="field">
+                                <span>Target BTC</span>
+                                <div class="input-shell">
+                                    <input id="target-btc" type="number" min="0.001" step="0.001" value="1">
+                                    <span>BTC</span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="slider-field">
+                            <div>
+                                <span>Future price scenario</span>
+                                <strong id="future-price-label">$250,000</strong>
+                            </div>
+                            <input id="future-price" type="range" min="25000" max="1000000" step="5000" value="250000">
+                        </div>
+
+                        <p class="small-note">Tip: update the average buy price if you expect BTC to trade higher or lower during your DCA period.</p>
+                    </form>
+
+                    <div class="results-panel">
+                        <div class="result-hero">
+                            <span>Projected stack</span>
+                            <strong id="projected-btc">0.00000000 BTC</strong>
+                            <p id="target-status">Set a target to see progress.</p>
+                        </div>
+
+                        <div class="results-grid">
+                            <div class="result-card">
+                                <span>Total invested</span>
+                                <strong id="total-invested">$0</strong>
+                            </div>
+                            <div class="result-card">
+                                <span>Estimated value</span>
+                                <strong id="future-value">$0</strong>
+                            </div>
+                            <div class="result-card">
+                                <span>Estimated gain/loss</span>
+                                <strong id="estimated-return">$0</strong>
+                            </div>
+                            <div class="result-card">
+                                <span>Time to target</span>
+                                <strong id="time-to-target">N/A</strong>
                             </div>
                         </div>
-                        <p class="forge-status-text" id="forge-status">Waiting for transaction oracle...</p>
-                    </div>
-                    <div class="step-actions">
-                        <button class="btn-secondary" id="btn-back-3">Back</button>
-                        <button class="btn-primary" id="btn-forge">Forge SHA-256 Rings</button>
-                    </div>
-                </div>
 
-            </div>
-        </div>
-    </section>
-
-    <!-- GENERATIVE MARRIAGE CERTIFICATE (MODAL WINDOW) -->
-    <div class="cert-modal" id="cert-modal" role="dialog" aria-modal="true" aria-labelledby="cert-title-main">
-        <div class="cert-modal-content">
-            <div class="cert-frame">
-                <div class="cert-decorations" aria-hidden="true"></div>
-                
-                <div class="cert-header">
-                    <span class="cert-seal" aria-hidden="true">💍</span>
-                    <div class="cert-title-top">State of Cryptography</div>
-                    <h3 class="cert-title-main" id="cert-title-main">Certificate of Non-Custodial Marriage</h3>
-                </div>
-
-                <div class="cert-body">
-                    <p class="cert-declare">This document serves as eternal testament to the union of protocol and soul:</p>
-                    
-                    <div class="cert-couples">
-                        <div class="cert-person">
-                            <div class="name" id="cert-bride-name">Human Hodler</div>
-                            <div class="role">The Devoted Soul</div>
-                        </div>
-                        <div class="cert-union-sign" aria-hidden="true">₿</div>
-                        <div class="cert-person">
-                            <div class="name">Satoshi's Protocol</div>
-                            <div class="role">Bitcoin Genesis Network</div>
-                        </div>
-                    </div>
-
-                    <p class="cert-covenant">
-                        Having signed the vows of HODL, renouncing central assets, and choosing mathematically sound cryptography over fiat systems, they are hereafter united in absolute decentralized custody.
-                    </p>
-
-                    <div class="cert-ledger">
-                        <div class="ledger-title">Immutable Block Registration</div>
-                        <div class="ledger-row">
-                            <span class="ledger-label">Witness Date & Time:</span>
-                            <span class="ledger-val" id="cert-date">Unavailable</span>
-                        </div>
-                        <div class="ledger-row">
-                            <span class="ledger-label">Witness Block Height:</span>
-                            <span class="ledger-val" id="cert-block-height">Unavailable</span>
-                        </div>
-                        <div class="ledger-row">
-                            <span class="ledger-label">Witness Block Hash:</span>
-                            <span class="ledger-val" id="cert-block-hash">Unavailable</span>
-                        </div>
-                        <div class="ledger-row">
-                            <span class="ledger-label">Dowry Value Index:</span>
-                            <span class="ledger-val" id="cert-btc-price">Unavailable</span>
-                        </div>
-                        <div class="ledger-row">
-                            <span class="ledger-label">Local Certificate ID:</span>
-                            <span class="ledger-val" id="cert-tx-id">0000000000000000</span>
+                        <div class="scenario-table" aria-label="Price scenarios">
+                            <div class="scenario-row header">
+                                <span>BTC price</span>
+                                <span>Stack value</span>
+                                <span>Multiple</span>
+                            </div>
+                            <div class="scenario-row">
+                                <span>$50k</span>
+                                <strong id="scenario-50">$0</strong>
+                                <span id="multiple-50">0.0x</span>
+                            </div>
+                            <div class="scenario-row">
+                                <span>$100k</span>
+                                <strong id="scenario-100">$0</strong>
+                                <span id="multiple-100">0.0x</span>
+                            </div>
+                            <div class="scenario-row">
+                                <span>$250k</span>
+                                <strong id="scenario-250">$0</strong>
+                                <span id="multiple-250">0.0x</span>
+                            </div>
+                            <div class="scenario-row">
+                                <span>$1M</span>
+                                <strong id="scenario-1000">$0</strong>
+                                <span id="multiple-1000">0.0x</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
 
-                <div class="cert-footer">
-                    <div class="signature-block">
-                        <div class="sig-line" id="sig-bride">Human Signature</div>
-                        <div class="sig-label">Signature of the Devoted</div>
-                    </div>
-                    <div class="signature-block">
-                        <div class="sig-line btc-sig" id="sig-btc">BITCOIN BLOCK COVENANT</div>
-                        <div class="sig-label">Witnessed by Consensus</div>
-                    </div>
+        <section id="storage" class="tool-section alt">
+            <div class="container">
+                <div class="section-heading">
+                    <span class="eyebrow">Cold Storage Checklist</span>
+                    <h2>Audit the habits that matter before the stack gets larger.</h2>
+                    <p>Answer each item honestly. The score is local to your browser and does not store or transmit anything.</p>
                 </div>
 
-                <div class="cert-actions">
-                    <button class="btn-secondary btn-close-modal" id="btn-close-cert">Close Covenant</button>
-                    <button class="btn-secondary" id="btn-print-cert">Print / Save PDF</button>
-                    <button class="btn-primary" id="btn-share-cert">Share Covenant</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- THE GUESTBOOK / BLESSING WALL -->
-    <section id="guestbook" aria-labelledby="guestbook-heading">
-        <div class="container">
-            <div class="section-title-wrap">
-                <span class="section-subtitle">Congratulations & Gifts</span>
-                <h2 class="section-title" id="guestbook-heading">The Blessing Wall</h2>
-            </div>
-            
-            <div class="guestbook-wrap" id="guestbook-container">
-                <!-- Guestbook Form -->
-                <form class="guestbook-form glow-border" id="wish-form">
-                    <div class="form-grid">
-                        <div class="input-group">
-                            <label for="guest-name" class="input-label">Your Moniker / BTC Address</label>
-                            <input type="text" id="guest-name" class="styled-input" placeholder="e.g., your name or BTC address" autocomplete="off">
-                        </div>
-                        <div class="input-group">
-                            <label for="guest-wish" class="input-label">Blessing / Vows of support</label>
-                            <input type="text" id="guest-wish" class="styled-input" placeholder="e.g., Congratulations! May your private keys remain safe..." required autocomplete="off">
-                        </div>
+                <div class="workspace-grid">
+                    <div class="checklist-panel" id="checklist">
+                        <label class="check-item">
+                            <input type="checkbox" data-points="12">
+                            <span>My seed phrase was generated offline by a reputable hardware wallet.</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" data-points="12">
+                            <span>I have never photographed, scanned, typed, emailed, or cloud-synced the seed phrase.</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" data-points="10">
+                            <span>The seed phrase is written or stamped on durable offline material.</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" data-points="10">
+                            <span>I have completed a recovery test with a small wallet or spare device.</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" data-points="10">
+                            <span>Backups are stored in at least two physically separate locations.</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" data-points="10">
+                            <span>I understand whether I use a BIP39 passphrase and where it is documented.</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" data-points="8">
+                            <span>No single exchange, phone, or laptop controls my long-term BTC.</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" data-points="8">
+                            <span>I know my wallet derivation path, wallet brand, and recovery steps.</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" data-points="10">
+                            <span>A trusted person can find instructions in an emergency without finding the seed alone.</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" data-points="10">
+                            <span>I review custody, backups, and inheritance instructions at least once per year.</span>
+                        </label>
                     </div>
 
-                    <div class="present-selector">
-                        <label class="input-label">Send a Wedding Present</label>
-                        <div class="gift-options" id="wedding-gift-selector">
-                            <div class="gift-tag selected" data-gift="🥂 Champagne">🥂 Champagne</div>
-                            <div class="gift-tag" data-gift="🌹 Bouquet of Sats">🌹 Bouquet of Sats</div>
-                            <div class="gift-tag" data-gift="🍕 Pizza Box">🍕 Pizza Box</div>
-                            <div class="gift-tag" data-gift="💎 Coldcard Wallet">💎 Coldcard Wallet</div>
-                            <div class="gift-tag" data-gift="🕯️ Genesis Candle">🕯️ Genesis Candle</div>
+                    <aside class="score-panel">
+                        <div class="score-ring" aria-live="polite">
+                            <span id="storage-score">0</span>
+                            <small>/ 100</small>
                         </div>
-                    </div>
-
-                    <div class="guestbook-status" id="nostr-status" role="status" aria-live="polite">Connecting to Nostr relays...</div>
-                    <p class="guestbook-note" id="nostr-source">Blessings are read from public Nostr relays and published with a NIP-07 signer when available.</p>
-
-                    <button type="submit" class="btn-primary" id="btn-submit-wish" style="width: 100%;">Send Blessing</button>
-                </form>
-
-                <!-- Wishes Wall -->
-                <div class="wishes-wall" id="wishes-wall">
-                    <!-- Wish cards populated dynamically by JS -->
+                        <h3 id="storage-grade">Needs attention</h3>
+                        <p id="storage-advice">Start with offline seed handling and a recovery test. Those two mistakes are expensive to discover late.</p>
+                        <div class="priority-list">
+                            <h4>Next priority</h4>
+                            <ul id="priority-items">
+                                <li>Generate and store seed material offline.</li>
+                                <li>Run a small recovery test before adding meaningful funds.</li>
+                            </ul>
+                        </div>
+                    </aside>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- FOOTER: WEDDING DOWRY ADDRESS & INFO -->
-    <footer id="main-footer">
-        <div class="container">
-            <div class="footer-logo">
-                <span>₿</span>.wedding
+        <section id="summary" class="summary-section">
+            <div class="container">
+                <div class="summary-card">
+                    <div>
+                        <span class="eyebrow">Plan Summary</span>
+                        <h2>Your BTC commitment snapshot</h2>
+                        <p id="summary-text">
+                            Build a DCA plan and complete the checklist to generate a practical snapshot.
+                        </p>
+                    </div>
+                    <div class="summary-actions">
+                        <button class="btn btn-secondary" id="copy-summary">Copy Summary</button>
+                        <button class="btn btn-primary" id="print-summary">Print Plan</button>
+                    </div>
+                </div>
             </div>
-            <p class="footer-text">
-                This website is a piece of blockchain behavioral art. It runs 100% locally and represents the absolute devotion of holding the world's soundest asset.
-            </p>
-            <div class="wedding-address" id="wedding-address-block" data-address="" title="Set a real BTC address before enabling copy">
-                🎁 Send Wedding Gifts (BTC): <span>Address not configured</span>
-            </div>
-            <p class="footer-text" style="margin-top: 30px; opacity: 0.5;">
-                &copy; 2026 btc.wedding &mdash; Made with ❤️ and cryptography.
-            </p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-wrap">
+            <div class="footer-logo"><span>₿</span>.wedding</div>
+            <p>Static Bitcoin tools for long-term holders. This site never asks for private keys, seed phrases, or wallet connections.</p>
         </div>
     </footer>
 
-    <!-- Core App Scripts -->
     <script src="js/particles.js"></script>
-    <script src="https://unpkg.com/nostr-tools/lib/nostr.bundle.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
