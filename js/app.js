@@ -1,20 +1,8 @@
+const STORAGE_KEY = "btc_wedding_simple_plan";
+
 const state = {
     currentBtcPrice: null,
-    blockHeight: null,
-    blockHash: "",
-    airGap: false,
-    activeTab: "single",
-    prevValues: {
-        "storage-score": 0,
-        "projected-btc": 0,
-        "total-invested": 0,
-        "future-value": 0,
-        "estimated-return": 0,
-        "scenario-50": 0,
-        "scenario-100": 0,
-        "scenario-250": 0,
-        "scenario-1000": 0
-    }
+    blockHeight: null
 };
 
 const DCA_INPUT_IDS = [
@@ -27,257 +15,102 @@ const DCA_INPUT_IDS = [
     "future-price"
 ];
 
-const STORAGE_PRIORITIES_SINGLE = [
-    "Generate seed material offline with a reputable hardware wallet.",
-    "Remove every digital copy of your seed phrase.",
-    "Move the backup to durable offline material.",
-    "Complete a small recovery test before adding meaningful funds.",
-    "Separate backups across more than one physical location.",
-    "Document passphrase usage clearly without placing it beside the seed.",
-    "Reduce dependence on exchanges, phones, or laptops.",
-    "Record wallet brand, derivation path, and recovery steps.",
-    "Prepare emergency instructions that do not expose the seed by themselves.",
-    "Set an annual custody review date."
-];
-
-const STORAGE_PRIORITIES_PASSPHRASE = [
-    "Understand that a BIP39 passphrase forms a completely separate wallet.",
-    "Store passphrase physically separate from your 24-word seed phrase.",
-    "Memorize or backup a strong, high-entropy passphrase offline.",
-    "Perform a recovery test for the passphrase wallet.",
-    "Provide clear guidance for heirs to find passphrase and seed separately.",
-    "Review passphrase storage security annually."
-];
-
-const STORAGE_PRIORITIES_MULTISIG = [
-    "Set up multi-signature keys on hardware wallets from different vendors.",
-    "Distribute seed phrase backups across distinct geographic locations.",
-    "Create multiple secure backups of your multisig config file (XPUBs).",
-    "Execute a test spend from the multi-sig wallet.",
-    "Ensure no single location stores more than 1 key's seed backup.",
-    "Write recovery instructions for heirs regarding keys and config files."
-];
-
-// Active animation frames store
-const activeAnimations = {};
-let dcaChartInstance = null;
-
 document.addEventListener("DOMContentLoaded", () => {
     setupHeaderState();
-    setupDcaPlanner();
-    setupStorageChecklist();
+    setupPlanner();
+    setupChecklist();
     setupSummaryActions();
     setupMarketRefresh();
-    setupAirGapToggle();
-    setupChecklistTabs();
-    setupInflationToggle();
-    
-    // Load local storage if it exists
-    loadStateFromLocalStorage();
-    
-    // Fetch live market data
+    restoreLocalState();
     fetchBitcoinSnapshot();
-
-    // Handle chart redraws on window resize
-    window.addEventListener("resize", () => {
-        calculateDca();
-    });
+    calculateDca();
+    updateStorageScore();
 });
 
 function setupHeaderState() {
     const header = document.querySelector(".site-header");
     window.addEventListener("scroll", () => {
-        if (header) {
-            header.style.boxShadow = window.scrollY > 20 ? "0 10px 30px rgba(0, 0, 0, 0.25)" : "none";
-        }
+        if (!header) return;
+        header.style.boxShadow = window.scrollY > 20 ? "0 10px 30px rgba(0, 0, 0, 0.24)" : "none";
     });
 }
 
-function setupDcaPlanner() {
+function setupPlanner() {
     DCA_INPUT_IDS.forEach((id) => {
         const input = document.getElementById(id);
-        if (input) {
-            input.addEventListener("input", () => {
-                calculateDca();
-                saveStateToLocalStorage();
-            });
-            input.addEventListener("change", () => {
-                calculateDca();
-                saveStateToLocalStorage();
-            });
-        }
+        if (!input) return;
+        input.addEventListener("input", handlePlanChange);
+        input.addEventListener("change", handlePlanChange);
     });
 
-    calculateDca();
-}
-
-function setupStorageChecklist() {
-    document.querySelectorAll(".checklist-panel input[type='checkbox']").forEach((checkbox) => {
-        checkbox.addEventListener("change", () => {
-            updateStorageScore();
-            saveStateToLocalStorage();
+    document.querySelectorAll(".preset-btn").forEach((button) => {
+        button.addEventListener("click", () => {
+            const target = document.getElementById("target-btc");
+            target.value = button.dataset.targetBtc;
+            markActivePreset();
+            handlePlanChange();
         });
     });
+}
 
-    updateStorageScore();
+function setupChecklist() {
+    document.querySelectorAll("#checklist input[type='checkbox']").forEach((checkbox) => {
+        checkbox.addEventListener("change", () => {
+            updateStorageScore();
+            saveLocalState();
+        });
+    });
 }
 
 function setupSummaryActions() {
     const copyBtn = document.getElementById("copy-summary");
-    if (copyBtn) {
-        copyBtn.addEventListener("click", async () => {
-            const summary = buildSummaryText();
-
-            try {
-                await copyTextToClipboard(summary);
-                flashButton("copy-summary", "Copied");
-            } catch (err) {
-                console.warn("Clipboard fallback failed", err);
-                flashButton("copy-summary", "Copy failed");
-            }
-        });
-    }
-
     const printBtn = document.getElementById("print-summary");
-    if (printBtn) {
-        printBtn.addEventListener("click", () => {
-            window.print();
-        });
-    }
-
     const resetBtn = document.getElementById("reset-summary");
-    if (resetBtn) {
-        resetBtn.addEventListener("click", () => {
-            if (confirm("Are you sure you want to reset all planner inputs and checklist scores?")) {
-                resetState();
-            }
-        });
-    }
-}
 
-function setupMarketRefresh() {
-    const refreshBtn = document.getElementById("refresh-market");
-    if (refreshBtn) {
-        refreshBtn.addEventListener("click", async () => {
-            if (state.airGap) {
-                alert("Cannot refresh live data while Air-Gap / Privacy Mode is enabled.");
-                return;
-            }
-            const icon = refreshBtn.querySelector(".refresh-icon");
-            if (icon) icon.classList.add("spinning");
-            refreshBtn.disabled = true;
+    copyBtn?.addEventListener("click", async () => {
+        try {
+            await copyTextToClipboard(buildSummaryText());
+            flashButton(copyBtn, "Copied");
+        } catch (err) {
+            console.warn("Copy failed", err);
+            flashButton(copyBtn, "Copy failed");
+        }
+    });
 
-            await fetchBitcoinSnapshot();
+    printBtn?.addEventListener("click", () => window.print());
 
-            setTimeout(() => {
-                if (icon) icon.classList.remove("spinning");
-                refreshBtn.disabled = false;
-            }, 800);
-        });
-    }
-}
-
-function setupAirGapToggle() {
-    const toggle = document.getElementById("air-gap-toggle");
-    if (toggle) {
-        toggle.addEventListener("change", (e) => {
-            state.airGap = e.target.checked;
-            saveStateToLocalStorage();
-            
-            if (state.airGap) {
-                setMarketOfflineState();
-            } else {
-                fetchBitcoinSnapshot();
-            }
-        });
-    }
-}
-
-function setupInflationToggle() {
-    const toggle = document.getElementById("inflation-toggle");
-    if (toggle) {
-        toggle.addEventListener("change", () => {
-            calculateDca();
-            saveStateToLocalStorage();
-        });
-    }
-}
-
-function setupChecklistTabs() {
-    const tabBtns = document.querySelectorAll(".tab-btn");
-    tabBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            tabBtns.forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            
-            const tabName = btn.dataset.tab;
-            state.activeTab = tabName;
-            
-            // Toggle panels
-            document.querySelectorAll(".checklist-panel").forEach(p => {
-                p.classList.remove("active");
-                p.style.display = "none";
-            });
-            
-            const targetPanel = document.getElementById("checklist-" + tabName);
-            if (targetPanel) {
-                targetPanel.classList.add("active");
-                targetPanel.style.display = "grid";
-            }
-            
-            updateStorageScore();
-            saveStateToLocalStorage();
-        });
+    resetBtn?.addEventListener("click", () => {
+        resetLocalState();
     });
 }
 
-function setMarketOfflineState() {
-    const priceEl = document.getElementById("btc-price");
-    const blockEl = document.getElementById("btc-block");
-    const halvingEl = document.getElementById("btc-halving");
-    const hashEl = document.getElementById("btc-hash");
-    const statusEl = document.getElementById("market-status");
-    const statusDot = document.getElementById("status-dot");
-    
-    if (priceEl) priceEl.textContent = "Offline";
-    if (blockEl) blockEl.textContent = "Offline";
-    if (halvingEl) halvingEl.textContent = "Offline";
-    if (hashEl) hashEl.textContent = "Air-Gapped";
-    
-    if (statusDot) {
-        statusDot.className = "status-dot"; // remove pulsing, turn gray
-    }
-    
-    if (statusEl) {
-        statusEl.textContent = "Air-Gap mode enabled. Public APIs disconnected for maximum privacy.";
-    }
+function setupMarketRefresh() {
+    document.getElementById("refresh-market")?.addEventListener("click", fetchBitcoinSnapshot);
+}
+
+function handlePlanChange() {
+    markActivePreset();
+    calculateDca();
+    saveLocalState();
 }
 
 async function fetchBitcoinSnapshot() {
-    if (state.airGap) {
-        setMarketOfflineState();
-        return;
-    }
-
     const priceEl = document.getElementById("btc-price");
     const blockEl = document.getElementById("btc-block");
-    const halvingEl = document.getElementById("btc-halving");
-    const hashEl = document.getElementById("btc-hash");
     const statusEl = document.getElementById("market-status");
     const statusDot = document.getElementById("status-dot");
 
-    let priceSuccess = false;
-    let blockSuccess = false;
+    statusDot?.classList.remove("ok", "error");
+    if (statusEl) statusEl.textContent = "Fetching public market and block data.";
 
     try {
         const price = await fetchPrice();
         state.currentBtcPrice = price;
         if (priceEl) priceEl.textContent = formatCurrency(price);
-        priceSuccess = true;
 
-        const avgPrice = document.getElementById("avg-price");
-        if (avgPrice && Number(avgPrice.value) === 100000) {
-            avgPrice.value = Math.round(price);
+        const avgPriceEl = document.getElementById("avg-price");
+        if (avgPriceEl && Number(avgPriceEl.value) === 100000) {
+            avgPriceEl.value = Math.round(price);
             calculateDca();
         }
     } catch (err) {
@@ -286,60 +119,21 @@ async function fetchBitcoinSnapshot() {
     }
 
     try {
-        const [height, hash] = await Promise.all([fetchBlockHeight(), fetchBlockHash()]);
+        const height = await fetchBlockHeight();
         state.blockHeight = height;
-        state.blockHash = hash;
         if (blockEl) blockEl.textContent = `#${height.toLocaleString("en-US")}`;
-        if (hashEl) hashEl.textContent = shortenHash(hash);
-        blockSuccess = true;
-        
-        // Calculate next halving countdown details
-        updateHalvingCountdown(height);
     } catch (err) {
-        console.warn("Block data fetch failed", err);
+        console.warn("Block height fetch failed", err);
         if (blockEl) blockEl.textContent = "Unavailable";
-        if (hashEl) hashEl.textContent = "Unavailable";
-        if (halvingEl) halvingEl.textContent = "Unavailable";
     }
 
-    if (statusDot) {
-        if (priceSuccess && blockSuccess) {
-            statusDot.className = "status-dot pulsing";
-        } else {
-            statusDot.className = "status-dot error";
-        }
+    if (state.currentBtcPrice || state.blockHeight) {
+        statusDot?.classList.add("ok");
+        if (statusEl) statusEl.textContent = "Live reference loaded. Calculations still use your editable assumptions.";
+    } else {
+        statusDot?.classList.add("error");
+        if (statusEl) statusEl.textContent = "Live data unavailable. The planner still works with manual assumptions.";
     }
-
-    if (statusEl) {
-        statusEl.textContent = state.currentBtcPrice
-            ? "Live data loaded from public Bitcoin APIs."
-            : "Live data unavailable. Planner still works with your manual assumptions.";
-    }
-}
-
-function updateHalvingCountdown(currentBlock) {
-    const halvingEl = document.getElementById("btc-halving");
-    if (!halvingEl) return;
-    
-    // Halvings occur every 210,000 blocks
-    const nextHalvingBlock = Math.ceil(currentBlock / 210000) * 210000;
-    const blocksRemaining = nextHalvingBlock - currentBlock;
-    
-    // 10 minutes average per block
-    const minutesRemaining = blocksRemaining * 10;
-    const daysRemaining = Math.floor(minutesRemaining / (24 * 60));
-    
-    const years = Math.floor(daysRemaining / 365);
-    const months = Math.floor((daysRemaining % 365) / 30);
-    const days = daysRemaining % 30;
-    
-    let timeStr = "";
-    if (years > 0) timeStr += `${years}y `;
-    if (months > 0) timeStr += `${months}m `;
-    timeStr += `${days}d`;
-    
-    halvingEl.textContent = `${timeStr} (${blocksRemaining.toLocaleString()} blks)`;
-    halvingEl.title = `Estimated countdown to block #${nextHalvingBlock.toLocaleString()}`;
 }
 
 async function fetchPrice() {
@@ -357,19 +151,15 @@ async function fetchPrice() {
         if (Number.isFinite(price)) return price;
     }
 
-    throw new Error("No price source returned a valid value.");
+    throw new Error("No valid price source.");
 }
 
 async function fetchBlockHeight() {
     const res = await fetchWithTimeout("https://blockstream.info/api/blocks/tip/height");
     if (!res.ok) throw new Error("Block height unavailable.");
-    return Number(await res.text());
-}
-
-async function fetchBlockHash() {
-    const res = await fetchWithTimeout("https://blockstream.info/api/blocks/tip/hash");
-    if (!res.ok) throw new Error("Block hash unavailable.");
-    return res.text();
+    const height = Number(await res.text());
+    if (!Number.isFinite(height)) throw new Error("Invalid block height.");
+    return height;
 }
 
 async function fetchWithTimeout(url, timeoutMs = 4500) {
@@ -383,42 +173,6 @@ async function fetchWithTimeout(url, timeoutMs = 4500) {
     }
 }
 
-// Numerical interpolation animator (Ease out quad)
-function animateValue(elementId, start, end, duration, formatFn) {
-    if (activeAnimations[elementId]) {
-        cancelAnimationFrame(activeAnimations[elementId]);
-    }
-
-    if (start === end) {
-        const el = document.getElementById(elementId);
-        if (el) el.textContent = formatFn(end);
-        return;
-    }
-
-    const startTime = performance.now();
-
-    function update(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const ease = progress * (2 - progress); // easeOutQuad
-        const current = start + (end - start) * ease;
-
-        const el = document.getElementById(elementId);
-        if (el) {
-            el.textContent = formatFn(current);
-        }
-
-        if (progress < 1) {
-            activeAnimations[elementId] = requestAnimationFrame(update);
-        } else {
-            if (el) el.textContent = formatFn(end);
-            delete activeAnimations[elementId];
-        }
-    }
-
-    activeAnimations[elementId] = requestAnimationFrame(update);
-}
-
 function calculateDca() {
     const amount = readNumber("dca-amount");
     const frequency = readNumber("dca-frequency");
@@ -427,317 +181,44 @@ function calculateDca() {
     const avgPrice = readNumber("avg-price");
     const targetBtc = readNumber("target-btc");
     const futurePrice = readNumber("future-price");
-    
-    // Inflation parameters
-    const inflationToggle = document.getElementById("inflation-toggle");
-    const isInflationAdjusted = inflationToggle ? inflationToggle.checked : false;
-    const inflationRate = 0.025; // 2.5% inflation rate
-    const inflationMultiplier = isInflationAdjusted ? Math.pow(1 + inflationRate, -years) : 1;
 
     const buys = Math.max(0, frequency * years);
-    let recurringInvested = amount * buys;
-    const purchasedBtc = avgPrice > 0 ? recurringInvested / avgPrice : 0;
+    const totalInvested = amount * buys;
+    const purchasedBtc = avgPrice > 0 ? totalInvested / avgPrice : 0;
     const projectedBtc = startingBtc + purchasedBtc;
-    const startingCostBasis = startingBtc * avgPrice;
-    const totalCostBasis = startingCostBasis + recurringInvested;
-    
-    // Apply inflation multipliers to projected values
-    let futureValue = (projectedBtc * futurePrice) * inflationMultiplier;
-    let estimatedReturn = futureValue - (totalCostBasis * inflationMultiplier);
-    
-    // Cost basis shown also adjusts under inflation toggle to represent real contributions purchasing power
-    let nominalInvested = recurringInvested * (isInflationAdjusted ? inflationMultiplier : 1);
+    const costBasis = totalInvested + startingBtc * avgPrice;
+    const futureValue = projectedBtc * futurePrice;
+    const gainLoss = futureValue - costBasis;
     const progress = targetBtc > 0 ? Math.min(100, (projectedBtc / targetBtc) * 100) : 0;
 
-    const futurePriceLabel = document.getElementById("future-price-label");
-    if (futurePriceLabel) {
-        futurePriceLabel.textContent = formatCurrency(futurePrice, 0);
-    }
-
-    // Smooth value counters
-    const prev = state.prevValues;
-    animateValue("projected-btc", prev["projected-btc"], projectedBtc, 450, (v) => `${formatBtc(v)} BTC`);
-    animateValue("total-invested", prev["total-invested"], nominalInvested, 450, (v) => formatCurrency(v, 0));
-    animateValue("future-value", prev["future-value"], futureValue, 450, (v) => formatCurrency(v, 0));
-    animateValue("estimated-return", prev["estimated-return"], estimatedReturn, 450, (v) => formatSignedCurrency(v));
-
-    prev["projected-btc"] = projectedBtc;
-    prev["total-invested"] = nominalInvested;
-    prev["future-value"] = futureValue;
-    prev["estimated-return"] = estimatedReturn;
+    setText("future-price-label", formatCurrency(futurePrice, 0));
+    setText("projected-btc", `${formatBtc(projectedBtc)} BTC`);
+    setText("projected-sats", `${formatSats(projectedBtc)} sats`);
+    setText("total-invested", formatCurrency(totalInvested, 0));
+    setText("future-value", formatCurrency(futureValue, 0));
+    setText("estimated-return", formatSignedCurrency(gainLoss));
+    setText("time-to-target", estimateTimeToTarget({ amount, frequency, avgPrice, startingBtc, targetBtc }));
 
     const returnEl = document.getElementById("estimated-return");
-    if (returnEl) {
-        returnEl.classList.toggle("positive", estimatedReturn >= 0);
-        returnEl.classList.toggle("negative", estimatedReturn < 0);
-    }
+    returnEl?.classList.toggle("positive", gainLoss >= 0);
+    returnEl?.classList.toggle("negative", gainLoss < 0);
 
-    const statusEl = document.getElementById("target-status");
-    if (statusEl) {
-        statusEl.textContent = targetBtc > 0
-            ? `${progress.toFixed(1)}% of your ${formatBtc(targetBtc)} BTC target.`
-            : "Set a target to see progress.";
-    }
+    setText("target-status", targetBtc > 0
+        ? `${progress.toFixed(1)}% of your ${formatBtc(targetBtc)} BTC target (${formatSats(targetBtc)} sats).`
+        : "Set a target to see progress.");
 
-    const timeEl = document.getElementById("time-to-target");
-    if (timeEl) {
-        timeEl.textContent = estimateTimeToTarget({
-            amount,
-            frequency,
-            avgPrice,
-            startingBtc,
-            targetBtc
-        });
-    }
-
-    updateScenario("50", projectedBtc, totalCostBasis, 50000, inflationMultiplier);
-    updateScenario("100", projectedBtc, totalCostBasis, 100000, inflationMultiplier);
-    updateScenario("250", projectedBtc, totalCostBasis, 250000, inflationMultiplier);
-    updateScenario("1000", projectedBtc, totalCostBasis, 1000000, inflationMultiplier);
-    
-    // Draw SVG Projection Graph
-    updateChart({
-        amount,
-        frequency,
-        years,
-        avgPrice,
-        startingBtc,
-        futurePrice,
-        isInflationAdjusted,
-        inflationRate
-    });
-
+    updateScenario("50", projectedBtc, costBasis, 50000);
+    updateScenario("100", projectedBtc, costBasis, 100000);
+    updateScenario("250", projectedBtc, costBasis, 250000);
+    updateScenario("1000", projectedBtc, costBasis, 1000000);
     updateSummary();
 }
 
-function updateScenario(id, btc, costBasis, price, inflationMultiplier) {
-    const value = (btc * price) * inflationMultiplier;
-    const cost = costBasis * inflationMultiplier;
-    const multiple = cost > 0 ? value / cost : 0;
-    
-    const key = `scenario-${id}`;
-    const prevVal = state.prevValues[key] || 0;
-    state.prevValues[key] = value;
-
-    animateValue(key, prevVal, value, 450, (v) => formatCurrency(v, 0));
-
-    const multEl = document.getElementById(`multiple-${id}`);
-    if (multEl) {
-        multEl.textContent = `${multiple.toFixed(1)}x`;
-    }
-}
-
-function updateChart({ amount, frequency, years, avgPrice, startingBtc, futurePrice, isInflationAdjusted, inflationRate }) {
-    if (typeof Chart === 'undefined') return;
-
-    const canvas = document.getElementById("projection-chart");
-    if (!canvas) return;
-
-    // Set parameters
-    const steps = 10;
-    let labels = [];
-    let basisData = [];
-    let valueData = [];
-
-    for (let i = 0; i <= steps; i++) {
-        const t = (i / steps) * years;
-        const buys = frequency * t;
-        let cost = (startingBtc * avgPrice) + (amount * buys);
-        const btcAccumulated = startingBtc + (avgPrice > 0 ? (amount * buys) / avgPrice : 0);
-        let val = btcAccumulated * futurePrice;
-        
-        // Apply inflation if toggle active
-        if (isInflationAdjusted) {
-            const mult = Math.pow(1 + inflationRate, -t);
-            cost *= mult;
-            val *= mult;
-        }
-        
-        basisData.push(cost);
-        valueData.push(val);
-
-        // Populate labels
-        let labelStr = "";
-        if (i === 0) {
-            labelStr = "START";
-        } else if (i === steps) {
-            labelStr = `${years.toFixed(0)} YR`;
-        } else if (i === Math.floor(steps / 2)) {
-            labelStr = `${(years / 2).toFixed(1)} YR`;
-        } else {
-            labelStr = `${t.toFixed(1)} YR`;
-        }
-        labels.push(labelStr);
-    }
-
-    const costBasisDataset = {
-        label: 'Cost Basis',
-        data: basisData,
-        borderColor: '#3b82f6',
-        borderWidth: 2,
-        borderDash: [4, 4],
-        backgroundColor: function(context) {
-            const chart = context.chart;
-            const {ctx, chartArea} = chart;
-            if (!chartArea) return null;
-            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.12)');
-            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.00)');
-            return gradient;
-        },
-        fill: true,
-        tension: 0.2,
-        pointRadius: 0,
-        pointHoverRadius: 5,
-        pointHoverBackgroundColor: '#3b82f6',
-        pointHoverBorderColor: '#0a0806',
-        pointHoverBorderWidth: 2
-    };
-
-    const projectedValueDataset = {
-        label: 'Projected Value',
-        data: valueData,
-        borderColor: '#f7931a',
-        borderWidth: 3,
-        backgroundColor: function(context) {
-            const chart = context.chart;
-            const {ctx, chartArea} = chart;
-            if (!chartArea) return null;
-            const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-            gradient.addColorStop(0, 'rgba(247, 147, 26, 0.16)');
-            gradient.addColorStop(1, 'rgba(247, 147, 26, 0.00)');
-            return gradient;
-        },
-        fill: true,
-        tension: 0.2,
-        pointRadius: 0,
-        pointHoverRadius: 6,
-        pointHoverBackgroundColor: '#f7931a',
-        pointHoverBorderColor: '#0a0806',
-        pointHoverBorderWidth: 2
-    };
-
-    if (dcaChartInstance) {
-        dcaChartInstance.data.labels = labels;
-        dcaChartInstance.data.datasets[0] = costBasisDataset;
-        dcaChartInstance.data.datasets[1] = projectedValueDataset;
-        dcaChartInstance.options.scales.x.ticks.callback = function(val, index) {
-            if (index === 0) return 'START';
-            if (index === steps) return `${years.toFixed(0)} YR`;
-            if (index === Math.floor(steps / 2)) return `${(years / 2).toFixed(1)} YR`;
-            return '';
-        };
-        dcaChartInstance.update();
-    } else {
-        const ctx = canvas.getContext('2d');
-        dcaChartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [costBasisDataset, projectedValueDataset]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: '#110d0a',
-                        titleColor: '#94a3b8',
-                        titleFont: {
-                            family: 'Inter',
-                            size: 11,
-                            weight: '600'
-                        },
-                        bodyColor: '#f8fafc',
-                        bodyFont: {
-                            family: 'Inter',
-                            size: 12,
-                            weight: '500'
-                        },
-                        borderColor: 'rgba(247, 147, 26, 0.15)',
-                        borderWidth: 1,
-                        padding: 10,
-                        displayColors: true,
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(context.parsed.y);
-                                }
-                                return label;
-                            },
-                            title: function(tooltipItems) {
-                                const idx = tooltipItems[0].dataIndex;
-                                const t = (idx / steps) * years;
-                                return `Year ${t.toFixed(1)}`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false
-                        },
-                        ticks: {
-                            color: '#64748b',
-                            font: {
-                                family: 'Inter',
-                                size: 10,
-                                weight: '600'
-                            },
-                            callback: function(val, index) {
-                                if (index === 0) return 'START';
-                                if (index === steps) return `${years.toFixed(0)} YR`;
-                                if (index === Math.floor(steps / 2)) return `${(years / 2).toFixed(1)} YR`;
-                                return '';
-                            }
-                        }
-                    },
-                    y: {
-                        grid: {
-                            color: 'rgba(255, 255, 255, 0.035)',
-                            drawBorder: false
-                        },
-                        ticks: {
-                            color: '#64748b',
-                            font: {
-                                family: 'Inter',
-                                size: 10,
-                                weight: '600'
-                            },
-                            callback: function(value) {
-                                return formatCompactCurrency(value);
-                            }
-                        }
-                    }
-                },
-                interaction: {
-                    mode: 'index',
-                    intersect: false
-                },
-                hover: {
-                    mode: 'index',
-                    intersect: false
-                }
-            }
-        });
-    }
-}
-
-function formatCompactCurrency(value) {
-    if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
-    if (value >= 1e3) return `$${(value / 1e3).toFixed(0)}K`;
-    return `$${Math.round(value)}`;
+function updateScenario(id, btc, costBasis, price) {
+    const value = btc * price;
+    const multiple = costBasis > 0 ? value / costBasis : 0;
+    setText(`scenario-${id}`, formatCurrency(value, 0));
+    setText(`multiple-${id}`, `${multiple.toFixed(1)}x`);
 }
 
 function estimateTimeToTarget({ amount, frequency, avgPrice, startingBtc, targetBtc }) {
@@ -755,126 +236,145 @@ function estimateTimeToTarget({ amount, frequency, avgPrice, startingBtc, target
 }
 
 function updateStorageScore() {
-    // Score based on active checklist tab only
-    const activePanel = document.getElementById("checklist-" + state.activeTab);
-    if (!activePanel) return;
-
-    const checkboxes = Array.from(activePanel.querySelectorAll("input[type='checkbox']"));
-    const score = checkboxes.reduce((total, checkbox) => {
+    const checkboxes = Array.from(document.querySelectorAll("#checklist input[type='checkbox']"));
+    const rawScore = checkboxes.reduce((total, checkbox) => {
         return total + (checkbox.checked ? Number(checkbox.dataset.points) : 0);
     }, 0);
-    const missing = checkboxes
-        .map((checkbox, index) => ({ checkbox, index }))
-        .filter((item) => !item.checkbox.checked)
-        .slice(0, 3);
+    const score = Math.min(100, rawScore);
 
-    const startScore = state.prevValues["storage-score"];
-    state.prevValues["storage-score"] = score;
-    animateValue("storage-score", startScore, score, 500, (v) => Math.round(v).toString());
-
-    // Update SVG Stroke Progress ring
-    const scoreProgress = document.getElementById("score-ring-progress");
-    if (scoreProgress) {
-        const circumference = 534;
-        const offset = circumference - (score / 100) * circumference;
-        scoreProgress.style.strokeDashoffset = offset;
-
-        // Dynamic color shifting rules
-        let strokeColor = "var(--red)";
-        if (score >= 85) {
-            strokeColor = "var(--green)";
-        } else if (score >= 65) {
-            strokeColor = "var(--blue)";
-        } else if (score >= 35) {
-            strokeColor = "var(--orange)";
-        }
-        scoreProgress.style.stroke = strokeColor;
-    }
+    setText("storage-score", score.toString());
+    document.querySelector(".score-ring")?.style.setProperty("--score-percent", score);
 
     const gradeEl = document.getElementById("storage-grade");
     const adviceEl = document.getElementById("storage-advice");
-
-    if (gradeEl && adviceEl) {
-        if (score >= 85) {
-            gradeEl.textContent = "Strong custody discipline";
-            adviceEl.textContent = "Your setup covers the major failure modes. Keep the annual review habit and avoid becoming casual with backups.";
-        } else if (score >= 65) {
-            gradeEl.textContent = "Good, with gaps";
-            adviceEl.textContent = "The foundation is there. Focus on recovery testing, physical separation, and emergency instructions.";
-        } else if (score >= 35) {
-            gradeEl.textContent = "Fragile setup";
-            adviceEl.textContent = "Before stacking more, close the biggest custody gaps. Most losses come from basic storage and recovery mistakes.";
-        } else {
-            gradeEl.textContent = "Needs attention";
-            adviceEl.textContent = "Start with offline seed handling and a recovery test. Those two mistakes are expensive to discover late.";
-        }
+    if (score >= 85) {
+        gradeEl.textContent = "Strong custody discipline";
+        adviceEl.textContent = "Your core storage habits are strong. Keep reviewing the setup yearly.";
+    } else if (score >= 65) {
+        gradeEl.textContent = "Good, with gaps";
+        adviceEl.textContent = "You have a workable setup. Focus on the top missing items below.";
+    } else if (score >= 35) {
+        gradeEl.textContent = "Fragile setup";
+        adviceEl.textContent = "Before stacking more, close the basic seed, backup, and recovery gaps.";
+    } else {
+        gradeEl.textContent = "Needs attention";
+        adviceEl.textContent = "Start with offline seed handling and a recovery test. Those mistakes are expensive to discover late.";
     }
+
+    const missing = checkboxes
+        .filter((checkbox) => !checkbox.checked)
+        .slice(0, 3)
+        .map((checkbox) => checkbox.dataset.priority);
 
     const priorityItems = document.getElementById("priority-items");
     if (priorityItems) {
-        if (missing.length === 0) {
-            priorityItems.innerHTML = "<li>Schedule the next annual custody review.</li><li>Keep instructions updated when setups or locations change.</li>";
-        } else {
-            // Fetch priorities list based on active tab
-            const prioritiesList = state.activeTab === "passphrase" 
-                ? STORAGE_PRIORITIES_PASSPHRASE 
-                : state.activeTab === "multisig" 
-                    ? STORAGE_PRIORITIES_MULTISIG 
-                    : STORAGE_PRIORITIES_SINGLE;
-
-            priorityItems.innerHTML = missing
-                .map(({ index }) => `<li>${prioritiesList[index]}</li>`)
-                .join("");
-        }
+        priorityItems.innerHTML = missing.length
+            ? missing.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
+            : "<li>Schedule your next annual custody review.</li><li>Update instructions whenever wallet devices or backup locations change.</li>";
     }
 
     updateSummary();
 }
 
 function updateSummary() {
-    const summaryEl = document.getElementById("summary-text");
-    if (!summaryEl) return;
-
-    summaryEl.textContent = buildSummaryText();
+    setText("summary-text", buildSummaryText());
 }
 
 function buildSummaryText() {
     const amount = readNumber("dca-amount");
-    const frequency = readNumber("dca-frequency");
+    const frequencyLabel = document.getElementById("dca-frequency")?.selectedOptions[0]?.textContent || "monthly";
     const years = readNumber("dca-years");
     const avgPrice = readNumber("avg-price");
     const startingBtc = readNumber("starting-btc");
     const futurePrice = readNumber("future-price");
     const targetBtc = readNumber("target-btc");
     const storageScore = Number(document.getElementById("storage-score")?.textContent || 0);
-    
-    const freqEl = document.getElementById("dca-frequency");
-    const frequencyLabel = freqEl ? freqEl.selectedOptions[0].textContent : "monthly";
 
-    const buys = frequency * years;
-    const recurringInvested = amount * buys;
-    const projectedBtc = startingBtc + (avgPrice > 0 ? recurringInvested / avgPrice : 0);
-    
-    const inflationToggle = document.getElementById("inflation-toggle");
-    const isInflationAdjusted = inflationToggle ? inflationToggle.checked : false;
-    const inflationMultiplier = isInflationAdjusted ? Math.pow(1.025, -years) : 1;
-    
-    const futureValue = projectedBtc * futurePrice * inflationMultiplier;
-    
-    const tabLabel = state.activeTab === "passphrase" 
-        ? "BIP39 Passphrase" 
-        : state.activeTab === "multisig" 
-            ? "Multi-Sig" 
-            : "Single-Sig";
+    const totalInvested = amount * readNumber("dca-frequency") * years;
+    const projectedBtc = startingBtc + (avgPrice > 0 ? totalInvested / avgPrice : 0);
+    const futureValue = projectedBtc * futurePrice;
 
-    return `DCA plan: ${formatCurrency(amount, 0)} ${frequencyLabel.toLowerCase()} for ${years} years, assuming an average buy price of ${formatCurrency(avgPrice, 0)}. Projected stack: ${formatBtc(projectedBtc)} BTC, worth ${formatCurrency(futureValue, 0)}${isInflationAdjusted ? " (inflation-adjusted)" : ""} at ${formatCurrency(futurePrice, 0)} per BTC. Target: ${formatBtc(targetBtc)} BTC. Cold storage score (${tabLabel}): ${storageScore}/100.`;
+    return `DCA plan: ${formatCurrency(amount, 0)} ${frequencyLabel.toLowerCase()} for ${years} years at an assumed average buy price of ${formatCurrency(avgPrice, 0)}. Projected stack: ${formatBtc(projectedBtc)} BTC (${formatSats(projectedBtc)} sats), worth ${formatCurrency(futureValue, 0)} at ${formatCurrency(futurePrice, 0)} per BTC. Target: ${formatBtc(targetBtc)} BTC. Cold storage score: ${storageScore}/100.`;
+}
+
+function saveLocalState() {
+    try {
+        const inputs = {};
+        DCA_INPUT_IDS.forEach((id) => {
+            const input = document.getElementById(id);
+            if (input) inputs[id] = input.value;
+        });
+
+        const checks = Array.from(document.querySelectorAll("#checklist input[type='checkbox']")).map((checkbox) => checkbox.checked);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ inputs, checks }));
+    } catch (err) {
+        console.warn("Failed to save local state", err);
+    }
+}
+
+function restoreLocalState() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+
+        Object.entries(data.inputs || {}).forEach(([id, value]) => {
+            const input = document.getElementById(id);
+            if (input) input.value = value;
+        });
+
+        const checks = Array.isArray(data.checks) ? data.checks : [];
+        document.querySelectorAll("#checklist input[type='checkbox']").forEach((checkbox, index) => {
+            checkbox.checked = Boolean(checks[index]);
+        });
+        markActivePreset();
+    } catch (err) {
+        console.warn("Failed to restore local state", err);
+    }
+}
+
+function resetLocalState() {
+    localStorage.removeItem(STORAGE_KEY);
+
+    const defaults = {
+        "dca-amount": "100",
+        "dca-frequency": "12",
+        "dca-years": "5",
+        "starting-btc": "0",
+        "avg-price": state.currentBtcPrice ? String(Math.round(state.currentBtcPrice)) : "100000",
+        "target-btc": "1",
+        "future-price": "250000"
+    };
+
+    Object.entries(defaults).forEach(([id, value]) => {
+        const input = document.getElementById(id);
+        if (input) input.value = value;
+    });
+
+    document.querySelectorAll("#checklist input[type='checkbox']").forEach((checkbox) => {
+        checkbox.checked = false;
+    });
+
+    markActivePreset();
+    calculateDca();
+    updateStorageScore();
+}
+
+function markActivePreset() {
+    const current = readNumber("target-btc");
+    document.querySelectorAll(".preset-btn").forEach((button) => {
+        button.classList.toggle("active", Number(button.dataset.targetBtc) === current);
+    });
 }
 
 function readNumber(id) {
-    const el = document.getElementById(id);
-    if (!el) return 0;
-    const value = Number(el.value);
+    const value = Number(document.getElementById(id)?.value);
     return Number.isFinite(value) ? value : 0;
+}
+
+function setText(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
 }
 
 function formatCurrency(value, digits = 2) {
@@ -900,225 +400,45 @@ function formatBtc(value) {
     });
 }
 
-function shortenHash(hash) {
-    if (!hash || hash.length < 18) return "Unavailable";
-    return `${hash.slice(0, 10)}...${hash.slice(-10)}`;
-}
-
-function flashButton(id, text) {
-    const button = document.getElementById(id);
-    if (!button) return;
-    const previous = button.textContent;
-    
-    const hasSvg = button.querySelector("svg");
-    
-    if (hasSvg) {
-        button.innerHTML = text;
-    } else {
-        button.textContent = text;
-    }
-
-    setTimeout(() => {
-        if (hasSvg) {
-            button.innerHTML = "";
-            button.appendChild(hasSvg);
-            const textNode = document.createTextNode(" " + previous.trim());
-            button.appendChild(textNode);
-        } else {
-            button.textContent = previous;
-        }
-    }, 1300);
-}
-
-// Local Storage auto-saving states
-function saveStateToLocalStorage() {
-    try {
-        const inputs = {};
-        DCA_INPUT_IDS.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) inputs[id] = el.value;
-        });
-
-        // Store checked boxes for each tab panel
-        const checks = {
-            single: [],
-            passphrase: [],
-            multisig: []
-        };
-
-        document.querySelectorAll("#checklist-single input[type='checkbox']").forEach(cb => checks.single.push(cb.checked));
-        document.querySelectorAll("#checklist-passphrase input[type='checkbox']").forEach(cb => checks.passphrase.push(cb.checked));
-        document.querySelectorAll("#checklist-multisig input[type='checkbox']").forEach(cb => checks.multisig.push(cb.checked));
-
-        const inflationToggle = document.getElementById("inflation-toggle");
-        
-        const localData = {
-            inputs,
-            checks,
-            activeTab: state.activeTab,
-            airGap: state.airGap,
-            inflation: inflationToggle ? inflationToggle.checked : false
-        };
-
-        localStorage.setItem("btc_wedding_local_state", JSON.stringify(localData));
-    } catch (err) {
-        console.warn("Failed to save state to localStorage", err);
-    }
-}
-
-function loadStateFromLocalStorage() {
-    try {
-        const dataStr = localStorage.getItem("btc_wedding_local_state");
-        if (!dataStr) return;
-        const data = JSON.parse(dataStr);
-
-        // Load inputs
-        if (data.inputs) {
-            for (const id in data.inputs) {
-                const el = document.getElementById(id);
-                if (el) el.value = data.inputs[id];
-            }
-        }
-
-        // Load checklists checked states
-        if (data.checks) {
-            if (data.checks.single) {
-                document.querySelectorAll("#checklist-single input[type='checkbox']").forEach((cb, idx) => {
-                    if (data.checks.single[idx] !== undefined) cb.checked = data.checks.single[idx];
-                });
-            }
-            if (data.checks.passphrase) {
-                document.querySelectorAll("#checklist-passphrase input[type='checkbox']").forEach((cb, idx) => {
-                    if (data.checks.passphrase[idx] !== undefined) cb.checked = data.checks.passphrase[idx];
-                });
-            }
-            if (data.checks.multisig) {
-                document.querySelectorAll("#checklist-multisig input[type='checkbox']").forEach((cb, idx) => {
-                    if (data.checks.multisig[idx] !== undefined) cb.checked = data.checks.multisig[idx];
-                });
-            }
-        }
-
-        // Load active Tab
-        if (data.activeTab) {
-            state.activeTab = data.activeTab;
-            
-            // Set active button
-            const activeBtn = document.querySelector(`.tab-btn[data-tab="${data.activeTab}"]`);
-            if (activeBtn) {
-                document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-                activeBtn.classList.add("active");
-            }
-
-            // Set active panel
-            document.querySelectorAll(".checklist-panel").forEach(p => {
-                p.classList.remove("active");
-                p.style.display = "none";
-            });
-            const activePanel = document.getElementById("checklist-" + data.activeTab);
-            if (activePanel) {
-                activePanel.classList.add("active");
-                activePanel.style.display = "grid";
-            }
-        }
-
-        // Load Air-Gap state
-        if (data.airGap !== undefined) {
-            state.airGap = data.airGap;
-            const toggle = document.getElementById("air-gap-toggle");
-            if (toggle) toggle.checked = data.airGap;
-        }
-
-        // Load Inflation state
-        if (data.inflation !== undefined) {
-            const toggle = document.getElementById("inflation-toggle");
-            if (toggle) toggle.checked = data.inflation;
-        }
-
-        // Recalculate
-        calculateDca();
-        updateStorageScore();
-    } catch (err) {
-        console.warn("Failed to load state from localStorage", err);
-    }
-}
-
-function resetState() {
-    try {
-        localStorage.removeItem("btc_wedding_local_state");
-        
-        // Reset inputs to defaults
-        document.getElementById("dca-amount").value = 100;
-        document.getElementById("dca-frequency").value = 12;
-        document.getElementById("dca-years").value = 5;
-        document.getElementById("starting-btc").value = 0;
-        document.getElementById("target-btc").value = 1;
-        document.getElementById("future-price").value = 250000;
-        
-        if (state.currentBtcPrice) {
-            document.getElementById("avg-price").value = Math.round(state.currentBtcPrice);
-        } else {
-            document.getElementById("avg-price").value = 100000;
-        }
-
-        // Uncheck all checkboxes
-        document.querySelectorAll(".checklist-panel input[type='checkbox']").forEach(cb => {
-            cb.checked = false;
-        });
-
-        // Reset toggles
-        const airGapToggle = document.getElementById("air-gap-toggle");
-        if (airGapToggle) airGapToggle.checked = false;
-        state.airGap = false;
-
-        const inflationToggle = document.getElementById("inflation-toggle");
-        if (inflationToggle) inflationToggle.checked = false;
-
-        // Reset tab
-        state.activeTab = "single";
-        const firstTabBtn = document.querySelector('.tab-btn[data-tab="single"]');
-        if (firstTabBtn) {
-            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-            firstTabBtn.classList.add("active");
-        }
-        document.querySelectorAll(".checklist-panel").forEach(p => {
-            p.classList.remove("active");
-            p.style.display = "none";
-        });
-        const defaultPanel = document.getElementById("checklist-single");
-        if (defaultPanel) {
-            defaultPanel.classList.add("active");
-            defaultPanel.style.display = "grid";
-        }
-
-        // Recalculate and fetch
-        calculateDca();
-        updateStorageScore();
-        fetchBitcoinSnapshot();
-    } catch (err) {
-        console.warn("Failed to reset tool state", err);
-    }
+function formatSats(btc) {
+    if (!Number.isFinite(btc)) return "0";
+    return Math.round(btc * 100000000).toLocaleString("en-US");
 }
 
 async function copyTextToClipboard(text) {
     if (navigator.clipboard && window.isSecureContext) {
         return navigator.clipboard.writeText(text);
-    } else {
-        const textarea = document.createElement("textarea");
-        textarea.value = text;
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-        try {
-            const successful = document.execCommand("copy");
-            document.body.removeChild(textarea);
-            if (successful) return Promise.resolve();
-            return Promise.reject(new Error("document.execCommand('copy') returned false"));
-        } catch (err) {
-            document.body.removeChild(textarea);
-            return Promise.reject(err);
-        }
     }
+
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+
+    try {
+        const success = document.execCommand("copy");
+        if (!success) throw new Error("Copy command returned false.");
+    } finally {
+        document.body.removeChild(textarea);
+    }
+}
+
+function flashButton(button, text) {
+    const previous = button.textContent;
+    button.textContent = text;
+    setTimeout(() => {
+        button.textContent = previous;
+    }, 1200);
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }

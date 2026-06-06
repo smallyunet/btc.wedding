@@ -7,9 +7,11 @@ The site does not require login, wallet connection, seed phrases, private keys, 
 ## Features
 
 - **BTC DCA Planner**: Calculate projected BTC accumulation from recurring buys, frequency, time horizon, average buy price, existing BTC, and target BTC.
+- **Sats Display & Target Presets**: See projected stack in both BTC and sats, with quick targets like 0.1 BTC, 0.21 BTC, 1 BTC, and 2.1 BTC.
 - **Future Price Scenarios**: Compare projected stack value at $50k, $100k, $250k, and $1M BTC.
-- **Live BTC Snapshot**: Fetches public BTC price, block height, and latest block hash from browser-reachable APIs.
-- **Cold Storage Checklist**: Scores offline seed handling, recovery testing, backup separation, passphrase clarity, exchange exposure, and emergency instructions.
+- **Live BTC Snapshot**: Fetches public BTC price and block height from browser-reachable APIs.
+- **Cold Storage Checklist**: Scores seed handling, backup durability, recovery testing, exchange exposure, and emergency instructions.
+- **Top 3 Improvements**: Shows the most important missing storage actions first.
 - **Plan Summary**: Generates a compact plan snapshot that can be copied or printed.
 - **Static Deployment**: Runs on plain HTML, CSS, and JavaScript. No build step.
 
