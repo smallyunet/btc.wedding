@@ -357,12 +357,12 @@ function renderDcaChart(years, startingBtc, avgPrice, futurePrice, totalInvested
     }
 
     const valueGradient = ctx.createLinearGradient(0, 0, 0, 220);
-    valueGradient.addColorStop(0, "rgba(16, 185, 129, 0.06)");
+    valueGradient.addColorStop(0, "rgba(16, 185, 129, 0.08)");
     valueGradient.addColorStop(1, "rgba(16, 185, 129, 0)");
 
     const investedGradient = ctx.createLinearGradient(0, 0, 0, 220);
-    investedGradient.addColorStop(0, "rgba(229, 169, 60, 0.03)");
-    investedGradient.addColorStop(1, "rgba(229, 169, 60, 0)");
+    investedGradient.addColorStop(0, "rgba(247, 147, 26, 0.04)");
+    investedGradient.addColorStop(1, "rgba(247, 147, 26, 0)");
 
     if (dcaChartInstance) {
         dcaChartInstance.destroy();
@@ -387,7 +387,7 @@ function renderDcaChart(years, startingBtc, avgPrice, futurePrice, totalInvested
                 {
                     label: "Total Invested",
                     data: investedData,
-                    borderColor: "#e5a93c", // Amber Gold
+                    borderColor: "#f7931a", // Bitcoin Orange/Gold
                     backgroundColor: investedGradient,
                     borderWidth: 1.5,
                     pointRadius: 0,
@@ -409,27 +409,27 @@ function renderDcaChart(years, startingBtc, avgPrice, futurePrice, totalInvested
                     display: true,
                     position: "top",
                     labels: {
-                        color: "rgba(245, 245, 247, 0.45)",
+                        color: "rgba(245, 245, 247, 0.65)",
                         boxWidth: 8,
                         boxHeight: 8,
                         usePointStyle: true,
                         font: {
                             family: "var(--sans)",
                             size: 11,
-                            weight: "500"
+                            weight: "600"
                         }
                     }
                 },
                 tooltip: {
-                    backgroundColor: "rgba(10, 10, 12, 0.95)",
-                    borderColor: "rgba(255, 255, 255, 0.05)",
+                    backgroundColor: "rgba(10, 10, 15, 0.98)",
+                    borderColor: "rgba(255, 255, 255, 0.08)",
                     borderWidth: 1,
                     titleColor: "#ffffff",
-                    bodyColor: "rgba(245, 245, 247, 0.8)",
+                    bodyColor: "rgba(245, 245, 247, 0.9)",
                     titleFont: { family: "var(--sans)", size: 12, weight: "600" },
                     bodyFont: { family: "var(--mono)", size: 11 },
                     padding: 10,
-                    cornerRadius: 6,
+                    cornerRadius: 8,
                     callbacks: {
                         label: function(context) {
                             let label = context.dataset.label || '';
@@ -447,21 +447,21 @@ function renderDcaChart(years, startingBtc, avgPrice, futurePrice, totalInvested
             scales: {
                 x: {
                     grid: {
-                        color: "rgba(255, 255, 255, 0.01)",
+                        color: "rgba(255, 255, 255, 0.02)",
                         drawBorder: false
                     },
                     ticks: {
-                        color: "rgba(245, 245, 247, 0.35)",
+                        color: "rgba(245, 245, 247, 0.55)",
                         font: { family: "var(--sans)", size: 10 }
                     }
                 },
                 y: {
                     grid: {
-                        color: "rgba(255, 255, 255, 0.01)",
+                        color: "rgba(255, 255, 255, 0.02)",
                         drawBorder: false
                     },
                     ticks: {
-                        color: "rgba(245, 245, 247, 0.35)",
+                        color: "rgba(245, 245, 247, 0.55)",
                         font: { family: "var(--mono)", size: 10 },
                         callback: function(value) {
                             if (value >= 1e6) return '$' + (value / 1e6).toFixed(1) + 'M';

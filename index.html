@@ -37,99 +37,139 @@
             <nav aria-label="Primary navigation">
                 <ul class="nav-links">
                     <li><a href="#top">Desk</a></li>
-                    <li><a href="#planner">DCA</a></li>
-                    <li><a href="#storage">Storage</a></li>
-                    <li><a href="#summary">Summary</a></li>
+                    <li><a href="#planner">DCA Planner</a></li>
+                    <li><a href="#storage">Custody Audit</a></li>
+                    <li><a href="#summary">Snapshot</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
     <main id="top">
+        <!-- Hero Section -->
         <section class="hero">
             <div class="container hero-grid">
                 <div class="hero-copy">
-                    <span class="eyebrow">Private Bitcoin Planning Desk</span>
-                    <h1>btc.wedding</h1>
-                    <p>Private Bitcoin planner and cold storage auditor.</p>
+                    <span class="eyebrow"><span class="badge-dot"></span> Private Bitcoin Planning Desk</span>
+                    <h1>₿.wedding</h1>
+                    <p class="hero-desc">Model your multi-year accumulation projections and audit cold storage safety. Built locally with privacy-first client logic.</p>
+                    
                     <div class="trust-strip" aria-label="Privacy and safety promises">
-                        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="8" y1="6" x2="16" y2="6"/></svg> Local calculations</span>
-                        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg> No login</span>
-                        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18.84 12.2a4.4 4.4 0 0 0-5.17-5.17M9.55 14.5a4.4 4.4 0 0 0 5.17 5.17M10.74 13.26l2.22-2.22M2 2l20 20"/></svg> No wallet connection</span>
-                        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg> No seed input</span>
+                        <span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="8" y1="6" x2="16" y2="6"/></svg> 
+                            Local Math Only
+                        </span>
+                        <span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg> 
+                            Zero Registration
+                        </span>
+                        <span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18.84 12.2a4.4 4.4 0 0 0-5.17-5.17M9.55 14.5a4.4 4.4 0 0 0 5.17 5.17M10.74 13.26l2.22-2.22M2 2l20 20"/></svg> 
+                            No Wallet Link
+                        </span>
+                        <span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg> 
+                            No Seeds Ever
+                        </span>
                     </div>
+
                     <div class="hero-actions">
                         <a class="btn btn-primary" href="#planner">Start Planning</a>
                         <a class="btn btn-secondary" href="#storage">Audit Storage</a>
                     </div>
                 </div>
 
+                <!-- Live Reference Widget -->
                 <aside class="market-panel brand-panel" aria-labelledby="market-heading">
                     <div class="panel-header">
-                        <span class="panel-kicker"><span class="status-dot" id="status-dot"></span> Live Reference</span>
-                        <button id="refresh-market" class="icon-btn" title="Refresh BTC data" aria-label="Refresh BTC data">↻</button>
+                        <span class="panel-kicker">
+                            <span class="status-dot" id="status-dot"></span> 
+                            Live Network State
+                        </span>
+                        <button id="refresh-market" class="icon-btn" title="Refresh market snapshot" aria-label="Refresh market snapshot">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                        </button>
                     </div>
-                    <h2 id="market-heading">Planning Signal</h2>
+                    <h2 id="market-heading">Bitcoin Planning Signal</h2>
+                    
+                    <p id="market-status" class="market-status-text">Synchronizing with node network...</p>
 
                     <div class="market-grid">
                         <div class="metric">
-                            <span><svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6M6 8h1M6 16h1"/></svg> BTC Price</span>
+                            <span>
+                                <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6M6 8h1M6 16h1"/></svg> 
+                                Price (USD)
+                            </span>
                             <strong id="btc-price">Loading...</strong>
                         </div>
+                        
                         <div class="metric">
-                            <span><svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg> Block Height</span>
+                            <span>
+                                <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg> 
+                                Block Tip
+                            </span>
                             <strong id="btc-block">Loading...</strong>
                         </div>
+                        
                         <div class="metric">
-                            <span><svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L20 4M21 21H3v-3M3 16h5v5"/></svg> Sats per Dollar <span class="info-trigger" data-tooltip="The number of Satoshis (1 Satoshi = 0.00000001 BTC) you get for $1 USD.">ⓘ</span></span>
+                            <span>
+                                <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L20 4M21 21H3v-3M3 16h5v5"/></svg> 
+                                Sat Purchasing Power <span class="info-trigger" data-tooltip="The number of Satoshis (1 Satoshi = 0.00000001 BTC) you get for $1 USD.">ⓘ</span>
+                            </span>
                             <strong id="sats-per-dollar">Loading...</strong>
                         </div>
+                        
                         <div class="metric">
-                            <span><svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Halving Progress <span class="info-trigger" data-tooltip="Bitcoin block rewards halve every 210,000 blocks. Epoch progress shows the distance to the next halving.">ⓘ</span></span>
+                            <span>
+                                <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 
+                                Halving Progress <span class="info-trigger" data-tooltip="Bitcoin block rewards halve every 210,000 blocks. Epoch progress shows the distance to the next halving.">ⓘ</span>
+                            </span>
                             <strong id="halving-progress">Loading...</strong>
                             <span class="sub-detail" id="halving-countdown">Loading...</span>
                         </div>
                     </div>
-
                 </aside>
             </div>
         </section>
 
+        <!-- DCA Planner Section -->
         <section id="planner" class="tool-section">
             <div class="container">
                 <div class="section-heading">
-                    <span class="eyebrow">Accumulation Model</span>
-                    <h2>Model your accumulation plan.</h2>
-
+                    <span class="eyebrow"><span class="badge-dot"></span> Accumulation Engine</span>
+                    <h2>DCA Planner & Projections</h2>
+                    <p>Simulate a recurring purchase strategy over your target horizon with custom future market valuation assumptions.</p>
                 </div>
 
                 <div class="workspace-grid">
-                    <!-- Left Column: Inputs & Visualizations -->
+                    <!-- Control Column: Inputs & Visualizations -->
                     <div class="planner-control-column">
                         <form class="tool-panel" id="dca-form">
-                            <!-- Card 1: Accumulation Settings -->
+                            <!-- Card 1: Core Settings -->
                             <div class="form-group-card">
-                                <span class="group-badge">1. Accumulation Plan</span>
+                                <span class="group-badge">1. Strategy Settings</span>
                                 <div class="field-grid">
                                     <label class="field">
-                                        <span>Recurring buy</span>
+                                        <span>Recurring Purchase Amount</span>
                                         <div class="input-shell">
                                             <span>$</span>
                                             <input id="dca-amount" type="number" min="1" step="1" value="100">
                                         </div>
                                     </label>
                                     <label class="field">
-                                        <span>Time horizon</span>
+                                        <span>Planning Horizon</span>
                                         <div class="input-shell">
                                             <input id="dca-years" type="number" min="1" max="40" step="1" value="5">
                                             <span>years</span>
                                         </div>
                                     </label>
                                 </div>
+                                
                                 <div class="field mt-16">
-                                    <span>Frequency</span>
+                                    <span>Purchase Frequency</span>
                                     <div class="segmented-control">
                                         <div class="segmented-indicator" id="freq-indicator"></div>
+                                        
                                         <input type="radio" name="dca-frequency" id="freq-daily" value="365">
                                         <label for="freq-daily">Daily</label>
 
@@ -145,53 +185,57 @@
                                 </div>
                             </div>
 
+                            <!-- Accordion Toggle -->
                             <button type="button" class="advanced-toggle-btn" id="advanced-toggle" aria-expanded="false" aria-controls="advanced-panel">
-                                Advanced Settings
+                                Advanced Adjustments
                                 <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                             </button>
 
+                            <!-- Advanced Panel -->
                             <div class="advanced-panel" id="advanced-panel">
-                                <!-- Card 2: Current & Targets -->
+                                <!-- Card 2: Initial Stack & Target -->
                                 <div class="form-group-card">
-                                    <span class="group-badge">2. Portfolio & Target</span>
+                                    <span class="group-badge">2. Initial Stack & Target Goals</span>
                                     <div class="field-grid">
                                         <label class="field">
-                                            <span>Starting BTC <span class="info-trigger" data-tooltip="Existing Bitcoin already in your possession.">ⓘ</span></span>
+                                            <span>Starting Balance <span class="info-trigger" data-tooltip="Existing Bitcoin already in your possession.">ⓘ</span></span>
                                             <div class="input-shell">
                                                 <input id="starting-btc" type="number" min="0" step="0.0001" value="0">
                                                 <span>BTC</span>
                                             </div>
                                         </label>
                                         <label class="field">
-                                            <span>Target stack <span class="info-trigger" data-tooltip="The target Bitcoin accumulation size you want to achieve.">ⓘ</span></span>
+                                            <span>Target Stack <span class="info-trigger" data-tooltip="The target Bitcoin accumulation size you want to achieve.">ⓘ</span></span>
                                             <div class="input-shell">
                                                 <input id="target-btc" type="number" min="0.001" step="0.001" value="1">
                                                 <span>BTC</span>
                                             </div>
                                         </label>
                                     </div>
+                                    
                                     <div class="preset-pills-row" aria-label="Target BTC presets">
-                                        <span>Presets</span>
+                                        <span>Quick Targets</span>
                                         <button type="button" class="preset-btn" data-target-btc="0.1">0.1 BTC</button>
                                         <button type="button" class="preset-btn" data-target-btc="0.21">0.21 BTC</button>
-                                        <button type="button" class="preset-btn" data-target-btc="1">1 BTC</button>
+                                        <button type="button" class="preset-btn" data-target-btc="1">1.0 BTC</button>
                                         <button type="button" class="preset-btn" data-target-btc="2.1">2.1 BTC</button>
                                     </div>
                                 </div>
 
-                                <!-- Card 3: Assumptions -->
+                                <!-- Card 3: Market Metrics -->
                                 <div class="form-group-card">
-                                    <span class="group-badge">3. Assumptions</span>
+                                    <span class="group-badge">3. Valuation Metrics</span>
                                     <label class="field">
-                                        <span>Average buy price <span class="info-trigger" data-tooltip="Estimated average purchase price of Bitcoin during your DCA plan. Defaults to live market price.">ⓘ</span></span>
+                                        <span>Average Buy Price <span class="info-trigger" data-tooltip="Estimated average purchase price of Bitcoin during your DCA plan. Defaults to live market price.">ⓘ</span></span>
                                         <div class="input-shell">
                                             <span>$</span>
                                             <input id="avg-price" type="number" min="1" step="100" value="100000">
                                         </div>
                                     </label>
+                                    
                                     <div class="slider-field mt-16">
                                         <div>
-                                            <span>Future price scenario <span class="info-trigger" data-tooltip="Expected Bitcoin price at the end of the time horizon, used to calculate future valuation.">ⓘ</span></span>
+                                            <span>Projected Terminal Price <span class="info-trigger" data-tooltip="Expected Bitcoin price at the end of the time horizon, used to calculate future valuation.">ⓘ</span></span>
                                             <strong id="future-price-label">$250,000</strong>
                                         </div>
                                         <input id="future-price" type="range" min="25000" max="1000000" step="5000" value="250000">
@@ -200,9 +244,9 @@
                             </div>
                         </form>
 
-                        <!-- Interactive Chart Card -->
-                        <div class="chart-panel mt-16">
-                            <span class="group-badge">Projected Growth Path</span>
+                        <!-- Projections Visual Graph -->
+                        <div class="chart-panel">
+                            <span class="group-badge">Projected Growth Trajectory</span>
                             <div class="chart-wrapper">
                                 <canvas id="dca-chart"></canvas>
                             </div>
@@ -216,54 +260,55 @@
                                 <span>Projected Stack</span>
                                 <strong id="projected-btc">0.00000000 BTC</strong>
                                 <em id="projected-sats">0 sats</em>
+                                
                                 <div class="progress-bar-container">
                                     <div id="progress-bar-fill" class="progress-bar-fill"></div>
                                 </div>
-                                <p id="target-status">Set a target to see progress.</p>
+                                <p id="target-status" class="target-status-text">Set a target to see progress.</p>
                             </div>
 
                             <div class="results-grid">
                                 <div class="result-card">
-                                    <span>Total invested</span>
+                                    <span>Total Outlay</span>
                                     <strong id="total-invested">$0</strong>
                                 </div>
                                 <div class="result-card">
-                                    <span>Estimated value</span>
+                                    <span>Terminal Value</span>
                                     <strong id="future-value">$0</strong>
                                 </div>
                                 <div class="result-card">
-                                    <span>Estimated gain/loss</span>
+                                    <span>Net Yield (Gain/Loss)</span>
                                     <strong id="estimated-return">$0</strong>
                                 </div>
                                 <div class="result-card">
-                                    <span>Time to target</span>
+                                    <span>Time to Target</span>
                                     <strong id="time-to-target">N/A</strong>
                                 </div>
                             </div>
 
                             <div class="scenario-table" aria-label="Price scenarios">
                                 <div class="scenario-row header">
-                                    <span>BTC price</span>
-                                    <span>Stack value</span>
-                                    <span>Multiple</span>
+                                    <span>Price Scenario</span>
+                                    <span>Terminal Value</span>
+                                    <span>ROI Multiplier</span>
                                 </div>
                                 <div class="scenario-row">
-                                    <span>$50k</span>
+                                    <span>$50,000</span>
                                     <strong id="scenario-50">$0</strong>
                                     <span id="multiple-50">0.0x</span>
                                 </div>
                                 <div class="scenario-row">
-                                    <span>$100k</span>
+                                    <span>$100,000</span>
                                     <strong id="scenario-100">$0</strong>
                                     <span id="multiple-100">0.0x</span>
                                 </div>
                                 <div class="scenario-row">
-                                    <span>$250k</span>
+                                    <span>$250,000</span>
                                     <strong id="scenario-250">$0</strong>
                                     <span id="multiple-250">0.0x</span>
                                 </div>
                                 <div class="scenario-row">
-                                    <span>$1M</span>
+                                    <span>$1,000,000</span>
                                     <strong id="scenario-1000">$0</strong>
                                     <span id="multiple-1000">0.0x</span>
                                 </div>
@@ -274,61 +319,64 @@
             </div>
         </section>
 
+        <!-- Cold Storage Audit Section -->
         <section id="storage" class="tool-section alt">
             <div class="container">
                 <div class="section-heading">
-                    <span class="eyebrow">Custody Discipline</span>
-                    <h2>Audit cold storage safety.</h2>
-
+                    <span class="eyebrow"><span class="badge-dot"></span> Self-Custody Discipline</span>
+                    <h2>Cold Storage Security Audit</h2>
+                    <p>Evaluate seed hygiene and backup resilience. Review areas of improvement before scaling your stack.</p>
                 </div>
 
                 <div class="workspace-grid">
+                    <!-- Checklist Card -->
                     <div class="checklist-panel" id="checklist">
-                        <div class="check-group-title">Seed Phrase Safety</div>
+                        <div class="check-group-title">Seed Phrase Hygiene</div>
                         <label class="check-item">
                             <input type="checkbox" data-points="14" data-priority="Generate seed offline via hardware">
-                            <span>Seed phrase generated offline on hardware wallet</span>
+                            <span>Seed phrase generated offline on a hardware device</span>
                         </label>
                         <label class="check-item">
                             <input type="checkbox" data-points="14" data-priority="Delete all digital seed copies">
-                            <span>Zero digital copies (no photos, cloud, or typing)</span>
+                            <span>No digital storage (no images, notes, or typing online)</span>
                         </label>
                         <label class="check-item">
                             <input type="checkbox" data-points="10" data-priority="Use durable offline backup material">
-                            <span>Backup stored on durable offline material (paper/metal)</span>
+                            <span>Seed stored on physical, offline material (steel/metal/paper)</span>
                         </label>
 
                         <div class="check-group-title">Backup Durability</div>
                         <label class="check-item">
                             <input type="checkbox" data-points="10" data-priority="Store backups in 2+ separate locations">
-                            <span>Backups split across 2+ physical locations</span>
+                            <span>Backups stored in two or more physical locations</span>
                         </label>
                         <label class="check-item">
                             <input type="checkbox" data-points="8" data-priority="Remove single-device custody points">
-                            <span>No exchange or single device controls my stack</span>
+                            <span>Single platform failure cannot compromise the total balance</span>
                         </label>
 
-                        <div class="check-group-title">Recovery Test</div>
+                        <div class="check-group-title">Recovery Procedures</div>
                         <label class="check-item">
                             <input type="checkbox" data-points="14" data-priority="Run a wallet recovery test">
-                            <span>Successful recovery test completed</span>
+                            <span>Full recovery verification successfully completed</span>
                         </label>
                         <label class="check-item">
                             <input type="checkbox" data-points="8" data-priority="Document wallet brand & derivation path">
-                            <span>Wallet brand and recovery steps documented</span>
+                            <span>Wallet model and specific derivation paths documented</span>
                         </label>
 
-                        <div class="check-group-title">Emergency Access</div>
+                        <div class="check-group-title">Emergency Planning</div>
                         <label class="check-item">
                             <input type="checkbox" data-points="14" data-priority="Write emergency access instructions">
-                            <span>Emergency instructions set up (no direct seed)</span>
+                            <span>Dead-man setup or inheritance guidelines established</span>
                         </label>
                         <label class="check-item">
                             <input type="checkbox" data-points="10" data-priority="Schedule annual custody review">
-                            <span>Custody setup reviewed annually</span>
+                            <span>Custody audit scheduled to be reviewed annually</span>
                         </label>
                     </div>
 
+                    <!-- Score Dashboard -->
                     <aside class="score-panel">
                         <div class="score-ring-container">
                             <svg class="score-ring-svg" width="150" height="150" viewBox="0 0 150 150">
@@ -340,23 +388,23 @@
                                 <small>/ 100</small>
                             </div>
                         </div>
-                        <h3 id="storage-grade">Needs attention</h3>
-
+                        
+                        <h3 id="storage-grade">Evaluating...</h3>
+                        <p id="storage-advice" class="storage-advice-text">Review your custody checklist to analyze gaps.</p>
 
                         <div class="priority-list">
-                            <h4>Top 3 Improvements</h4>
+                            <h4>Top Gaps to Address</h4>
                             <ul id="priority-items">
-                                <li>Generate and store seed material offline.</li>
-                                <li>Run a small recovery test before adding meaningful funds.</li>
+                                <li>Select items to analyze your security footprint.</li>
                             </ul>
                         </div>
 
                         <div class="danger-list">
-                            <h4>Never Do This</h4>
+                            <h4>Prohibited Practices</h4>
                             <ul>
-                                <li>Never type seed words online.</li>
-                                <li>Never store seed words digitally.</li>
-                                <li>Never fund a wallet without testing recovery.</li>
+                                <li>Never input your recovery seed online.</li>
+                                <li>Never capture photos or keep digital text backups.</li>
+                                <li>Never transfer large assets to a wallet without test recovery.</li>
                             </ul>
                         </div>
                     </aside>
@@ -364,17 +412,18 @@
             </div>
         </section>
 
+        <!-- Summary & Snapshot Section -->
         <section id="summary" class="summary-section">
             <div class="container">
                 <div class="summary-card">
-                    <div>
-                        <span class="eyebrow">Plan Summary</span>
-                        <h2>Your private BTC snapshot</h2>
-                        <p id="summary-text">Build a DCA plan and complete the checklist to generate a practical snapshot.</p>
+                    <div class="summary-info">
+                        <span class="eyebrow"><span class="badge-dot"></span> Desk Output</span>
+                        <h2>Interactive Workspace Snapshot</h2>
+                        <p id="summary-text">Complete the DCA variables and security checklist to compile your workspace snapshot.</p>
                     </div>
                     <div class="summary-actions">
                         <button class="btn btn-secondary" id="copy-summary">Copy Snapshot</button>
-                        <button class="btn btn-secondary danger" id="reset-summary">Reset Data</button>
+                        <button class="btn btn-secondary danger" id="reset-summary">Reset Output</button>
                         <button class="btn btn-primary" id="print-summary">Export Plan</button>
                     </div>
                 </div>
@@ -385,7 +434,7 @@
     <footer class="site-footer">
         <div class="container footer-wrap">
             <div class="footer-logo"><span>₿</span>.wedding</div>
-            <p>© 2026 btc.wedding. Local calculations only. No keys, seeds, or connections.</p>
+            <p>© 2026 btc.wedding. Local execution. Calculations are executed strictly client-side. No seeds, nodes or wallet connections are initiated.</p>
         </div>
     </footer>
 
