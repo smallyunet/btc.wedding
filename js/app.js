@@ -5,6 +5,8 @@ const state = {
     blockHeight: null
 };
 
+let dcaChartInstance = null;
+
 const DCA_INPUT_IDS = [
     "dca-amount",
     "dca-frequency",
@@ -21,10 +23,22 @@ document.addEventListener("DOMContentLoaded", () => {
     setupChecklist();
     setupSummaryActions();
     setupMarketRefresh();
+    setupAdvancedAccordion();
+    setupSpotlightCards();
     restoreLocalState();
     fetchBitcoinSnapshot();
     calculateDca();
     updateStorageScore();
+    updateSegmentedIndicator();
+    updateSliderProgress();
+    updateChecklistVisuals();
+
+    const printDateEl = document.getElementById("print-date");
+    if (printDateEl) {
+        printDateEl.textContent = new Date().toLocaleDateString("en-US", { dateStyle: "long" });
+    }
+
+    window.addEventListener("resize", updateSegmentedIndicator);
 });
 
 function setupHeaderState() {
@@ -35,12 +49,45 @@ function setupHeaderState() {
     });
 }
 
+function setupAdvancedAccordion() {
+    const toggleBtn = document.getElementById("advanced-toggle");
+    const panel = document.getElementById("advanced-panel");
+    if (!toggleBtn || !panel) return;
+
+    toggleBtn.addEventListener("click", () => {
+        const isExpanded = panel.classList.toggle("expanded");
+        toggleBtn.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+    });
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
 function setupPlanner() {
+    const debouncedPlanChange = debounce(handlePlanChange, 180);
+
     DCA_INPUT_IDS.forEach((id) => {
+        if (id === "dca-frequency") {
+            document.querySelectorAll('input[name="dca-frequency"]').forEach((radio) => {
+                radio.addEventListener("change", handlePlanChange);
+            });
+            return;
+        }
         const input = document.getElementById(id);
         if (!input) return;
-        input.addEventListener("input", handlePlanChange);
-        input.addEventListener("change", handlePlanChange);
+
+        if (input.type === "number" || input.type === "text") {
+            input.addEventListener("input", debouncedPlanChange);
+            input.addEventListener("change", handlePlanChange);
+        } else {
+            input.addEventListener("input", handlePlanChange);
+            input.addEventListener("change", handlePlanChange);
+        }
     });
 
     document.querySelectorAll(".preset-btn").forEach((button) => {
@@ -58,6 +105,7 @@ function setupChecklist() {
         checkbox.addEventListener("change", () => {
             updateStorageScore();
             saveLocalState();
+            updateChecklistVisuals();
         });
     });
 }
@@ -92,6 +140,8 @@ function handlePlanChange() {
     markActivePreset();
     calculateDca();
     saveLocalState();
+    updateSegmentedIndicator();
+    updateSliderProgress();
 }
 
 async function fetchBitcoinSnapshot() {
@@ -106,25 +156,56 @@ async function fetchBitcoinSnapshot() {
     try {
         const price = await fetchPrice();
         state.currentBtcPrice = price;
-        if (priceEl) priceEl.textContent = formatCurrency(price);
+        if (priceEl) {
+            updateNumberWithAnimation("btc-price", price, (v) => formatCurrency(v, 2));
+        }
 
         const avgPriceEl = document.getElementById("avg-price");
         if (avgPriceEl && Number(avgPriceEl.value) === 100000) {
             avgPriceEl.value = Math.round(price);
             calculateDca();
         }
+
+        const satsPerDollarEl = document.getElementById("sats-per-dollar");
+        if (satsPerDollarEl) {
+            updateNumberWithAnimation("sats-per-dollar", 100000000 / price, (v) => `${Math.round(v).toLocaleString("en-US")} sats`);
+        }
     } catch (err) {
         console.warn("Price fetch failed", err);
         if (priceEl) priceEl.textContent = "Unavailable";
+        const satsPerDollarEl = document.getElementById("sats-per-dollar");
+        if (satsPerDollarEl) satsPerDollarEl.textContent = "Unavailable";
     }
 
     try {
         const height = await fetchBlockHeight();
         state.blockHeight = height;
-        if (blockEl) blockEl.textContent = `#${height.toLocaleString("en-US")}`;
+        if (blockEl) {
+            updateNumberWithAnimation("btc-block", height, (v) => `#${Math.round(v).toLocaleString("en-US")}`);
+        }
+
+        const currentEpoch = Math.floor(height / 210000);
+        const nextHalvingBlock = (currentEpoch + 1) * 210000;
+        const blocksRemaining = nextHalvingBlock - height;
+        const epochStartBlock = currentEpoch * 210000;
+        const progressPercent = ((height - epochStartBlock) / 210000) * 100;
+
+        const halvingProgressEl = document.getElementById("halving-progress");
+        const halvingCountdownEl = document.getElementById("halving-countdown");
+
+        if (halvingProgressEl) {
+            updateNumberWithAnimation("halving-progress", progressPercent, (v) => `${v.toFixed(2)}%`);
+        }
+        if (halvingCountdownEl) {
+            updateNumberWithAnimation("halving-countdown", blocksRemaining, (v) => `${Math.round(v).toLocaleString("en-US")} blocks left`);
+        }
     } catch (err) {
         console.warn("Block height fetch failed", err);
         if (blockEl) blockEl.textContent = "Unavailable";
+        const halvingProgressEl = document.getElementById("halving-progress");
+        const halvingCountdownEl = document.getElementById("halving-countdown");
+        if (halvingProgressEl) halvingProgressEl.textContent = "Unavailable";
+        if (halvingCountdownEl) halvingCountdownEl.textContent = "";
     }
 
     if (state.currentBtcPrice || state.blockHeight) {
@@ -192,16 +273,29 @@ function calculateDca() {
     const progress = targetBtc > 0 ? Math.min(100, (projectedBtc / targetBtc) * 100) : 0;
 
     setText("future-price-label", formatCurrency(futurePrice, 0));
-    setText("projected-btc", `${formatBtc(projectedBtc)} BTC`);
-    setText("projected-sats", `${formatSats(projectedBtc)} sats`);
-    setText("total-invested", formatCurrency(totalInvested, 0));
-    setText("future-value", formatCurrency(futureValue, 0));
-    setText("estimated-return", formatSignedCurrency(gainLoss));
+    updateNumberWithAnimation("projected-btc", projectedBtc, (v) => `${formatBtc(v)} BTC`);
+    updateNumberWithAnimation("projected-sats", projectedBtc * 100000000, (v) => `${Math.round(v).toLocaleString("en-US")} sats`);
+    updateNumberWithAnimation("total-invested", totalInvested, (v) => formatCurrency(v, 0));
+    updateNumberWithAnimation("future-value", futureValue, (v) => formatCurrency(v, 0));
+    updateNumberWithAnimation("estimated-return", gainLoss, (v) => formatSignedCurrency(v));
     setText("time-to-target", estimateTimeToTarget({ amount, frequency, avgPrice, startingBtc, targetBtc }));
 
     const returnEl = document.getElementById("estimated-return");
     returnEl?.classList.toggle("positive", gainLoss >= 0);
     returnEl?.classList.toggle("negative", gainLoss < 0);
+
+    const progressBar = document.getElementById("progress-bar-fill");
+    if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+        // Transition colors from gold to green if 100% target met
+        if (progress >= 100) {
+            progressBar.style.background = "linear-gradient(90deg, #10b981 0%, #059669 100%)";
+            progressBar.style.boxShadow = "0 0 10px rgba(16, 185, 129, 0.4)";
+        } else {
+            progressBar.style.background = "var(--accent-gradient)";
+            progressBar.style.boxShadow = "0 0 8px rgba(229, 169, 60, 0.25)";
+        }
+    }
 
     setText("target-status", targetBtc > 0
         ? `${progress.toFixed(1)}% of your ${formatBtc(targetBtc)} BTC target (${formatSats(targetBtc)} sats).`
@@ -211,14 +305,174 @@ function calculateDca() {
     updateScenario("100", projectedBtc, costBasis, 100000);
     updateScenario("250", projectedBtc, costBasis, 250000);
     updateScenario("1000", projectedBtc, costBasis, 1000000);
+
+    renderDcaChart(years, startingBtc, avgPrice, futurePrice, totalInvested, purchasedBtc);
+
     updateSummary();
 }
 
 function updateScenario(id, btc, costBasis, price) {
     const value = btc * price;
     const multiple = costBasis > 0 ? value / costBasis : 0;
-    setText(`scenario-${id}`, formatCurrency(value, 0));
-    setText(`multiple-${id}`, `${multiple.toFixed(1)}x`);
+    updateNumberWithAnimation(`scenario-${id}`, value, (v) => formatCurrency(v, 0));
+    updateNumberWithAnimation(`multiple-${id}`, multiple, (v) => `${v.toFixed(1)}x`);
+}
+
+function renderDcaChart(years, startingBtc, avgPrice, futurePrice, totalInvested, purchasedBtc) {
+    if (typeof Chart === "undefined") return;
+
+    const ctx = document.getElementById("dca-chart")?.getContext("2d");
+    if (!ctx) return;
+
+    const chartLabels = [];
+    const investedData = [];
+    const valueData = [];
+
+    const intervals = years === 1 ? 12 : 10;
+    const buys = Math.max(0, readNumber("dca-frequency") * years);
+
+    for (let i = 0; i <= intervals; i++) {
+        const t = i / intervals;
+        const yr = t * years;
+
+        if (years === 1) {
+            chartLabels.push(`Mo ${i}`);
+        } else {
+            chartLabels.push(`Yr ${yr.toFixed(yr % 1 === 0 ? 0 : 1)}`);
+        }
+
+        // DCA buys up to this point
+        const currentBuys = Math.floor(t * buys);
+        const currentInvested = (readNumber("dca-amount") * currentBuys) + (startingBtc * avgPrice);
+        investedData.push(Math.round(currentInvested));
+
+        // Stack accumulated up to this point
+        const currentPurchasedBtc = avgPrice > 0 ? (readNumber("dca-amount") * currentBuys) / avgPrice : 0;
+        const currentBtc = startingBtc + currentPurchasedBtc;
+
+        // Price at this interval (linear from avgPrice to futurePrice)
+        const currentPrice = avgPrice + t * (futurePrice - avgPrice);
+        const currentValue = currentBtc * currentPrice;
+        valueData.push(Math.round(currentValue));
+    }
+
+    const valueGradient = ctx.createLinearGradient(0, 0, 0, 220);
+    valueGradient.addColorStop(0, "rgba(16, 185, 129, 0.06)");
+    valueGradient.addColorStop(1, "rgba(16, 185, 129, 0)");
+
+    const investedGradient = ctx.createLinearGradient(0, 0, 0, 220);
+    investedGradient.addColorStop(0, "rgba(229, 169, 60, 0.03)");
+    investedGradient.addColorStop(1, "rgba(229, 169, 60, 0)");
+
+    if (dcaChartInstance) {
+        dcaChartInstance.destroy();
+    }
+
+    dcaChartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: chartLabels,
+            datasets: [
+                {
+                    label: "Projected Value",
+                    data: valueData,
+                    borderColor: "#10b981", // Mint Green
+                    backgroundColor: valueGradient,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    fill: true,
+                    tension: 0.15
+                },
+                {
+                    label: "Total Invested",
+                    data: investedData,
+                    borderColor: "#e5a93c", // Amber Gold
+                    backgroundColor: investedGradient,
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 4,
+                    fill: true,
+                    tension: 0.15
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: "index",
+                intersect: false
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: "top",
+                    labels: {
+                        color: "rgba(245, 245, 247, 0.45)",
+                        boxWidth: 8,
+                        boxHeight: 8,
+                        usePointStyle: true,
+                        font: {
+                            family: "var(--sans)",
+                            size: 11,
+                            weight: "500"
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: "rgba(10, 10, 12, 0.95)",
+                    borderColor: "rgba(255, 255, 255, 0.05)",
+                    borderWidth: 1,
+                    titleColor: "#ffffff",
+                    bodyColor: "rgba(245, 245, 247, 0.8)",
+                    titleFont: { family: "var(--sans)", size: 12, weight: "600" },
+                    bodyFont: { family: "var(--mono)", size: 11 },
+                    padding: 10,
+                    cornerRadius: 6,
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(context.parsed.y);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: "rgba(255, 255, 255, 0.01)",
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: "rgba(245, 245, 247, 0.35)",
+                        font: { family: "var(--sans)", size: 10 }
+                    }
+                },
+                y: {
+                    grid: {
+                        color: "rgba(255, 255, 255, 0.01)",
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: "rgba(245, 245, 247, 0.35)",
+                        font: { family: "var(--mono)", size: 10 },
+                        callback: function(value) {
+                            if (value >= 1e6) return '$' + (value / 1e6).toFixed(1) + 'M';
+                            if (value >= 1e3) return '$' + (value / 1e3).toFixed(0) + 'k';
+                            return '$' + value;
+                        }
+                    }
+                }
+            }
+        }
+    });
 }
 
 function estimateTimeToTarget({ amount, frequency, avgPrice, startingBtc, targetBtc }) {
@@ -242,23 +496,57 @@ function updateStorageScore() {
     }, 0);
     const score = Math.min(100, rawScore);
 
-    setText("storage-score", score.toString());
-    document.querySelector(".score-ring")?.style.setProperty("--score-percent", score);
+    updateNumberWithAnimation("storage-score", score, (v) => Math.round(v).toString());
+
+    const progressCircle = document.getElementById("score-ring-progress");
+    if (progressCircle) {
+        const radius = progressCircle.r.baseVal.value || 62;
+        const circumference = 2 * Math.PI * radius;
+        progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+        const offset = circumference - (score / 100) * circumference;
+        progressCircle.style.strokeDashoffset = offset;
+
+        // Dynamically adjust color and glow filters based on custody score grade
+        if (score >= 85) {
+            progressCircle.style.stroke = "var(--green)";
+            progressCircle.style.filter = "drop-shadow(0 0 8px rgba(16, 185, 129, 0.35))";
+        } else if (score >= 65) {
+            progressCircle.style.stroke = "var(--gold)";
+            progressCircle.style.filter = "drop-shadow(0 0 8px rgba(229, 169, 60, 0.25))";
+        } else if (score >= 35) {
+            progressCircle.style.stroke = "var(--gold)";
+            progressCircle.style.filter = "drop-shadow(0 0 8px rgba(229, 169, 60, 0.25))";
+        } else {
+            progressCircle.style.stroke = "var(--red)";
+            progressCircle.style.filter = "drop-shadow(0 0 8px rgba(244, 63, 94, 0.35))";
+        }
+    }
 
     const gradeEl = document.getElementById("storage-grade");
     const adviceEl = document.getElementById("storage-advice");
-    if (score >= 85) {
-        gradeEl.textContent = "Strong custody discipline";
-        adviceEl.textContent = "Your core storage habits are strong. Keep reviewing the setup yearly.";
-    } else if (score >= 65) {
-        gradeEl.textContent = "Good, with gaps";
-        adviceEl.textContent = "You have a workable setup. Focus on the top missing items below.";
-    } else if (score >= 35) {
-        gradeEl.textContent = "Fragile setup";
-        adviceEl.textContent = "Before stacking more, close the basic seed, backup, and recovery gaps.";
-    } else {
-        gradeEl.textContent = "Needs attention";
-        adviceEl.textContent = "Start with offline seed handling and a recovery test. Those mistakes are expensive to discover late.";
+
+    if (gradeEl) {
+        if (score >= 85) {
+            gradeEl.textContent = "Strong custody discipline";
+        } else if (score >= 65) {
+            gradeEl.textContent = "Good, with gaps";
+        } else if (score >= 35) {
+            gradeEl.textContent = "Fragile setup";
+        } else {
+            gradeEl.textContent = "Needs attention";
+        }
+    }
+
+    if (adviceEl) {
+        if (score >= 85) {
+            adviceEl.textContent = "Strong storage habits. Review annually.";
+        } else if (score >= 65) {
+            adviceEl.textContent = "Workable setup. Focus on missing items below.";
+        } else if (score >= 35) {
+            adviceEl.textContent = "Close the basic seed, backup, and recovery gaps.";
+        } else {
+            adviceEl.textContent = "Start with offline seeds and a recovery test.";
+        }
     }
 
     const missing = checkboxes
@@ -270,7 +558,7 @@ function updateStorageScore() {
     if (priorityItems) {
         priorityItems.innerHTML = missing.length
             ? missing.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
-            : "<li>Schedule your next annual custody review.</li><li>Update instructions whenever wallet devices or backup locations change.</li>";
+            : "<li>Schedule annual custody review.</li><li>Update instructions on setup changes.</li>";
     }
 
     updateSummary();
@@ -282,7 +570,8 @@ function updateSummary() {
 
 function buildSummaryText() {
     const amount = readNumber("dca-amount");
-    const frequencyLabel = document.getElementById("dca-frequency")?.selectedOptions[0]?.textContent || "monthly";
+    const activeFreqRadio = document.querySelector('input[name="dca-frequency"]:checked');
+    const frequencyLabel = activeFreqRadio ? activeFreqRadio.nextElementSibling.textContent : "Monthly";
     const years = readNumber("dca-years");
     const avgPrice = readNumber("avg-price");
     const startingBtc = readNumber("starting-btc");
@@ -301,6 +590,11 @@ function saveLocalState() {
     try {
         const inputs = {};
         DCA_INPUT_IDS.forEach((id) => {
+            if (id === "dca-frequency") {
+                const checked = document.querySelector('input[name="dca-frequency"]:checked');
+                if (checked) inputs[id] = checked.value;
+                return;
+            }
             const input = document.getElementById(id);
             if (input) inputs[id] = input.value;
         });
@@ -319,6 +613,11 @@ function restoreLocalState() {
         const data = JSON.parse(raw);
 
         Object.entries(data.inputs || {}).forEach(([id, value]) => {
+            if (id === "dca-frequency") {
+                const radio = document.querySelector(`input[name="dca-frequency"][value="${value}"]`);
+                if (radio) radio.checked = true;
+                return;
+            }
             const input = document.getElementById(id);
             if (input) input.value = value;
         });
@@ -328,6 +627,8 @@ function restoreLocalState() {
             checkbox.checked = Boolean(checks[index]);
         });
         markActivePreset();
+        updateSliderProgress();
+        updateChecklistVisuals();
     } catch (err) {
         console.warn("Failed to restore local state", err);
     }
@@ -347,6 +648,11 @@ function resetLocalState() {
     };
 
     Object.entries(defaults).forEach(([id, value]) => {
+        if (id === "dca-frequency") {
+            const radio = document.querySelector(`input[name="dca-frequency"][value="${value}"]`);
+            if (radio) radio.checked = true;
+            return;
+        }
         const input = document.getElementById(id);
         if (input) input.value = value;
     });
@@ -358,6 +664,8 @@ function resetLocalState() {
     markActivePreset();
     calculateDca();
     updateStorageScore();
+    updateSliderProgress();
+    updateChecklistVisuals();
 }
 
 function markActivePreset() {
@@ -368,6 +676,10 @@ function markActivePreset() {
 }
 
 function readNumber(id) {
+    if (id === "dca-frequency") {
+        const checked = document.querySelector('input[name="dca-frequency"]:checked');
+        return checked ? Number(checked.value) : 12;
+    }
     const value = Number(document.getElementById(id)?.value);
     return Number.isFinite(value) ? value : 0;
 }
@@ -441,4 +753,96 @@ function escapeHtml(value) {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
+}
+
+function animateNumber(id, startValue, endValue, duration = 300, formatter = (v) => v.toString()) {
+    const element = document.getElementById(id);
+    if (!element) return;
+
+    if (element.dataset.animFrame) {
+        cancelAnimationFrame(Number(element.dataset.animFrame));
+    }
+
+    const startTime = performance.now();
+
+    function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        const easeProgress = progress * (2 - progress); // Ease-out quad
+        const currentValue = startValue + (endValue - startValue) * easeProgress;
+
+        element.textContent = formatter(currentValue);
+
+        if (progress < 1) {
+            element.dataset.animFrame = requestAnimationFrame(update);
+        } else {
+            element.textContent = formatter(endValue);
+            delete element.dataset.animFrame;
+        }
+    }
+
+    element.dataset.animFrame = requestAnimationFrame(update);
+}
+
+function updateNumberWithAnimation(id, targetValue, formatter = (v) => v.toString()) {
+    const element = document.getElementById(id);
+    if (!element) return;
+
+    const lastValue = parseFloat(element.dataset.lastValue) || 0;
+    if (lastValue === targetValue) {
+        element.textContent = formatter(targetValue);
+        return;
+    }
+
+    element.dataset.lastValue = targetValue;
+    animateNumber(id, lastValue, targetValue, 300, formatter);
+}
+
+function updateSegmentedIndicator() {
+    const checkedRadio = document.querySelector('input[name="dca-frequency"]:checked');
+    const label = checkedRadio ? document.querySelector(`label[for="${checkedRadio.id}"]`) : null;
+    const indicator = document.getElementById("freq-indicator");
+    if (!label || !indicator) return;
+
+    indicator.style.width = `${label.offsetWidth}px`;
+    indicator.style.left = `${label.offsetLeft}px`;
+}
+
+function setupSpotlightCards() {
+    const cards = document.querySelectorAll(
+        ".market-panel, .tool-panel, .results-panel, .checklist-panel, .score-panel, .summary-card, .chart-panel"
+    );
+    cards.forEach((card) => {
+        if (!card.querySelector(".spotlight-bg")) {
+            const bg = document.createElement("div");
+            bg.className = "spotlight-bg";
+            card.prepend(bg);
+        }
+        card.addEventListener("mousemove", (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty("--mouse-x", `${x}px`);
+            card.style.setProperty("--mouse-y", `${y}px`);
+        });
+    });
+}
+
+function updateSliderProgress() {
+    const slider = document.getElementById("future-price");
+    if (!slider) return;
+    const min = Number(slider.min) || 0;
+    const max = Number(slider.max) || 100;
+    const val = Number(slider.value) || 0;
+    const percent = ((val - min) / (max - min)) * 100;
+    slider.style.setProperty("--slider-progress", `${percent}%`);
+}
+
+function updateChecklistVisuals() {
+    document.querySelectorAll("#checklist label.check-item").forEach((label) => {
+        const checkbox = label.querySelector("input[type='checkbox']");
+        if (checkbox) {
+            label.classList.toggle("checked", checkbox.checked);
+        }
+    });
 }

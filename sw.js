@@ -1,11 +1,10 @@
-const CACHE_NAME = "btc-wedding-v1";
+const CACHE_NAME = "btc-wedding-v2";
 const ASSETS = [
   "./",
   "./index.html",
   "./css/style.css",
   "./js/chart.js",
   "./js/app.js",
-  "./js/particles.js",
   "./pwa_icon.png",
   "./manifest.json"
 ];
@@ -33,6 +32,26 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
+  const requestUrl = new URL(event.request.url);
+  const isLocalAsset = requestUrl.origin === self.location.origin;
+  const shouldRefreshFirst = isLocalAsset && (
+    requestUrl.pathname === "/" ||
+    requestUrl.pathname.endsWith(".html") ||
+    requestUrl.pathname.endsWith(".css") ||
+    requestUrl.pathname.endsWith(".js")
+  );
+
+  if (shouldRefreshFirst) {
+    event.respondWith(
+      fetch(event.request).then(response => {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        return response;
+      }).catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
       return cachedResponse || fetch(event.request).catch(() => {
