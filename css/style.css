@@ -1,43 +1,50 @@
 :root {
     /* Theme Colors */
-    --bg-dark: #060609;
-    --bg-grid: rgba(255, 255, 255, 0.015);
+    --bg-dark: #030305;
+    --bg-grid: rgba(255, 255, 255, 0.012);
+    --bg-grid-accent: rgba(247, 147, 26, 0.015);
     
-    --card-bg: rgba(10, 10, 15, 0.55);
-    --card-bg-hover: rgba(13, 13, 20, 0.75);
-    --card-border: rgba(255, 255, 255, 0.04);
-    --card-border-hover: rgba(247, 147, 26, 0.2);
+    --card-bg: rgba(9, 9, 14, 0.65);
+    --card-bg-hover: rgba(14, 14, 22, 0.85);
+    --card-border: rgba(255, 255, 255, 0.05);
+    --card-border-hover: rgba(247, 147, 26, 0.3);
     
-    --text-primary: #f5f5f7;
-    --text-secondary: rgba(245, 245, 247, 0.65);
-    --text-muted: rgba(245, 245, 247, 0.45);
-    --text-faint: rgba(245, 245, 247, 0.2);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-faint: #334155;
     
     /* Accents & Gradients */
     --btc-orange: #f7931a;
-    --btc-gold: #e5a93c;
+    --btc-gold: #f59e0b;
     --mint-green: #10b981;
     --rose-red: #f43f5e;
+    
+    /* Missing variables used in JS */
+    --green: #10b981;
+    --gold: #f59e0b;
+    --red: #f43f5e;
+    --accent-gradient: linear-gradient(135deg, #f7931a 0%, #ffb900 100%);
     
     --gold-gradient: linear-gradient(135deg, #f7931a 0%, #ffb900 100%);
     --emerald-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
     --crimson-gradient: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
-    --glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
-    --metallic-gradient: linear-gradient(135deg, #ffffff 0%, #a1a1aa 50%, #52525b 100%);
-    --panel-glow: 0 20px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    --glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+    --metallic-gradient: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #64748b 100%);
+    --panel-glow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.03);
     
     /* Layout & Geometry */
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 20px;
-    --radius-xl: 30px;
+    --radius-xl: 32px;
     
     /* Font Stacks */
     --sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --display: "Outfit", -apple-system, BlinkMacSystemFont, "SF Pro Display", var(--sans);
     --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
     
-    --transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Base resets & resets */
@@ -56,6 +63,22 @@ html {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Custom premium scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--btc-orange);
+}
+
 body {
     min-height: 100vh;
     color: var(--text-primary);
@@ -66,8 +89,9 @@ body {
     background-color: var(--bg-dark);
     background-image: 
         linear-gradient(var(--bg-grid) 1px, transparent 1px),
-        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
-    background-size: 36px 36px;
+        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
+        radial-gradient(circle at top, var(--bg-grid-accent) 0%, transparent 60%);
+    background-size: 36px 36px, 36px 36px, 100% 100%;
     background-position: center top;
 }
 

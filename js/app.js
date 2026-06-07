@@ -210,10 +210,10 @@ async function fetchBitcoinSnapshot() {
 
     if (state.currentBtcPrice || state.blockHeight) {
         statusDot?.classList.add("ok");
-        if (statusEl) statusEl.textContent = "Live reference loaded. Calculations still use your editable assumptions.";
+        if (statusEl) statusEl.textContent = "Live reference loaded. Your commitment still uses editable assumptions.";
     } else {
         statusDot?.classList.add("error");
-        if (statusEl) statusEl.textContent = "Live data unavailable. The planner still works with manual assumptions.";
+        if (statusEl) statusEl.textContent = "Live data unavailable. The commitment planner still works with manual assumptions.";
     }
 }
 
@@ -527,25 +527,25 @@ function updateStorageScore() {
 
     if (gradeEl) {
         if (score >= 85) {
-            gradeEl.textContent = "Strong custody discipline";
+            gradeEl.textContent = "Strong custody vow";
         } else if (score >= 65) {
-            gradeEl.textContent = "Good, with gaps";
+            gradeEl.textContent = "Good vow, with gaps";
         } else if (score >= 35) {
-            gradeEl.textContent = "Fragile setup";
+            gradeEl.textContent = "Fragile custody promise";
         } else {
-            gradeEl.textContent = "Needs attention";
+            gradeEl.textContent = "Vow needs attention";
         }
     }
 
     if (adviceEl) {
         if (score >= 85) {
-            adviceEl.textContent = "Strong storage habits. Review annually.";
+            adviceEl.textContent = "Strong storage habits. Renew the vow annually.";
         } else if (score >= 65) {
-            adviceEl.textContent = "Workable setup. Focus on missing items below.";
+            adviceEl.textContent = "Workable setup. Tighten the missing promises below.";
         } else if (score >= 35) {
-            adviceEl.textContent = "Close the basic seed, backup, and recovery gaps.";
+            adviceEl.textContent = "Close the basic seed, backup, and recovery promises.";
         } else {
-            adviceEl.textContent = "Start with offline seeds and a recovery test.";
+            adviceEl.textContent = "Begin with offline seeds and a recovery rehearsal.";
         }
     }
 
@@ -558,7 +558,7 @@ function updateStorageScore() {
     if (priorityItems) {
         priorityItems.innerHTML = missing.length
             ? missing.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
-            : "<li>Schedule annual custody review.</li><li>Update instructions on setup changes.</li>";
+            : "<li>Renew the custody vow annually.</li><li>Update instructions whenever the setup changes.</li>";
     }
 
     updateSummary();
@@ -583,7 +583,7 @@ function buildSummaryText() {
     const projectedBtc = startingBtc + (avgPrice > 0 ? totalInvested / avgPrice : 0);
     const futureValue = projectedBtc * futurePrice;
 
-    return `DCA plan: ${formatCurrency(amount, 0)} ${frequencyLabel.toLowerCase()} for ${years} years at an assumed average buy price of ${formatCurrency(avgPrice, 0)}. Projected stack: ${formatBtc(projectedBtc)} BTC (${formatSats(projectedBtc)} sats), worth ${formatCurrency(futureValue, 0)} at ${formatCurrency(futurePrice, 0)} per BTC. Target: ${formatBtc(targetBtc)} BTC. Cold storage score: ${storageScore}/100.`;
+    return `Bitcoin vow: contribute ${formatCurrency(amount, 0)} ${frequencyLabel.toLowerCase()} for ${years} years at an assumed average buy price of ${formatCurrency(avgPrice, 0)}. Promised stack: ${formatBtc(projectedBtc)} BTC (${formatSats(projectedBtc)} sats), worth ${formatCurrency(futureValue, 0)} at ${formatCurrency(futurePrice, 0)} per BTC. Vow target: ${formatBtc(targetBtc)} BTC. Custody vow score: ${storageScore}/100.`;
 }
 
 function saveLocalState() {
