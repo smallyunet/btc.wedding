@@ -1,10 +1,14 @@
-const CACHE_NAME = "btc-wedding-v4";
+const CACHE_NAME = "btc-wedding-v5";
 const ASSETS = [
   "./",
   "./index.html",
   "./css/style.css",
   "./js/app.js",
-  "./pwa_icon.png",
+  "./favicon-32.png",
+  "./apple-touch-icon.png",
+  "./icon-192.png",
+  "./icon-512.png",
+  "./icon-512-maskable.png",
   "./manifest.json"
 ];
 
