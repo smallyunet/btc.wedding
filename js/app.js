@@ -1,848 +1,1135 @@
-const STORAGE_KEY = "btc_wedding_simple_plan";
+const STORAGE_KEY = "btc_wedding_prenup_v3";
 
-const state = {
-    currentBtcPrice: null,
-    blockHeight: null
-};
-
-let dcaChartInstance = null;
-
-const DCA_INPUT_IDS = [
-    "dca-amount",
-    "dca-frequency",
-    "dca-years",
-    "starting-btc",
-    "avg-price",
-    "target-btc",
-    "future-price"
+const FIELD_IDS = [
+    "buy-amount",
+    "buy-frequency",
+    "no-panic",
+    "no-leverage",
+    "cold-storage",
+    "no-shitcoins",
+    "partner-a-name",
+    "partner-b-name",
+    "ceremony-date",
+    "ceremony-place",
+    "custom-vow",
+    "witness-name",
+    "enable-witness"
 ];
 
-document.addEventListener("DOMContentLoaded", () => {
-    setupHeaderState();
-    setupPlanner();
-    setupChecklist();
-    setupSummaryActions();
-    setupMarketRefresh();
-    setupAdvancedAccordion();
-    setupSpotlightCards();
-    restoreLocalState();
-    fetchBitcoinSnapshot();
-    calculateDca();
-    updateStorageScore();
-    updateSegmentedIndicator();
-    updateSliderProgress();
-    updateChecklistVisuals();
+// Canvas storage & sealed state
+const canvasState = {};
+let isSealed = false;
+let savedBlockHeight = "";
+let confettiSystem = null;
 
-    const printDateEl = document.getElementById("print-date");
-    if (printDateEl) {
-        printDateEl.textContent = new Date().toLocaleDateString("en-US", { dateStyle: "long" });
+document.addEventListener("DOMContentLoaded", () => {
+    // Initialize Confetti
+    const confettiCanvas = document.getElementById("confetti-canvas");
+    if (confettiCanvas) {
+        confettiSystem = new ConfettiSystem(confettiCanvas);
     }
 
-    window.addEventListener("resize", updateSegmentedIndicator);
+    // Restore state first
+    restoreState();
+
+    // Bind inputs, toggles, signatures, actions, faq
+    bindSetupTypeToggles();
+    bindInputs();
+    bindSignatures();
+    bindActions();
+    bindFAQ();
+
+    // Initial render & setups
+    initHeroTilt();
+    updateWitnessVisibility();
+    updatePrenup();
+    updateCardClasses();
+    renderBlockHeight();
+
+    // Interactive detail setups
+    initScrollspy();
+    initScrollReveal();
+    initBackgroundParallax();
+
+    // Bind mouse gold dust trail
+    window.addEventListener("mousemove", (e) => {
+        if (confettiSystem) {
+            confettiSystem.spawnSparkle(e.clientX, e.clientY);
+        }
+    });
+    window.addEventListener("touchmove", (e) => {
+        if (confettiSystem && e.touches.length > 0) {
+            confettiSystem.spawnSparkle(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: true });
 });
 
-function setupHeaderState() {
-    const header = document.querySelector(".site-header");
-    window.addEventListener("scroll", () => {
-        if (!header) return;
-        header.style.boxShadow = window.scrollY > 20 ? "0 10px 30px rgba(0, 0, 0, 0.24)" : "none";
+// Setup Joint/Solo Radio Toggles
+function bindSetupTypeToggles() {
+    const btnSolo = document.getElementById("btn-solo");
+    const btnJoint = document.getElementById("btn-joint");
+    const inputSolo = btnSolo.querySelector("input");
+    const inputJoint = btnJoint.querySelector("input");
+
+    btnSolo.addEventListener("click", () => {
+        if (isSealed) return; // Prevent changing layout when sealed
+        inputSolo.checked = true;
+        setSetupType("solo");
+    });
+
+    btnJoint.addEventListener("click", () => {
+        if (isSealed) return; // Prevent changing layout when sealed
+        inputJoint.checked = true;
+        setSetupType("joint");
     });
 }
 
-function setupAdvancedAccordion() {
-    const toggleBtn = document.getElementById("advanced-toggle");
-    const panel = document.getElementById("advanced-panel");
-    if (!toggleBtn || !panel) return;
+function setSetupType(type) {
+    const btnSolo = document.getElementById("btn-solo");
+    const btnJoint = document.getElementById("btn-joint");
+    const wrapperB = document.getElementById("partner-b-wrapper");
+    const sigBoxB = document.getElementById("sig-box-b");
+    const nameInputs = document.querySelector(".name-inputs");
 
-    toggleBtn.addEventListener("click", () => {
-        const isExpanded = panel.classList.toggle("expanded");
-        toggleBtn.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+    if (type === "solo") {
+        btnSolo.classList.add("active");
+        btnJoint.classList.remove("active");
+        wrapperB.classList.add("hidden");
+        sigBoxB.classList.add("hidden");
+        nameInputs.classList.remove("two-cols");
+    } else {
+        btnSolo.classList.remove("active");
+        btnJoint.classList.add("active");
+        wrapperB.classList.remove("hidden");
+        sigBoxB.classList.remove("hidden");
+        nameInputs.classList.add("two-cols");
+    }
+
+    updateWitnessVisibility();
+    handleChange();
+}
+
+function getSetupType() {
+    const btnJoint = document.getElementById("btn-joint");
+    return btnJoint && btnJoint.classList.contains("active") ? "joint" : "solo";
+}
+
+function bindInputs() {
+    // Normal fields
+    FIELD_IDS.forEach((id) => {
+        const field = document.getElementById(id);
+        if (!field) return;
+
+        const eventName = (field.tagName === "SELECT" || field.type === "checkbox") ? "change" : "input";
+        field.addEventListener(eventName, handleChange);
+    });
+
+    // Checkbox cards
+    const checkboxes = ["no-panic", "no-leverage", "cold-storage", "no-shitcoins"];
+    checkboxes.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener("change", () => {
+            const card = el.closest(".vow-card");
+            if (card) {
+                card.classList.toggle("card-active", el.checked);
+            }
+            handleChange();
+        });
+    });
+
+    // Witness toggle specific action
+    const enableWitnessCheckbox = document.getElementById("enable-witness");
+    if (enableWitnessCheckbox) {
+        enableWitnessCheckbox.addEventListener("change", () => {
+            updateWitnessVisibility();
+        });
+    }
+}
+
+function updateCardClasses() {
+    const checkboxes = ["no-panic", "no-leverage", "cold-storage", "no-shitcoins"];
+    checkboxes.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const card = el.closest(".vow-card");
+        if (card) {
+            card.classList.toggle("card-active", el.checked);
+        }
     });
 }
 
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
+function handleChange() {
+    saveState();
+    updatePrenup();
+}
+
+
+function updateWitnessVisibility() {
+    const enableWitness = document.getElementById("enable-witness")?.checked;
+    const witnessNameWrapper = document.getElementById("witness-name-wrapper");
+    const sigBoxWitness = document.getElementById("sig-box-witness");
+    const sigSection = document.getElementById("cert-signatures-section");
+
+    if (enableWitness) {
+        witnessNameWrapper?.classList.remove("hidden");
+        sigBoxWitness?.classList.remove("hidden");
+    } else {
+        witnessNameWrapper?.classList.add("hidden");
+        sigBoxWitness?.classList.add("hidden");
+    }
+
+    const isJoint = getSetupType() === "joint";
+    let activeSigs = 1;
+    if (isJoint) activeSigs++;
+    if (enableWitness) activeSigs++;
+
+    if (sigSection) {
+        if (activeSigs >= 3) {
+            sigSection.classList.remove("two-cols");
+            sigSection.classList.add("three-cols");
+        } else if (activeSigs === 2) {
+            sigSection.classList.remove("three-cols");
+            sigSection.classList.add("two-cols");
+        } else {
+            sigSection.classList.remove("three-cols");
+            sigSection.classList.remove("two-cols");
+        }
+    }
+}
+
+function bindFAQ() {
+    const faqQuestions = document.querySelectorAll(".faq-question");
+    faqQuestions.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const item = btn.closest(".faq-item");
+            const isOpen = btn.getAttribute("aria-expanded") === "true";
+
+            document.querySelectorAll(".faq-item").forEach(otherItem => {
+                if (otherItem !== item) {
+                    otherItem.querySelector(".faq-question").setAttribute("aria-expanded", "false");
+                    otherItem.querySelector(".faq-answer").style.maxHeight = null;
+                }
+            });
+
+            if (isOpen) {
+                btn.setAttribute("aria-expanded", "false");
+                item.querySelector(".faq-answer").style.maxHeight = null;
+            } else {
+                btn.setAttribute("aria-expanded", "true");
+                const answer = item.querySelector(".faq-answer");
+                answer.style.maxHeight = answer.scrollHeight + "px";
+            }
+        });
+    });
+}
+
+function initHeroTilt() {
+    const wrapper = document.querySelector(".hero-document-wrapper");
+    const card = document.querySelector(".hero-document");
+    if (!wrapper || !card) return;
+
+    wrapper.addEventListener("mousemove", (e) => {
+        const rect = wrapper.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = ((centerY - y) / centerY) * 12;
+        const rotateY = ((x - centerX) / centerX) * 12;
+
+        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.04)`;
+    });
+
+    wrapper.addEventListener("mouseleave", () => {
+        card.style.transform = "rotateY(-8deg) rotateX(4deg) rotateZ(1deg) scale(1)";
+    });
+}
+
+// -------------------------------------------------------------
+// Signature Pad Canvas Engine
+// -------------------------------------------------------------
+function bindSignatures() {
+    setupSignaturePad("sig-canvas-a", "clear-sig-a");
+    setupSignaturePad("sig-canvas-b", "clear-sig-b");
+    setupSignaturePad("sig-canvas-witness", "clear-sig-witness");
+}
+
+function setupSignaturePad(canvasId, clearBtnId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    // Set line styles for ink pen look
+    ctx.strokeStyle = "#121824"; // deep midnight ink
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    let isDrawing = false;
+    let points = [];
+    let lastTime = Date.now();
+
+    function getCoordinates(e) {
+        const rect = canvas.getBoundingClientRect();
+        let clientX, clientY;
+
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+
+        // Project coordinate scaling
+        const x = (clientX - rect.left) * (canvas.width / rect.width);
+        const y = (clientY - rect.top) * (canvas.height / rect.height);
+        return { x, y };
+    }
+
+    function startDrawing(e) {
+        if (isSealed) return; // Prevent drawing if sealed
+        isDrawing = true;
+        const coords = getCoordinates(e);
+        points = [coords];
+        lastTime = Date.now();
+        ctx.lineWidth = 2.2;
+
+        // Draw a tiny starting dot
+        ctx.beginPath();
+        ctx.arc(coords.x, coords.y, ctx.lineWidth / 2, 0, Math.PI * 2);
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(coords.x, coords.y);
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        if (isSealed) return;
+        e.preventDefault(); // Stop screen dragging/scrolling on mobile
+
+        const coords = getCoordinates(e);
+        const p1 = points[points.length - 1];
+        points.push(coords);
+
+        const dx = coords.x - p1.x;
+        const dy = coords.y - p1.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const now = Date.now();
+        const dt = now - lastTime || 1;
+        lastTime = now;
+        const velocity = dist / dt;
+
+        // Calligraphy dynamics: draw slower = thicker, faster = thinner
+        const targetWidth = Math.max(1.1, Math.min(3.2, 4.2 - velocity * 1.6));
+        ctx.lineWidth = ctx.lineWidth * 0.6 + targetWidth * 0.4;
+
+        if (points.length === 2) {
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            ctx.lineTo(points[1].x, points[1].y);
+            ctx.stroke();
+        } else if (points.length > 2) {
+            const p0 = points[points.length - 3];
+            const p1_pt = points[points.length - 2];
+            const p2 = points[points.length - 1];
+
+            const mid1 = { x: (p0.x + p1_pt.x) / 2, y: (p0.y + p1_pt.y) / 2 };
+            const mid2 = { x: (p1_pt.x + p2.x) / 2, y: (p1_pt.y + p2.y) / 2 };
+
+            ctx.beginPath();
+            ctx.moveTo(mid1.x, mid1.y);
+            ctx.quadraticCurveTo(p1_pt.x, p1_pt.y, mid2.x, mid2.y);
+            ctx.stroke();
+        }
+    }
+
+    function stopDrawing() {
+        if (isDrawing) {
+            isDrawing = false;
+            canvasState[canvasId] = canvas.toDataURL();
+            saveState();
+        }
+    }
+
+    // Mouse listeners
+    canvas.addEventListener("mousedown", startDrawing);
+    canvas.addEventListener("mousemove", draw);
+    canvas.addEventListener("mouseup", stopDrawing);
+    canvas.addEventListener("mouseleave", stopDrawing);
+
+    // Touch listeners
+    canvas.addEventListener("touchstart", startDrawing, { passive: false });
+    canvas.addEventListener("touchmove", draw, { passive: false });
+    canvas.addEventListener("touchend", stopDrawing);
+
+    // Clear listener
+    const clearBtn = document.getElementById(clearBtnId);
+    if (clearBtn) {
+        clearBtn.addEventListener("click", () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            delete canvasState[canvasId];
+            saveState();
+        });
+    }
+}
+
+// -------------------------------------------------------------
+// Document Generation and Rendering
+// -------------------------------------------------------------
+function updatePrenup() {
+    const list = document.getElementById("prenup-output-list");
+    const dateDisp = document.getElementById("cert-date-display");
+    const placeDisp = document.getElementById("cert-place-display");
+    const introText = document.getElementById("cert-intro-text");
+    const sigNameA = document.getElementById("sig-name-display-a");
+    const sigNameB = document.getElementById("sig-name-display-b");
+    const sigNameWitness = document.getElementById("sig-name-display-witness");
+
+    if (!list) return;
+
+    const values = readValues();
+    const isJoint = getSetupType() === "joint";
+
+    const ceremonyDate = formatCeremonyDate(values.ceremonyDate);
+    const ceremonyPlace = values.ceremonyPlace.trim() || "Cyberspace Chapel";
+    dateDisp.textContent = ceremonyDate;
+    if (placeDisp) placeDisp.textContent = ceremonyPlace;
+
+    // Intro Text
+    const nameA = values.partnerAName.trim() || "Satoshi";
+    const nameB = values.partnerBName.trim() || "Hal Finney";
+    const witnessName = values.witnessName.trim() || "Nick Szabo";
+
+    if (isJoint) {
+        introText.innerHTML = `<strong>${escapeHtml(nameA)}</strong> and <strong>${escapeHtml(nameB)}</strong> mark this day at <strong>${escapeHtml(ceremonyPlace)}</strong> with these Bitcoin vows:`;
+        sigNameA.textContent = nameA;
+        sigNameB.textContent = nameB;
+    } else {
+        introText.innerHTML = `<strong>${escapeHtml(nameA)}</strong> marks this day at <strong>${escapeHtml(ceremonyPlace)}</strong> with these Bitcoin vows:`;
+        sigNameA.textContent = nameA;
+    }
+
+    if (sigNameWitness) {
+        sigNameWitness.textContent = witnessName;
+    }
+
+    // Form Vow Bullet Points
+    const rules = [];
+
+    // Accumulation Vow
+    rules.push(`Promise to stack <strong>${formatCurrency(values.buyAmount)}</strong> of Bitcoin <strong>${values.buyFrequency}</strong> with patience and care.`);
+
+    // Panic Sell Vow
+    if (values.noPanic) {
+        rules.push("Hold firm through volatility and <strong>never panic sell</strong> under market pressure.");
+    }
+
+    // Leverage Vow
+    if (values.noLeverage) {
+        rules.push("Reject derivative trading and <strong>never use leverage</strong> against shared peace of mind.");
+    }
+
+    // Custody Vow
+    if (values.coldStorage) {
+        rules.push("Keep private keys offline in <strong>secure cold storage</strong>, away from temptation and hurry.");
+    }
+
+    // Bitcoin Only Vow
+    if (values.noShitcoins) {
+        rules.push("Stay faithful to Bitcoin and <strong>ignore altcoin noise</strong>.");
+    }
+
+    // Custom Vow
+    if (values.customVow && values.customVow.trim() !== "") {
+        rules.push(escapeHtml(values.customVow.trim()));
+    }
+
+    // Render list
+    list.innerHTML = rules.map(rule => `<li>${rule}</li>`).join("");
+}
+
+function readValues() {
+    return {
+        buyAmount: readNumber("buy-amount"),
+        buyFrequency: readSelect("buy-frequency"),
+        noPanic: readChecked("no-panic"),
+        noLeverage: readChecked("no-leverage"),
+        coldStorage: readChecked("cold-storage"),
+        noShitcoins: readChecked("no-shitcoins"),
+        partnerAName: readText("partner-a-name"),
+        partnerBName: readText("partner-b-name"),
+        ceremonyDate: readText("ceremony-date"),
+        ceremonyPlace: readText("ceremony-place"),
+        customVow: readText("custom-vow"),
+        witnessName: readText("witness-name"),
+        enableWitness: readChecked("enable-witness")
     };
 }
 
-function setupPlanner() {
-    const debouncedPlanChange = debounce(handlePlanChange, 180);
-
-    DCA_INPUT_IDS.forEach((id) => {
-        if (id === "dca-frequency") {
-            document.querySelectorAll('input[name="dca-frequency"]').forEach((radio) => {
-                radio.addEventListener("change", handlePlanChange);
-            });
-            return;
-        }
-        const input = document.getElementById(id);
-        if (!input) return;
-
-        if (input.type === "number" || input.type === "text") {
-            input.addEventListener("input", debouncedPlanChange);
-            input.addEventListener("change", handlePlanChange);
-        } else {
-            input.addEventListener("input", handlePlanChange);
-            input.addEventListener("change", handlePlanChange);
-        }
-    });
-
-    document.querySelectorAll(".preset-btn").forEach((button) => {
-        button.addEventListener("click", () => {
-            const target = document.getElementById("target-btc");
-            target.value = button.dataset.targetBtc;
-            markActivePreset();
-            handlePlanChange();
-        });
-    });
+function readNumber(id) {
+    const value = Number(document.getElementById(id)?.value || 0);
+    return Number.isFinite(value) ? value : 0;
 }
 
-function setupChecklist() {
-    document.querySelectorAll("#checklist input[type='checkbox']").forEach((checkbox) => {
-        checkbox.addEventListener("change", () => {
-            updateStorageScore();
-            saveLocalState();
-            updateChecklistVisuals();
-        });
-    });
+function readSelect(id) {
+    return document.getElementById(id)?.value || "";
 }
 
-function setupSummaryActions() {
-    const copyBtn = document.getElementById("copy-summary");
-    const printBtn = document.getElementById("print-summary");
-    const resetBtn = document.getElementById("reset-summary");
-
-    copyBtn?.addEventListener("click", async () => {
-        try {
-            await copyTextToClipboard(buildSummaryText());
-            flashButton(copyBtn, "Copied");
-        } catch (err) {
-            console.warn("Copy failed", err);
-            flashButton(copyBtn, "Copy failed");
-        }
-    });
-
-    printBtn?.addEventListener("click", () => window.print());
-
-    resetBtn?.addEventListener("click", () => {
-        resetLocalState();
-    });
+function readChecked(id) {
+    return Boolean(document.getElementById(id)?.checked);
 }
 
-function setupMarketRefresh() {
-    document.getElementById("refresh-market")?.addEventListener("click", fetchBitcoinSnapshot);
+function readText(id) {
+    return document.getElementById(id)?.value || "";
 }
 
-function handlePlanChange() {
-    markActivePreset();
-    calculateDca();
-    saveLocalState();
-    updateSegmentedIndicator();
-    updateSliderProgress();
-}
-
-async function fetchBitcoinSnapshot() {
-    const priceEl = document.getElementById("btc-price");
-    const blockEl = document.getElementById("btc-block");
-    const statusEl = document.getElementById("market-status");
-    const statusDot = document.getElementById("status-dot");
-
-    statusDot?.classList.remove("ok", "error");
-    if (statusEl) statusEl.textContent = "Fetching public market and block data.";
-
-    try {
-        const price = await fetchPrice();
-        state.currentBtcPrice = price;
-        if (priceEl) {
-            updateNumberWithAnimation("btc-price", price, (v) => formatCurrency(v, 2));
-        }
-
-        const avgPriceEl = document.getElementById("avg-price");
-        if (avgPriceEl && Number(avgPriceEl.value) === 100000) {
-            avgPriceEl.value = Math.round(price);
-            calculateDca();
-        }
-
-        const satsPerDollarEl = document.getElementById("sats-per-dollar");
-        if (satsPerDollarEl) {
-            updateNumberWithAnimation("sats-per-dollar", 100000000 / price, (v) => `${Math.round(v).toLocaleString("en-US")} sats`);
-        }
-    } catch (err) {
-        console.warn("Price fetch failed", err);
-        if (priceEl) priceEl.textContent = "Unavailable";
-        const satsPerDollarEl = document.getElementById("sats-per-dollar");
-        if (satsPerDollarEl) satsPerDollarEl.textContent = "Unavailable";
-    }
-
-    try {
-        const height = await fetchBlockHeight();
-        state.blockHeight = height;
-        if (blockEl) {
-            updateNumberWithAnimation("btc-block", height, (v) => `#${Math.round(v).toLocaleString("en-US")}`);
-        }
-
-        const currentEpoch = Math.floor(height / 210000);
-        const nextHalvingBlock = (currentEpoch + 1) * 210000;
-        const blocksRemaining = nextHalvingBlock - height;
-        const epochStartBlock = currentEpoch * 210000;
-        const progressPercent = ((height - epochStartBlock) / 210000) * 100;
-
-        const halvingProgressEl = document.getElementById("halving-progress");
-        const halvingCountdownEl = document.getElementById("halving-countdown");
-
-        if (halvingProgressEl) {
-            updateNumberWithAnimation("halving-progress", progressPercent, (v) => `${v.toFixed(2)}%`);
-        }
-        if (halvingCountdownEl) {
-            updateNumberWithAnimation("halving-countdown", blocksRemaining, (v) => `${Math.round(v).toLocaleString("en-US")} blocks left`);
-        }
-    } catch (err) {
-        console.warn("Block height fetch failed", err);
-        if (blockEl) blockEl.textContent = "Unavailable";
-        const halvingProgressEl = document.getElementById("halving-progress");
-        const halvingCountdownEl = document.getElementById("halving-countdown");
-        if (halvingProgressEl) halvingProgressEl.textContent = "Unavailable";
-        if (halvingCountdownEl) halvingCountdownEl.textContent = "";
-    }
-
-    if (state.currentBtcPrice || state.blockHeight) {
-        statusDot?.classList.add("ok");
-        if (statusEl) statusEl.textContent = "Live reference loaded. Your commitment still uses editable assumptions.";
-    } else {
-        statusDot?.classList.add("error");
-        if (statusEl) statusEl.textContent = "Live data unavailable. The commitment planner still works with manual assumptions.";
-    }
-}
-
-async function fetchPrice() {
-    const coinbaseRes = await fetchWithTimeout("https://api.coinbase.com/v2/prices/BTC-USD/spot");
-    if (coinbaseRes.ok) {
-        const data = await coinbaseRes.json();
-        const price = Number(data.data.amount);
-        if (Number.isFinite(price)) return price;
-    }
-
-    const mempoolRes = await fetchWithTimeout("https://mempool.space/api/v1/prices");
-    if (mempoolRes.ok) {
-        const data = await mempoolRes.json();
-        const price = Number(data.USD);
-        if (Number.isFinite(price)) return price;
-    }
-
-    throw new Error("No valid price source.");
-}
-
+// -------------------------------------------------------------
+// Timechain Block Height fetching
+// -------------------------------------------------------------
 async function fetchBlockHeight() {
-    const res = await fetchWithTimeout("https://blockstream.info/api/blocks/tip/height");
-    if (!res.ok) throw new Error("Block height unavailable.");
-    const height = Number(await res.text());
-    if (!Number.isFinite(height)) throw new Error("Invalid block height.");
-    return height;
-}
+    const el = document.getElementById("cert-block-height");
+    if (!el) return;
 
-async function fetchWithTimeout(url, timeoutMs = 4500) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    el.textContent = "Connecting to Timechain...";
 
     try {
-        return await fetch(url, { signal: controller.signal });
-    } finally {
-        clearTimeout(timeout);
-    }
-}
-
-function calculateDca() {
-    const amount = readNumber("dca-amount");
-    const frequency = readNumber("dca-frequency");
-    const years = readNumber("dca-years");
-    const startingBtc = readNumber("starting-btc");
-    const avgPrice = readNumber("avg-price");
-    const targetBtc = readNumber("target-btc");
-    const futurePrice = readNumber("future-price");
-
-    const buys = Math.max(0, frequency * years);
-    const totalInvested = amount * buys;
-    const purchasedBtc = avgPrice > 0 ? totalInvested / avgPrice : 0;
-    const projectedBtc = startingBtc + purchasedBtc;
-    const costBasis = totalInvested + startingBtc * avgPrice;
-    const futureValue = projectedBtc * futurePrice;
-    const gainLoss = futureValue - costBasis;
-    const progress = targetBtc > 0 ? Math.min(100, (projectedBtc / targetBtc) * 100) : 0;
-
-    setText("future-price-label", formatCurrency(futurePrice, 0));
-    updateNumberWithAnimation("projected-btc", projectedBtc, (v) => `${formatBtc(v)} BTC`);
-    updateNumberWithAnimation("projected-sats", projectedBtc * 100000000, (v) => `${Math.round(v).toLocaleString("en-US")} sats`);
-    updateNumberWithAnimation("total-invested", totalInvested, (v) => formatCurrency(v, 0));
-    updateNumberWithAnimation("future-value", futureValue, (v) => formatCurrency(v, 0));
-    updateNumberWithAnimation("estimated-return", gainLoss, (v) => formatSignedCurrency(v));
-    setText("time-to-target", estimateTimeToTarget({ amount, frequency, avgPrice, startingBtc, targetBtc }));
-
-    const returnEl = document.getElementById("estimated-return");
-    returnEl?.classList.toggle("positive", gainLoss >= 0);
-    returnEl?.classList.toggle("negative", gainLoss < 0);
-
-    const progressBar = document.getElementById("progress-bar-fill");
-    if (progressBar) {
-        progressBar.style.width = `${progress}%`;
-        // Transition colors from gold to green if 100% target met
-        if (progress >= 100) {
-            progressBar.style.background = "linear-gradient(90deg, #10b981 0%, #059669 100%)";
-            progressBar.style.boxShadow = "0 0 10px rgba(16, 185, 129, 0.4)";
+        const response = await fetch("https://mempool.space/api/blocks/tip/height");
+        if (response.ok) {
+            const height = await response.text();
+            savedBlockHeight = height.trim();
+            renderBlockHeight();
         } else {
-            progressBar.style.background = "var(--accent-gradient)";
-            progressBar.style.boxShadow = "0 0 8px rgba(229, 169, 60, 0.25)";
+            throw new Error("HTTP error status");
         }
+    } catch (e) {
+        console.warn("Could not retrieve block height, estimating...", e);
+        // Estimate based on standard block intervals
+        const genesisTimestamp = 1231006505000;
+        const elapsedMinutes = (Date.now() - genesisTimestamp) / 60000;
+        const estHeight = Math.floor(elapsedMinutes / 10.02);
+        savedBlockHeight = `${estHeight} (Est.)`;
+        renderBlockHeight();
     }
-
-    setText("target-status", targetBtc > 0
-        ? `${progress.toFixed(1)}% of your ${formatBtc(targetBtc)} BTC target (${formatSats(targetBtc)} sats).`
-        : "Set a target to see progress.");
-
-    updateScenario("50", projectedBtc, costBasis, 50000);
-    updateScenario("100", projectedBtc, costBasis, 100000);
-    updateScenario("250", projectedBtc, costBasis, 250000);
-    updateScenario("1000", projectedBtc, costBasis, 1000000);
-
-    renderDcaChart(years, startingBtc, avgPrice, futurePrice, totalInvested, purchasedBtc);
-
-    updateSummary();
 }
 
-function updateScenario(id, btc, costBasis, price) {
-    const value = btc * price;
-    const multiple = costBasis > 0 ? value / costBasis : 0;
-    updateNumberWithAnimation(`scenario-${id}`, value, (v) => formatCurrency(v, 0));
-    updateNumberWithAnimation(`multiple-${id}`, multiple, (v) => `${v.toFixed(1)}x`);
+function renderBlockHeight() {
+    const el = document.getElementById("cert-block-height");
+    if (!el) return;
+
+    if (isSealed && savedBlockHeight) {
+        el.innerHTML = `Block <strong>#${savedBlockHeight}</strong>`;
+    } else {
+        el.textContent = "Unsealed";
+    }
 }
 
-function renderDcaChart(years, startingBtc, avgPrice, futurePrice, totalInvested, purchasedBtc) {
-    if (typeof Chart === "undefined") return;
+// -------------------------------------------------------------
+// Buttons & UI Actions
+// -------------------------------------------------------------
+function bindActions() {
+    document.getElementById("btn-seal")?.addEventListener("click", toggleSeal);
+    document.getElementById("copy-prenup")?.addEventListener("click", copyContractText);
+    document.getElementById("print-prenup")?.addEventListener("click", () => window.print());
+    document.getElementById("reset-prenup")?.addEventListener("click", resetState);
+}
 
-    const ctx = document.getElementById("dca-chart")?.getContext("2d");
-    if (!ctx) return;
+async function toggleSeal() {
+    const docSheet = document.querySelector(".document-sheet");
+    const waxSeal = document.getElementById("cert-wax-seal");
+    const sealBtn = document.getElementById("btn-seal");
+    const btnText = sealBtn?.querySelector(".btn-text");
 
-    const chartLabels = [];
-    const investedData = [];
-    const valueData = [];
+    if (!isSealed) {
+        // Start melting wax loader
+        sealBtn.classList.add("loading-wax");
+        if (btnText) btnText.textContent = "Melting Wax...";
 
-    const intervals = years === 1 ? 12 : 10;
-    const buys = Math.max(0, readNumber("dca-frequency") * years);
+        await new Promise(r => setTimeout(r, 900)); // wait for wax melting
 
-    for (let i = 0; i <= intervals; i++) {
-        const t = i / intervals;
-        const yr = t * years;
+        sealBtn.classList.remove("loading-wax");
+        isSealed = true;
 
-        if (years === 1) {
-            chartLabels.push(`Mo ${i}`);
-        } else {
-            chartLabels.push(`Yr ${yr.toFixed(yr % 1 === 0 ? 0 : 1)}`);
+        // Fetch block height at the moment of sealing
+        await fetchBlockHeight();
+
+        // Lock Document & trigger animations
+        docSheet?.classList.add("sealed-lock");
+
+        // Add vibration feedback impact shake
+        docSheet?.classList.remove("shake-effect");
+        void docSheet?.offsetWidth; // Trigger reflow to restart animation
+        docSheet?.classList.add("shake-effect");
+
+        waxSeal?.classList.add("sealed");
+
+        // Trigger ripple shockwave
+        const ripple = document.getElementById("stamp-ripple");
+        if (ripple) {
+            ripple.classList.remove("active");
+            void ripple.offsetWidth;
+            ripple.classList.add("active");
         }
 
-        // DCA buys up to this point
-        const currentBuys = Math.floor(t * buys);
-        const currentInvested = (readNumber("dca-amount") * currentBuys) + (startingBtc * avgPrice);
-        investedData.push(Math.round(currentInvested));
+        if (btnText) btnText.textContent = "Unlock Vows";
+        sealBtn?.classList.remove("glow-effect");
+        sealBtn?.classList.add("secondary");
 
-        // Stack accumulated up to this point
-        const currentPurchasedBtc = avgPrice > 0 ? (readNumber("dca-amount") * currentBuys) / avgPrice : 0;
-        const currentBtc = startingBtc + currentPurchasedBtc;
-
-        // Price at this interval (linear from avgPrice to futurePrice)
-        const currentPrice = avgPrice + t * (futurePrice - avgPrice);
-        const currentValue = currentBtc * currentPrice;
-        valueData.push(Math.round(currentValue));
-    }
-
-    const valueGradient = ctx.createLinearGradient(0, 0, 0, 220);
-    valueGradient.addColorStop(0, "rgba(16, 185, 129, 0.08)");
-    valueGradient.addColorStop(1, "rgba(16, 185, 129, 0)");
-
-    const investedGradient = ctx.createLinearGradient(0, 0, 0, 220);
-    investedGradient.addColorStop(0, "rgba(247, 147, 26, 0.04)");
-    investedGradient.addColorStop(1, "rgba(247, 147, 26, 0)");
-
-    if (dcaChartInstance) {
-        dcaChartInstance.destroy();
-    }
-
-    dcaChartInstance = new Chart(ctx, {
-        type: "line",
-        data: {
-            labels: chartLabels,
-            datasets: [
-                {
-                    label: "Projected Value",
-                    data: valueData,
-                    borderColor: "#10b981", // Mint Green
-                    backgroundColor: valueGradient,
-                    borderWidth: 2,
-                    pointRadius: 0,
-                    pointHoverRadius: 4,
-                    fill: true,
-                    tension: 0.15
-                },
-                {
-                    label: "Total Invested",
-                    data: investedData,
-                    borderColor: "#f7931a", // Bitcoin Orange/Gold
-                    backgroundColor: investedGradient,
-                    borderWidth: 1.5,
-                    pointRadius: 0,
-                    pointHoverRadius: 4,
-                    fill: true,
-                    tension: 0.15
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: "index",
-                intersect: false
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: "top",
-                    labels: {
-                        color: "rgba(245, 245, 247, 0.65)",
-                        boxWidth: 8,
-                        boxHeight: 8,
-                        usePointStyle: true,
-                        font: {
-                            family: "var(--sans)",
-                            size: 11,
-                            weight: "600"
-                        }
-                    }
-                },
-                tooltip: {
-                    backgroundColor: "rgba(10, 10, 15, 0.98)",
-                    borderColor: "rgba(255, 255, 255, 0.08)",
-                    borderWidth: 1,
-                    titleColor: "#ffffff",
-                    bodyColor: "rgba(245, 245, 247, 0.9)",
-                    titleFont: { family: "var(--sans)", size: 12, weight: "600" },
-                    bodyFont: { family: "var(--mono)", size: 11 },
-                    padding: 10,
-                    cornerRadius: 8,
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            if (context.parsed.y !== null) {
-                                label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(context.parsed.y);
-                            }
-                            return label;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    grid: {
-                        color: "rgba(255, 255, 255, 0.02)",
-                        drawBorder: false
-                    },
-                    ticks: {
-                        color: "rgba(245, 245, 247, 0.55)",
-                        font: { family: "var(--sans)", size: 10 }
-                    }
-                },
-                y: {
-                    grid: {
-                        color: "rgba(255, 255, 255, 0.02)",
-                        drawBorder: false
-                    },
-                    ticks: {
-                        color: "rgba(245, 245, 247, 0.55)",
-                        font: { family: "var(--mono)", size: 10 },
-                        callback: function(value) {
-                            if (value >= 1e6) return '$' + (value / 1e6).toFixed(1) + 'M';
-                            if (value >= 1e3) return '$' + (value / 1e3).toFixed(0) + 'k';
-                            return '$' + value;
-                        }
-                    }
-                }
-            }
+        // Trigger Confetti
+        if (confettiSystem) {
+            confettiSystem.spawn();
         }
-    });
-}
+    } else {
+        // Unlock Document
+        isSealed = false;
+        docSheet?.classList.remove("sealed-lock");
+        docSheet?.classList.remove("shake-effect");
+        waxSeal?.classList.remove("sealed");
 
-function estimateTimeToTarget({ amount, frequency, avgPrice, startingBtc, targetBtc }) {
-    if (!targetBtc || targetBtc <= startingBtc) return "Already there";
-    if (!amount || !frequency || !avgPrice) return "N/A";
+        const ripple = document.getElementById("stamp-ripple");
+        ripple?.classList.remove("active");
 
-    const btcPerYear = (amount * frequency) / avgPrice;
-    if (btcPerYear <= 0) return "N/A";
+        savedBlockHeight = "";
+        renderBlockHeight();
 
-    const years = (targetBtc - startingBtc) / btcPerYear;
-    if (years > 99) return "99+ years";
-    if (years < 1 / 12) return "Under 1 month";
-    if (years < 1) return `${Math.ceil(years * 12)} months`;
-    return `${years.toFixed(1)} years`;
-}
-
-function updateStorageScore() {
-    const checkboxes = Array.from(document.querySelectorAll("#checklist input[type='checkbox']"));
-    const rawScore = checkboxes.reduce((total, checkbox) => {
-        return total + (checkbox.checked ? Number(checkbox.dataset.points) : 0);
-    }, 0);
-    const score = Math.min(100, rawScore);
-
-    updateNumberWithAnimation("storage-score", score, (v) => Math.round(v).toString());
-
-    const progressCircle = document.getElementById("score-ring-progress");
-    if (progressCircle) {
-        const radius = progressCircle.r.baseVal.value || 62;
-        const circumference = 2 * Math.PI * radius;
-        progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
-        const offset = circumference - (score / 100) * circumference;
-        progressCircle.style.strokeDashoffset = offset;
-
-        // Dynamically adjust color and glow filters based on custody score grade
-        if (score >= 85) {
-            progressCircle.style.stroke = "var(--green)";
-            progressCircle.style.filter = "drop-shadow(0 0 8px rgba(16, 185, 129, 0.35))";
-        } else if (score >= 65) {
-            progressCircle.style.stroke = "var(--gold)";
-            progressCircle.style.filter = "drop-shadow(0 0 8px rgba(229, 169, 60, 0.25))";
-        } else if (score >= 35) {
-            progressCircle.style.stroke = "var(--gold)";
-            progressCircle.style.filter = "drop-shadow(0 0 8px rgba(229, 169, 60, 0.25))";
-        } else {
-            progressCircle.style.stroke = "var(--red)";
-            progressCircle.style.filter = "drop-shadow(0 0 8px rgba(244, 63, 94, 0.35))";
-        }
+        if (btnText) btnText.textContent = "Sign & Seal Vows";
+        sealBtn?.classList.add("glow-effect");
+        sealBtn?.classList.remove("secondary");
     }
 
-    const gradeEl = document.getElementById("storage-grade");
-    const adviceEl = document.getElementById("storage-advice");
-
-    if (gradeEl) {
-        if (score >= 85) {
-            gradeEl.textContent = "Strong custody vow";
-        } else if (score >= 65) {
-            gradeEl.textContent = "Good vow, with gaps";
-        } else if (score >= 35) {
-            gradeEl.textContent = "Fragile custody promise";
-        } else {
-            gradeEl.textContent = "Vow needs attention";
-        }
-    }
-
-    if (adviceEl) {
-        if (score >= 85) {
-            adviceEl.textContent = "Strong storage habits. Renew the vow annually.";
-        } else if (score >= 65) {
-            adviceEl.textContent = "Workable setup. Tighten the missing promises below.";
-        } else if (score >= 35) {
-            adviceEl.textContent = "Close the basic seed, backup, and recovery promises.";
-        } else {
-            adviceEl.textContent = "Begin with offline seeds and a recovery rehearsal.";
-        }
-    }
-
-    const missing = checkboxes
-        .filter((checkbox) => !checkbox.checked)
-        .slice(0, 3)
-        .map((checkbox) => checkbox.dataset.priority);
-
-    const priorityItems = document.getElementById("priority-items");
-    if (priorityItems) {
-        priorityItems.innerHTML = missing.length
-            ? missing.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
-            : "<li>Renew the custody vow annually.</li><li>Update instructions whenever the setup changes.</li>";
-    }
-
-    updateSummary();
+    saveState();
 }
 
-function updateSummary() {
-    setText("summary-text", buildSummaryText());
-}
+async function copyContractText() {
+    const values = readValues();
+    const isJoint = getSetupType() === "joint";
+    const nameA = values.partnerAName.trim() || "Satoshi";
+    const nameB = values.partnerBName.trim() || "Hal Finney";
+    const ceremonyDate = formatCeremonyDate(values.ceremonyDate);
+    const ceremonyPlace = values.ceremonyPlace.trim() || "Cyberspace Chapel";
 
-function buildSummaryText() {
-    const amount = readNumber("dca-amount");
-    const activeFreqRadio = document.querySelector('input[name="dca-frequency"]:checked');
-    const frequencyLabel = activeFreqRadio ? activeFreqRadio.nextElementSibling.textContent : "Monthly";
-    const years = readNumber("dca-years");
-    const avgPrice = readNumber("avg-price");
-    const startingBtc = readNumber("starting-btc");
-    const futurePrice = readNumber("future-price");
-    const targetBtc = readNumber("target-btc");
-    const storageScore = Number(document.getElementById("storage-score")?.textContent || 0);
+    const intro = isJoint
+        ? `${nameA} and ${nameB} mark this day at ${ceremonyPlace} with these Bitcoin vows:`
+        : `${nameA} marks this day at ${ceremonyPlace} with these Bitcoin vows:`;
 
-    const totalInvested = amount * readNumber("dca-frequency") * years;
-    const projectedBtc = startingBtc + (avgPrice > 0 ? totalInvested / avgPrice : 0);
-    const futureValue = projectedBtc * futurePrice;
+    const rules = [];
+    rules.push(`- Promise to stack ${formatCurrency(values.buyAmount)} of Bitcoin ${values.buyFrequency} with patience and care.`);
+    if (values.noPanic) rules.push("- Hold firm through volatility and never panic sell under market pressure.");
+    if (values.noLeverage) rules.push("- Reject derivative trading and never use leverage against shared peace of mind.");
+    if (values.coldStorage) rules.push("- Keep private keys offline in secure cold storage, away from temptation and hurry.");
+    if (values.noShitcoins) rules.push("- Stay faithful to Bitcoin and ignore altcoin noise.");
+    if (values.customVow && values.customVow.trim() !== "") {
+        rules.push(`- ${values.customVow.trim()}`);
+    }
 
-    return `Bitcoin vow: contribute ${formatCurrency(amount, 0)} ${frequencyLabel.toLowerCase()} for ${years} years at an assumed average buy price of ${formatCurrency(avgPrice, 0)}. Promised stack: ${formatBtc(projectedBtc)} BTC (${formatSats(projectedBtc)} sats), worth ${formatCurrency(futureValue, 0)} at ${formatCurrency(futurePrice, 0)} per BTC. Vow target: ${formatBtc(targetBtc)} BTC. Custody vow score: ${storageScore}/100.`;
-}
+    const text = [
+        "=========================================",
+        "            BITCOIN VOW CERTIFICATE",
+        "=========================================",
+        `Date: ${ceremonyDate}`,
+        `Place: ${ceremonyPlace}`,
+        isSealed && savedBlockHeight ? `Timechain Block: #${savedBlockHeight}` : "Timechain Status: Unsealed",
+        "",
+        intro,
+        "",
+        ...rules,
+        "",
+        "Symbolic keepsake only. Never type a recovery seed into any website.",
+        "",
+        isJoint ? `Signed (Partner A): ${nameA}` : `Signed: ${nameA}`,
+        isJoint ? `Signed (Partner B): ${nameB}` : "",
+        values.enableWitness ? `Witnessed by: ${values.witnessName.trim() || "Witness"}` : "",
+        "========================================="
+    ].filter(line => line !== "").join("\n");
 
-function saveLocalState() {
     try {
-        const inputs = {};
-        DCA_INPUT_IDS.forEach((id) => {
-            if (id === "dca-frequency") {
-                const checked = document.querySelector('input[name="dca-frequency"]:checked');
-                if (checked) inputs[id] = checked.value;
-                return;
-            }
-            const input = document.getElementById(id);
-            if (input) inputs[id] = input.value;
+        await navigator.clipboard.writeText(text);
+        showSavedToast("Copied");
+    } catch (error) {
+        fallbackCopy(text);
+        showSavedToast("Copied");
+    }
+}
+
+function fallbackCopy(text) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
+}
+
+// -------------------------------------------------------------
+// State Management (LocalStorage)
+// -------------------------------------------------------------
+function saveState() {
+    try {
+        const data = {
+            setupType: getSetupType(),
+            isSealed: isSealed,
+            savedBlockHeight: savedBlockHeight,
+            canvasState: canvasState
+        };
+
+        FIELD_IDS.forEach((id) => {
+            const field = document.getElementById(id);
+            if (!field) return;
+            data[id] = field.type === "checkbox" ? field.checked : field.value;
         });
 
-        const checks = Array.from(document.querySelectorAll("#checklist input[type='checkbox']")).map((checkbox) => checkbox.checked);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ inputs, checks }));
-    } catch (err) {
-        console.warn("Failed to save local state", err);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (error) {
+        console.warn("Unable to save prenup state", error);
     }
 }
 
-function restoreLocalState() {
+function restoreState() {
     try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return;
         const data = JSON.parse(raw);
 
-        Object.entries(data.inputs || {}).forEach(([id, value]) => {
-            if (id === "dca-frequency") {
-                const radio = document.querySelector(`input[name="dca-frequency"][value="${value}"]`);
-                if (radio) radio.checked = true;
-                return;
-            }
-            const input = document.getElementById(id);
-            if (input) input.value = value;
-        });
-
-        const checks = Array.isArray(data.checks) ? data.checks : [];
-        document.querySelectorAll("#checklist input[type='checkbox']").forEach((checkbox, index) => {
-            checkbox.checked = Boolean(checks[index]);
-        });
-        markActivePreset();
-        updateSliderProgress();
-        updateChecklistVisuals();
-    } catch (err) {
-        console.warn("Failed to restore local state", err);
-    }
-}
-
-function resetLocalState() {
-    localStorage.removeItem(STORAGE_KEY);
-
-    const defaults = {
-        "dca-amount": "100",
-        "dca-frequency": "12",
-        "dca-years": "5",
-        "starting-btc": "0",
-        "avg-price": state.currentBtcPrice ? String(Math.round(state.currentBtcPrice)) : "100000",
-        "target-btc": "1",
-        "future-price": "250000"
-    };
-
-    Object.entries(defaults).forEach(([id, value]) => {
-        if (id === "dca-frequency") {
-            const radio = document.querySelector(`input[name="dca-frequency"][value="${value}"]`);
-            if (radio) radio.checked = true;
-            return;
+        // Restore Setup Type Solo/Joint
+        const type = data.setupType || "solo";
+        const btnSolo = document.getElementById("btn-solo");
+        const btnJoint = document.getElementById("btn-joint");
+        if (type === "solo" && btnSolo) {
+            btnSolo.querySelector("input").checked = true;
+        } else if (btnJoint) {
+            btnJoint.querySelector("input").checked = true;
         }
-        const input = document.getElementById(id);
-        if (input) input.value = value;
-    });
 
-    document.querySelectorAll("#checklist input[type='checkbox']").forEach((checkbox) => {
-        checkbox.checked = false;
-    });
+        // Restore standard field values
+        FIELD_IDS.forEach((id) => {
+            const field = document.getElementById(id);
+            if (!field || !(id in data)) return;
+            if (field.type === "checkbox") {
+                field.checked = Boolean(data[id]);
+            } else {
+                field.value = data[id];
+            }
+        });
 
-    markActivePreset();
-    calculateDca();
-    updateStorageScore();
-    updateSliderProgress();
-    updateChecklistVisuals();
-}
+        // Trigger view switches for Setup Type
+        setSetupType(type);
 
-function markActivePreset() {
-    const current = readNumber("target-btc");
-    document.querySelectorAll(".preset-btn").forEach((button) => {
-        button.classList.toggle("active", Number(button.dataset.targetBtc) === current);
-    });
-}
+        // Restore Block height
+        savedBlockHeight = data.savedBlockHeight || "";
 
-function readNumber(id) {
-    if (id === "dca-frequency") {
-        const checked = document.querySelector('input[name="dca-frequency"]:checked');
-        return checked ? Number(checked.value) : 12;
+        // Restore canvas state
+        if (data.canvasState) {
+            Object.assign(canvasState, data.canvasState);
+            Object.keys(canvasState).forEach((canvasId) => {
+                const canvas = document.getElementById(canvasId);
+                if (canvas && canvasState[canvasId]) {
+                    const ctx = canvas.getContext("2d");
+                    const img = new Image();
+                    img.onload = function () {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, 0);
+                    };
+                    img.src = canvasState[canvasId];
+                }
+            });
+        }
+
+        // Restore Sealed Lock state
+        if (data.isSealed) {
+            isSealed = true;
+            document.querySelector(".document-sheet")?.classList.add("sealed-lock");
+            document.getElementById("cert-wax-seal")?.classList.add("sealed");
+            const sealBtn = document.getElementById("btn-seal");
+            const btnText = sealBtn?.querySelector(".btn-text");
+            if (btnText) btnText.textContent = "Unlock Vows";
+            sealBtn?.classList.remove("glow-effect");
+            sealBtn?.classList.add("secondary");
+        }
+    } catch (error) {
+        console.warn("Unable to restore prenup state", error);
     }
-    const value = Number(document.getElementById(id)?.value);
-    return Number.isFinite(value) ? value : 0;
 }
 
-function setText(id, value) {
-    const element = document.getElementById(id);
-    if (element) element.textContent = value;
-}
-
-function formatCurrency(value, digits = 2) {
-    if (!Number.isFinite(value)) return "N/A";
-    return value.toLocaleString("en-US", {
-        style: "currency",
-        currency: "USD",
-        minimumFractionDigits: digits,
-        maximumFractionDigits: digits
-    });
-}
-
-function formatSignedCurrency(value) {
-    const formatted = formatCurrency(Math.abs(value), 0);
-    return value >= 0 ? `+${formatted}` : `-${formatted}`;
-}
-
-function formatBtc(value) {
-    if (!Number.isFinite(value)) return "0.00000000";
-    return value.toLocaleString("en-US", {
-        minimumFractionDigits: 8,
-        maximumFractionDigits: 8
-    });
-}
-
-function formatSats(btc) {
-    if (!Number.isFinite(btc)) return "0";
-    return Math.round(btc * 100000000).toLocaleString("en-US");
-}
-
-async function copyTextToClipboard(text) {
-    if (navigator.clipboard && window.isSecureContext) {
-        return navigator.clipboard.writeText(text);
-    }
-
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    textarea.style.position = "fixed";
-    textarea.style.opacity = "0";
-    document.body.appendChild(textarea);
-    textarea.focus();
-    textarea.select();
+async function resetState() {
+    const confirmed = await showConfirmModal();
+    if (!confirmed) return;
 
     try {
-        const success = document.execCommand("copy");
-        if (!success) throw new Error("Copy command returned false.");
-    } finally {
-        document.body.removeChild(textarea);
-    }
-}
-
-function flashButton(button, text) {
-    const previous = button.textContent;
-    button.textContent = text;
-    setTimeout(() => {
-        button.textContent = previous;
-    }, 1200);
-}
-
-function escapeHtml(value) {
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-function animateNumber(id, startValue, endValue, duration = 300, formatter = (v) => v.toString()) {
-    const element = document.getElementById(id);
-    if (!element) return;
-
-    if (element.dataset.animFrame) {
-        cancelAnimationFrame(Number(element.dataset.animFrame));
+        localStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+        console.warn("Unable to reset prenup state", error);
     }
 
-    const startTime = performance.now();
-
-    function update(now) {
-        const elapsed = now - startTime;
-        const progress = Math.min(1, elapsed / duration);
-        const easeProgress = progress * (2 - progress); // Ease-out quad
-        const currentValue = startValue + (endValue - startValue) * easeProgress;
-
-        element.textContent = formatter(currentValue);
-
-        if (progress < 1) {
-            element.dataset.animFrame = requestAnimationFrame(update);
-        } else {
-            element.textContent = formatter(endValue);
-            delete element.dataset.animFrame;
+    // Reset canvasses
+    const canvases = ["sig-canvas-a", "sig-canvas-b", "sig-canvas-witness"];
+    canvases.forEach(id => {
+        const canvas = document.getElementById(id);
+        if (canvas) {
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
-    }
+        delete canvasState[id];
+    });
 
-    element.dataset.animFrame = requestAnimationFrame(update);
+    // Reset seal & block state
+    isSealed = false;
+    savedBlockHeight = "";
+    renderBlockHeight();
+
+    const docSheet = document.querySelector(".document-sheet");
+    docSheet?.classList.remove("sealed-lock");
+    docSheet?.classList.remove("shake-effect");
+    document.getElementById("cert-wax-seal")?.classList.remove("sealed");
+
+    const sealBtn = document.getElementById("btn-seal");
+    const btnText = sealBtn?.querySelector(".btn-text");
+    if (btnText) btnText.textContent = "Sign & Seal Vows";
+    sealBtn?.classList.add("glow-effect");
+    sealBtn?.classList.remove("secondary");
+
+    // Reset Form
+    document.getElementById("prenup-form")?.reset();
+
+    // Set Default Radio View (Solo)
+    const btnSolo = document.getElementById("btn-solo");
+    if (btnSolo) btnSolo.querySelector("input").checked = true;
+    setSetupType("solo");
+
+    updateWitnessVisibility();
+    updatePrenup();
+    updateCardClasses();
+    showSavedToast("Reset complete");
 }
 
-function updateNumberWithAnimation(id, targetValue, formatter = (v) => v.toString()) {
-    const element = document.getElementById(id);
-    if (!element) return;
-
-    const lastValue = parseFloat(element.dataset.lastValue) || 0;
-    if (lastValue === targetValue) {
-        element.textContent = formatter(targetValue);
-        return;
-    }
-
-    element.dataset.lastValue = targetValue;
-    animateNumber(id, lastValue, targetValue, 300, formatter);
+function showSavedToast(text) {
+    const status = document.getElementById("saved-status");
+    if (!status) return;
+    status.textContent = text;
+    window.clearTimeout(showSavedToast.timeout);
+    showSavedToast.timeout = window.setTimeout(() => {
+        status.textContent = "Saved locally";
+    }, 1800);
 }
 
-function updateSegmentedIndicator() {
-    const checkedRadio = document.querySelector('input[name="dca-frequency"]:checked');
-    const label = checkedRadio ? document.querySelector(`label[for="${checkedRadio.id}"]`) : null;
-    const indicator = document.getElementById("freq-indicator");
-    if (!label || !indicator) return;
-
-    indicator.style.width = `${label.offsetWidth}px`;
-    indicator.style.left = `${label.offsetLeft}px`;
+// -------------------------------------------------------------
+// Formatting Helpers
+// -------------------------------------------------------------
+function formatCurrency(value) {
+    return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+    }).format(Math.max(0, value));
 }
 
-function setupSpotlightCards() {
-    const cards = document.querySelectorAll(
-        ".market-panel, .tool-panel, .results-panel, .checklist-panel, .score-panel, .summary-card, .chart-panel"
-    );
-    cards.forEach((card) => {
-        if (!card.querySelector(".spotlight-bg")) {
-            const bg = document.createElement("div");
-            bg.className = "spotlight-bg";
-            card.prepend(bg);
-        }
-        card.addEventListener("mousemove", (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            card.style.setProperty("--mouse-x", `${x}px`);
-            card.style.setProperty("--mouse-y", `${y}px`);
+function formatCeremonyDate(value) {
+    if (!value) {
+        return new Date().toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
         });
+    }
+
+    const date = new Date(`${value}T00:00:00`);
+    if (Number.isNaN(date.getTime())) return value;
+
+    return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
     });
 }
 
-function updateSliderProgress() {
-    const slider = document.getElementById("future-price");
-    if (!slider) return;
-    const min = Number(slider.min) || 0;
-    const max = Number(slider.max) || 100;
-    const val = Number(slider.value) || 0;
-    const percent = ((val - min) / (max - min)) * 100;
-    slider.style.setProperty("--slider-progress", `${percent}%`);
+function escapeHtml(str) {
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
-function updateChecklistVisuals() {
-    document.querySelectorAll("#checklist label.check-item").forEach((label) => {
-        const checkbox = label.querySelector("input[type='checkbox']");
-        if (checkbox) {
-            label.classList.toggle("checked", checkbox.checked);
+// -------------------------------------------------------------
+// Confetti / Gold Coin Particle System
+// -------------------------------------------------------------
+class ConfettiSystem {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext("2d");
+        this.particles = [];
+        this.isActive = false;
+        this.colors = [
+            "#ffd700", // Gold
+            "#d4af37", // Metallic Gold
+            "#f7931a", // Bitcoin Orange
+            "#fff275", // Pastel Gold
+            "#a88118", // Dark Gold
+            "#f8b153"  // Muted Orange
+        ];
+
+        window.addEventListener("resize", () => this.resizeCanvas());
+        this.resizeCanvas();
+    }
+
+    resizeCanvas() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+    }
+
+    spawn() {
+        this.particles = [];
+        const count = 180;
+
+        for (let i = 0; i < count; i++) {
+            this.particles.push({
+                x: Math.random() * this.canvas.width + window.scrollX,
+                y: -30 - Math.random() * 80 + window.scrollY,
+                size: 5 + Math.random() * 9,
+                color: this.colors[Math.floor(Math.random() * this.colors.length)],
+                speedX: -2.5 + Math.random() * 5,
+                speedY: 2.5 + Math.random() * 6,
+                rotation: Math.random() * 360,
+                rotationSpeed: -3 + Math.random() * 6,
+                isCoin: Math.random() < 0.28, // ~28% gold coins
+                opacity: 0.85 + Math.random() * 0.15,
+                isSparkle: false
+            });
+        }
+
+        if (!this.isActive) {
+            this.isActive = true;
+            this.animate();
+        }
+    }
+
+    spawnSparkle(x, y) {
+        if (Math.random() > 0.25) return; // subtle trailing
+
+        this.particles.push({
+            x: x + window.scrollX,
+            y: y + window.scrollY,
+            size: 1.2 + Math.random() * 2.8,
+            color: this.colors[Math.floor(Math.random() * this.colors.length)],
+            speedX: -0.4 + Math.random() * 0.8,
+            speedY: 0.3 + Math.random() * 0.7,
+            rotation: Math.random() * 360,
+            rotationSpeed: -2 + Math.random() * 4,
+            isCoin: false,
+            opacity: 0.75 + Math.random() * 0.25,
+            isSparkle: true
+        });
+
+        if (!this.isActive) {
+            this.isActive = true;
+            this.animate();
+        }
+    }
+
+    animate() {
+        if (this.particles.length === 0) {
+            this.isActive = false;
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            return;
+        }
+
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+
+            p.y += p.speedY;
+            p.x += p.speedX;
+            p.rotation += p.rotationSpeed;
+
+            if (p.isSparkle) {
+                p.opacity -= 0.012;
+                if (p.opacity <= 0) {
+                    this.particles.splice(i, 1);
+                    continue;
+                }
+            }
+
+            const drawX = p.x - window.scrollX;
+            const drawY = p.y - window.scrollY;
+
+            // Remove off-screen particles relative to viewport
+            if (drawY > this.canvas.height + 20 || drawX < -20 || drawX > this.canvas.width + 20) {
+                this.particles.splice(i, 1);
+                continue;
+            }
+
+            this.ctx.save();
+            this.ctx.translate(drawX, drawY);
+            this.ctx.rotate((p.rotation * Math.PI) / 180);
+            this.ctx.globalAlpha = p.opacity;
+
+            if (p.isCoin) {
+                // Draw a gold coin with ₿
+                this.ctx.fillStyle = p.color;
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                this.ctx.strokeStyle = "#9a7b1c";
+                this.ctx.lineWidth = 1;
+                this.ctx.stroke();
+
+                // Draw tiny ₿ in coin center
+                this.ctx.fillStyle = "#5c4608";
+                this.ctx.font = `bold ${p.size * 1.1}px sans-serif`;
+                this.ctx.textAlign = "center";
+                this.ctx.textBaseline = "middle";
+                this.ctx.fillText("₿", 0, p.size * 0.05);
+            } else if (p.isSparkle) {
+                // Draw small sparkle dot
+                this.ctx.fillStyle = p.color;
+                this.ctx.beginPath();
+                this.ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+                this.ctx.fill();
+            } else {
+                // Draw normal rectangular confetti
+                this.ctx.fillStyle = p.color;
+                this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.55);
+            }
+
+            this.ctx.restore();
+        }
+
+        requestAnimationFrame(() => this.animate());
+    }
+}
+
+// -------------------------------------------------------------
+// Custom Confirm Modal Dialog Helper
+// -------------------------------------------------------------
+function showConfirmModal() {
+    return new Promise((resolve) => {
+        const modal = document.getElementById("confirm-modal");
+        const btnCancel = document.getElementById("modal-cancel");
+        const btnConfirm = document.getElementById("modal-confirm");
+
+        if (!modal || !btnCancel || !btnConfirm) {
+            resolve(false);
+            return;
+        }
+
+        // Show modal
+        modal.classList.remove("hidden");
+        btnConfirm.focus();
+
+        function handleCancel() {
+            cleanup();
+            resolve(false);
+        }
+
+        function handleConfirm() {
+            cleanup();
+            resolve(true);
+        }
+
+        function cleanup() {
+            modal.classList.add("hidden");
+            btnCancel.removeEventListener("click", handleCancel);
+            btnConfirm.removeEventListener("click", handleConfirm);
+        }
+
+        btnCancel.addEventListener("click", handleCancel);
+        btnConfirm.addEventListener("click", handleConfirm);
+    });
+}
+
+// -------------------------------------------------------------
+// Scrollspy active navigation item highlighter
+// -------------------------------------------------------------
+function initScrollspy() {
+    const rulesLink = document.querySelector('a[href="#rules"]');
+    const prenupLink = document.querySelector('a[href="#prenup"]');
+
+    window.addEventListener("scroll", () => {
+        const scrollPos = window.scrollY + 180;
+        const rulesSec = document.getElementById("rules");
+        const prenupSec = document.getElementById("prenup");
+        const eduSec = document.querySelector(".education-section");
+
+        if (!rulesSec) return;
+
+        const isDesktop = window.innerWidth > 1024;
+
+        if (isDesktop) {
+            // On desktop, columns are side-by-side. Highlight "Rules" when viewing the workspace.
+            const workspaceTop = rulesSec.offsetTop;
+            const workspaceBottom = rulesSec.offsetTop + rulesSec.offsetHeight;
+
+            if (scrollPos >= workspaceTop && scrollPos < workspaceBottom) {
+                rulesLink?.classList.add("active-nav");
+                prenupLink?.classList.remove("active-nav");
+            } else {
+                rulesLink?.classList.remove("active-nav");
+                prenupLink?.classList.remove("active-nav");
+            }
+        } else {
+            // On mobile, modules stack vertically. Track bounds dynamically.
+            const rulesTop = rulesSec.offsetTop;
+            const prenupTop = prenupSec ? prenupSec.getBoundingClientRect().top + window.scrollY : 0;
+            const eduTop = eduSec ? eduSec.offsetTop : document.body.scrollHeight;
+
+            if (prenupTop && scrollPos >= prenupTop && scrollPos < eduTop) {
+                prenupLink?.classList.add("active-nav");
+                rulesLink?.classList.remove("active-nav");
+            } else if (scrollPos >= rulesTop && scrollPos < prenupTop) {
+                rulesLink?.classList.add("active-nav");
+                prenupLink?.classList.remove("active-nav");
+            } else {
+                rulesLink?.classList.remove("active-nav");
+                prenupLink?.classList.remove("active-nav");
+            }
+        }
+    });
+}
+
+// -------------------------------------------------------------
+// Scroll Reveal animation observer
+// -------------------------------------------------------------
+function initScrollReveal() {
+    const targets = document.querySelectorAll(".education-section, .faq-section, .workspace");
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("reveal-active");
+            }
+        });
+    }, { threshold: 0.08 });
+
+    targets.forEach(t => {
+        t.classList.add("reveal-hidden");
+        observer.observe(t);
+    });
+}
+
+// -------------------------------------------------------------
+// Cursor-driven background blobs parallax animation
+// -------------------------------------------------------------
+function initBackgroundParallax() {
+    let ticked = false;
+    window.addEventListener("mousemove", (e) => {
+        if (!ticked) {
+            window.requestAnimationFrame(() => {
+                const x = (e.clientX / window.innerWidth) - 0.5;
+                const y = (e.clientY / window.innerHeight) - 0.5;
+                document.body.style.setProperty("--mx", `${x * 35}px`);
+                document.body.style.setProperty("--my", `${y * 35}px`);
+                ticked = false;
+            });
+            ticked = true;
         }
     });
 }

@@ -1,7 +1,7 @@
 {
-  "name": "BTC.Wedding DCA & Custody Planner",
+  "name": "BTC.Wedding Bitcoin Vow Certificate Generator",
   "short_name": "BTC.Wedding",
-  "description": "A practical static Bitcoin planning tool for long-term holders. Calculate DCA, model future price scenarios, and audit cold storage safety.",
+  "description": "A static Bitcoin vow certificate generator for names, ceremony details, Bitcoin vows, signatures, and print-ready keepsakes.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#04060a",

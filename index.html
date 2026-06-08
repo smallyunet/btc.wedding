@@ -3,442 +3,517 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>btc.wedding | Bitcoin Commitment Planner</title>
-    <meta name="description" content="A private Bitcoin commitment planner for long-term holders. Shape an accumulation vow, check custody discipline, and keep a local record without login or wallet connection.">
-    <meta name="keywords" content="bitcoin commitment planner, btc dca calculator, sats calculator, cold storage checklist, bitcoin inheritance planning">
+    <title>btc.wedding | Bitcoin Vow Certificate Generator</title>
+    <meta name="description" content="Create a printable Bitcoin vow certificate locally in your browser. Add names, date, location, rules, and signatures without login or seed input.">
+    <meta name="keywords" content="bitcoin vow certificate, bitcoin wedding certificate, btc prenup, bitcoin rules, cold storage vows, local certificate generator">
     <meta name="author" content="btc.wedding">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://btc.wedding/">
-    <meta property="og:title" content="btc.wedding | Bitcoin Commitment Planner">
-    <meta property="og:description" content="Shape a Bitcoin accumulation vow and custody record without login, seed phrases, or wallet connection.">
+    <meta property="og:title" content="btc.wedding | Bitcoin Vow Certificate Generator">
+    <meta property="og:description" content="Design a symbolic Bitcoin vow certificate with names, date, rules, and signatures. Local-only, no login, no wallet connection.">
     <meta property="twitter:card" content="summary_large_image">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.85em' font-size='82'%3E%E2%82%BF%3C/text%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%230b0c0f'/%3E%3Ctext x='50' y='67' text-anchor='middle' font-size='58' fill='%23f7931a' font-family='Arial, sans-serif'%3E%E2%82%BF%3C/text%3E%3C/svg%3E">
+
+    <!-- Premium Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="ambient-glow" aria-hidden="true">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-2"></div>
-        <div class="glow-orb orb-3"></div>
-    </div>
-
-    <div class="print-header" aria-hidden="true">
-        <h1>₿.wedding</h1>
-        <p>Private Bitcoin Commitment & Custody Vow Snapshot</p>
-        <span id="print-date"></span>
+    <!-- Faint glowing blobs in background -->
+    <div class="glow-bg">
+        <div class="blob gold"></div>
+        <div class="blob orange"></div>
     </div>
 
     <header class="site-header">
-        <div class="container nav-wrap">
-            <a href="#top" class="logo"><span>₿</span>.wedding</a>
-            <nav aria-label="Primary navigation">
-                <ul class="nav-links">
-                    <li><a href="#top">Vows</a></li>
-                    <li><a href="#planner">Stack Plan</a></li>
-                    <li><a href="#storage">Custody Vow</a></li>
-                    <li><a href="#summary">Record</a></li>
-                </ul>
-            </nav>
-        </div>
+        <a class="brand" href="#top" aria-label="btc.wedding home">
+            <!-- Official Slanted Bitcoin Logo in Header -->
+            <svg class="brand-mark-svg" viewBox="0 0 64 64" width="36" height="36">
+                <path fill="#f7931a" d="m63.033,39.744c-4.274,17.143-21.637,27.576-38.782,23.301-17.138-4.274-27.571-21.638-23.295-38.78,4.272-17.145,21.635-27.579,38.775-23.305,17.144,4.274,27.576,21.64,23.302,38.784z"/>
+                <path fill="#FFF" d="m46.103,27.444c0.637-4.258-2.605-6.547-7.038-8.074l1.438-5.768-3.511-0.875-1.4,5.616c-0.923-0.23-1.871-0.447-2.813-0.662l1.41-5.653-3.509-0.875-1.439,5.766c-0.764-0.174-1.514-0.346-2.242-0.527l0.004-0.018-4.842-1.209-0.934,3.75s2.605,0.597,2.55,0.634c1.422,0.355,1.679,1.296,1.636,2.042l-1.638,6.571c0.098,0.025,0.225,0.061,0.365,0.117-0.117-0.029-0.242-0.061-0.371-0.092l-2.296,9.205c-0.174,0.432-0.615,1.08-1.609,0.834,0.035,0.051-2.552-0.637-2.552-0.637l-1.743,4.019,4.569,1.139c0.85,0.213,1.683,0.436,2.503,0.646l-1.453,5.834,3.507,0.875,1.439-5.772c0.958,0.26,1.888,0.5,2.798,0.726l-1.434,5.745,3.511,0.875,1.453-5.823c5.987,1.133,10.489,0.676,12.384-4.739,1.527-4.36-0.076-6.875-3.226-8.515,2.294-0.529,4.022-2.038,4.483-5.155zm-8.022,11.249c-1.085,4.36-8.426,2.003-10.806,1.412l1.928-7.729c2.38,0.594,10.012,1.77,8.878,6.317zm1.086-11.312c-0.99,3.966-7.1,1.951-9.082,1.457l1.748-7.01c1.982,0.494,8.365,1.416,7.334,5.553z"/>
+            </svg>
+            <span class="brand-text">btc.wedding</span>
+        </a>
+        <nav aria-label="Primary navigation">
+            <a href="#rules" class="nav-link">Rules</a>
+            <a href="#prenup" class="nav-link">Prenup</a>
+        </nav>
     </header>
 
     <main id="top">
-        <!-- Hero Section -->
         <section class="hero">
-            <div class="container hero-grid">
-                <div class="hero-copy">
-                    <span class="eyebrow"><span class="badge-dot"></span> Bitcoin Commitment Planner</span>
-                    <h1>₿.wedding</h1>
-                    <p class="hero-desc">Turn a long-term Bitcoin promise into a concrete rhythm: how much you will stack, how carefully you will hold it, and what record survives the moment.</p>
-                    
-                    <div class="trust-strip" aria-label="Privacy and safety promises">
-                        <span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12" y2="18"/><line x1="16" y1="14" x2="16" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="16" y1="10" x2="16" y2="10"/><line x1="12" y1="10" x2="12" y2="10"/><line x1="8" y1="10" x2="8" y2="10"/><line x1="8" y1="6" x2="16" y2="6"/></svg> 
-                            Local Vows Only
-                        </span>
-                        <span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg> 
-                            No Accounts
-                        </span>
-                        <span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18.84 12.2a4.4 4.4 0 0 0-5.17-5.17M9.55 14.5a4.4 4.4 0 0 0 5.17 5.17M10.74 13.26l2.22-2.22M2 2l20 20"/></svg> 
-                            No Wallet Link
-                        </span>
-                        <span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg> 
-                            No Seed Requests
-                        </span>
+            <div class="hero-copy">
+                <div class="badge">
+                    <span class="badge-dot"></span>
+                    <span>Local-only</span>
+                </div>
+                <h1>Bitcoin Vow Certificate</h1>
+                <p class="hero-text">Create a symbolic wedding certificate for shared Bitcoin rules. Add names, ceremony details, vows, signatures, and print a keepsake without sending anything to a server.</p>
+                <div class="promise-row" aria-label="Privacy promises">
+                    <div class="promise-item">
+                        <span>No login</span>
                     </div>
+                    <div class="promise-item">
+                        <span>No seed input</span>
+                    </div>
+                    <div class="promise-item">
+                        <span>Printable</span>
+                    </div>
+                </div>
+                <div class="hero-actions">
+                    <a class="primary-action" href="#rules">Create Certificate</a>
+                </div>
+            </div>
 
-                    <div class="hero-actions">
-                        <a class="btn btn-primary" href="#planner">Write Stack Vow</a>
-                        <a class="btn btn-secondary" href="#storage">Review Custody Vow</a>
+            <aside class="hero-document-wrapper" aria-label="Example Bitcoin vow certificate preview">
+                <div class="hero-document">
+                    <div class="gold-frame-inner">
+                        <!-- Ornate Corner Flourishes (Preview) -->
+                        <div class="cert-corner top-left"></div>
+                        <div class="cert-corner top-right"></div>
+                        <div class="cert-corner bottom-left"></div>
+                        <div class="cert-corner bottom-right"></div>
+
+                        <span class="paper-label">Preview</span>
+
+                        <!-- Official Slanted B Watermark in Preview -->
+                        <div class="cert-watermark">
+                            <svg viewBox="0 0 64 64" class="cert-watermark-svg">
+                                <path d="m46.103,27.444c0.637-4.258-2.605-6.547-7.038-8.074l1.438-5.768-3.511-0.875-1.4,5.616c-0.923-0.23-1.871-0.447-2.813-0.662l1.41-5.653-3.509-0.875-1.439,5.766c-0.764-0.174-1.514-0.346-2.242-0.527l0.004-0.018-4.842-1.209-0.934,3.75s2.605,0.597,2.55,0.634c1.422,0.355,1.679,1.296,1.636,2.042l-1.638,6.571c0.098,0.025,0.225,0.061,0.365,0.117-0.117-0.029-0.242-0.061-0.371-0.092l-2.296,9.205c-0.174,0.432-0.615,1.08-1.609,0.834,0.035,0.051-2.552-0.637-2.552-0.637l-1.743,4.019,4.569,1.139c0.85,0.213,1.683,0.436,2.503,0.646l-1.453,5.834,3.507,0.875,1.439-5.772c0.958,0.26,1.888,0.5,2.798,0.726l-1.434,5.745,3.511,0.875,1.453-5.823c5.987,1.133,10.489,0.676,12.384-4.739,1.527-4.36-0.076-6.875-3.226-8.515,2.294-0.529,4.022-2.038,4.483-5.155zm-8.022,11.249c-1.085,4.36-8.426,2.003-10.806,1.412l1.928-7.729c2.38,0.594,10.012,1.77,8.878,6.317zm1.086-11.312c-0.99,3.966-7.1,1.951-9.082,1.457l1.748-7.01c1.982,0.494,8.365,1.416,7.334,5.553z"/>
+                            </svg>
+                        </div>
+
+                        <h2>Bitcoin Vows</h2>
+                        <p class="cert-date">June 8, 2026 · Cyberspace Chapel</p>
+                        <p class="cert-intro">Satoshi and Hal promise to guard their Bitcoin with patience, honesty, and cold storage.</p>
+                        <ul class="cert-list">
+                            <li>Buy on schedule.</li>
+                            <li>No panic selling.</li>
+                            <li>Keep keys offline.</li>
+                        </ul>
+                        <div class="cert-seal-mock">
+                            <!-- Slanted B inside preview seal -->
+                            <svg viewBox="0 0 64 64" width="34" height="34">
+                                <path fill="#FFF" d="m46.103,27.444c0.637-4.258-2.605-6.547-7.038-8.074l1.438-5.768-3.511-0.875-1.4,5.616c-0.923-0.23-1.871-0.447-2.813-0.662l1.41-5.653-3.509-0.875-1.439,5.766c-0.764-0.174-1.514-0.346-2.242-0.527l0.004-0.018-4.842-1.209-0.934,3.75s2.605,0.597,2.55,0.634c1.422,0.355,1.679,1.296,1.636,2.042l-1.638,6.571c0.098,0.025,0.225,0.061,0.365,0.117-0.117-0.029-0.242-0.061-0.371-0.092l-2.296,9.205c-0.174,0.432-0.615,1.08-1.609,0.834,0.035,0.051-2.552-0.637-2.552-0.637l-1.743,4.019,4.569,1.139c0.85,0.213,1.683,0.436,2.503,0.646l-1.453,5.834,3.507,0.875,1.439-5.772c0.958,0.26,1.888,0.5,2.798,0.726l-1.434,5.745,3.511,0.875,1.453-5.823c5.987,1.133,10.489,0.676,12.384-4.739,1.527-4.36-0.076-6.875-3.226-8.515,2.294-0.529,4.022-2.038,4.483-5.155zm-8.022,11.249c-1.085,4.36-8.426,2.003-10.806,1.412l1.928-7.729c2.38,0.594,10.012,1.77,8.878,6.317zm1.086-11.312c-0.99,3.966-7.1,1.951-9.082,1.457l1.748-7.01c1.982,0.494,8.365,1.416,7.334,5.553z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <section id="rules" class="workspace" aria-label="Bitcoin prenup rules">
+            <form class="rules-panel" id="prenup-form" onsubmit="return false;">
+                <div class="panel-heading">
+                    <span class="eyebrow">Certificate details</span>
+                    <h2>Personalize The Vows</h2>
+                </div>
+
+                <!-- Setup Type Selector -->
+                <div class="form-section">
+                    <label class="section-label">Certificate Type</label>
+                    <div class="toggle-group">
+                        <label class="toggle-btn active" id="btn-solo">
+                            <input type="radio" name="setup-type" value="solo" checked class="sr-only">
+                            <span>Solo Keepsake</span>
+                        </label>
+                        <label class="toggle-btn" id="btn-joint">
+                            <input type="radio" name="setup-type" value="joint" class="sr-only">
+                            <span>Couple Vows</span>
+                        </label>
                     </div>
                 </div>
 
-                <!-- Live Reference Widget -->
-                <aside class="market-panel brand-panel" aria-labelledby="market-heading">
-                    <div class="panel-header">
-                        <span class="panel-kicker">
-                            <span class="status-dot" id="status-dot"></span> 
-                            Live Bitcoin Context
-                        </span>
-                        <button id="refresh-market" class="icon-btn" title="Refresh market snapshot" aria-label="Refresh market snapshot">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                        </button>
+                <!-- Partner Names -->
+                <div class="form-section field-grid name-inputs">
+                    <div class="field" id="partner-a-wrapper">
+                        <label for="partner-a-name" class="field-label">Name on Certificate</label>
+                        <div class="input-shell">
+                            <input id="partner-a-name" type="text" placeholder="e.g. Satoshi" value="Satoshi">
+                        </div>
                     </div>
-                    <h2 id="market-heading">Today's Bitcoin Reference</h2>
-                    
-                    <p id="market-status" class="market-status-text">Synchronizing with node network...</p>
+                    <div class="field hidden" id="partner-b-wrapper">
+                        <label for="partner-b-name" class="field-label">Partner's Name</label>
+                        <div class="input-shell">
+                            <input id="partner-b-name" type="text" placeholder="e.g. Hal Finney" value="Hal Finney">
+                        </div>
+                    </div>
+                </div>
 
-                    <div class="market-grid">
-                        <div class="metric">
-                            <span>
-                                <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6M6 8h1M6 16h1"/></svg> 
-                                Price (USD)
-                            </span>
-                            <strong id="btc-price">Loading...</strong>
+                <!-- Witness Toggle Option -->
+                <div class="form-section">
+                    <div class="witness-toggle-container">
+                        <label class="witness-checkbox-label" for="enable-witness">
+                            <div class="checkbox-witness-wrapper">
+                                <input type="checkbox" id="enable-witness" class="checkbox-witness sr-only">
+                                <span class="custom-witness-checkbox"></span>
+                            </div>
+                            <span class="witness-label-text">Include Witness / Notary signature</span>
+                        </label>
+                    </div>
+                    <div class="field hidden" id="witness-name-wrapper">
+                        <label for="witness-name" class="field-label">Witness Name</label>
+                        <div class="input-shell">
+                            <input id="witness-name" type="text" placeholder="e.g. Nick Szabo" value="Nick Szabo">
                         </div>
-                        
-                        <div class="metric">
-                            <span>
-                                <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg> 
-                                Block Tip
-                            </span>
-                            <strong id="btc-block">Loading...</strong>
+                    </div>
+                </div>
+
+                <div class="form-section field-grid certificate-details-grid">
+                    <label class="field">
+                        <span class="field-label">Ceremony Date</span>
+                        <div class="input-shell">
+                            <input id="ceremony-date" type="date" value="2026-06-08">
                         </div>
-                        
-                        <div class="metric">
-                            <span>
-                                <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L20 4M21 21H3v-3M3 16h5v5"/></svg> 
-                                Sat Purchasing Power <span class="info-trigger" data-tooltip="The number of Satoshis (1 Satoshi = 0.00000001 BTC) you get for $1 USD.">ⓘ</span>
-                            </span>
-                            <strong id="sats-per-dollar">Loading...</strong>
+                    </label>
+                    <label class="field">
+                        <span class="field-label">Ceremony Place</span>
+                        <div class="input-shell">
+                            <input id="ceremony-place" type="text" placeholder="e.g. Cyberspace Chapel" value="Cyberspace Chapel">
                         </div>
-                        
-                        <div class="metric">
-                            <span>
-                                <svg class="metric-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 
-                                Halving Progress <span class="info-trigger" data-tooltip="Bitcoin block rewards halve every 210,000 blocks. Epoch progress shows the distance to the next halving.">ⓘ</span>
-                            </span>
-                            <strong id="halving-progress">Loading...</strong>
-                            <span class="sub-detail" id="halving-countdown">Loading...</span>
+                    </label>
+                </div>
+
+                <!-- DCA Setup -->
+                <fieldset class="form-fieldset">
+                    <legend>Bitcoin Rule</legend>
+                    <div class="field-grid">
+                        <label class="field">
+                            <span class="field-label">Amount</span>
+                            <div class="input-shell amount-input">
+                                <span class="input-prefix">$</span>
+                                <input id="buy-amount" type="number" min="0" step="1" value="100">
+                            </div>
+                        </label>
+                        <label class="field">
+                            <span class="field-label">Frequency</span>
+                            <div class="select-shell">
+                                <select id="buy-frequency">
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="bi-weekly">Bi-weekly</option>
+                                    <option value="monthly" selected>Monthly</option>
+                                </select>
+                            </div>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <!-- Core Checklist (Styled as Toggle Cards) -->
+                <fieldset class="form-fieldset">
+                    <legend>Certificate Vows</legend>
+                    <div class="vows-card-grid">
+                        <!-- Card 1: No Panic Selling -->
+                        <label class="vow-card" for="no-panic">
+                            <input id="no-panic" type="checkbox" checked class="sr-only">
+                            <div class="vow-card-header">
+                                <span class="vow-icon">
+                                    <svg class="vow-svg-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 18l-9.5-9.5-5 5L1 6"></path><path d="M17 18h6v-6"></path></svg>
+                                </span>
+                                <span class="vow-checkbox-indicator"></span>
+                            </div>
+                            <span class="vow-title">Ban Panic Selling</span>
+                        </label>
+
+                        <!-- Card 2: No Leverage -->
+                        <label class="vow-card" for="no-leverage">
+                            <input id="no-leverage" type="checkbox" checked class="sr-only">
+                            <div class="vow-card-header">
+                                <span class="vow-icon">
+                                    <svg class="vow-svg-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                </span>
+                                <span class="vow-checkbox-indicator"></span>
+                            </div>
+                            <span class="vow-title">Reject Leverage</span>
+                        </label>
+
+                        <!-- Card 3: Cold Storage -->
+                        <label class="vow-card" for="cold-storage">
+                            <input id="cold-storage" type="checkbox" checked class="sr-only">
+                            <div class="vow-card-header">
+                                <span class="vow-icon">
+                                    <svg class="vow-svg-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+                                </span>
+                                <span class="vow-checkbox-indicator"></span>
+                            </div>
+                            <span class="vow-title">Offline Keys</span>
+                        </label>
+
+                        <!-- Card 4: Bitcoin Only -->
+                        <label class="vow-card" for="no-shitcoins">
+                            <input id="no-shitcoins" type="checkbox" checked class="sr-only">
+                            <div class="vow-card-header">
+                                <span class="vow-icon">
+                                    <svg class="vow-svg-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2h-3V8h3zm0 4a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H9v-4h3z"></path><path d="M9 6v12M11 6v2M11 16v2M13 6v2M13 16v2"></path></svg>
+                                </span>
+                                <span class="vow-checkbox-indicator"></span>
+                            </div>
+                            <span class="vow-title">Bitcoin Only</span>
+                        </label>
+                    </div>
+
+                    <!-- Custom Vow Field -->
+                    <div class="field custom-vow-container" style="margin-top: 20px;">
+                        <label for="custom-vow" class="field-label">Custom Wedding Line (Optional)</label>
+                        <div class="input-shell">
+                            <input id="custom-vow" type="text" placeholder="e.g. We will protect our keys and our future together" value="">
                         </div>
+                    </div>
+                </fieldset>
+            </form>
+
+            <div class="output-panel-wrapper">
+                <aside class="output-panel" id="prenup" aria-label="Generated Bitcoin prenup">
+                    <div class="output-header">
+                        <div>
+                            <span class="eyebrow">Live certificate</span>
+                            <h2>Your Bitcoin Vows</h2>
+                        </div>
+                        <span id="saved-status" class="saved-status">Saved locally</span>
+                    </div>
+
+                    <!-- Certificate layout -->
+                    <div class="document-sheet">
+                        <div class="stamp-ripple" id="stamp-ripple"></div>
+                        <div class="cert-frame">
+                            <div class="cert-frame-inner">
+                                <!-- Ornate Corner Flourishes -->
+                                <div class="cert-corner top-left"></div>
+                                <div class="cert-corner top-right"></div>
+                                <div class="cert-corner bottom-left"></div>
+                                <div class="cert-corner bottom-right"></div>
+
+                                <!-- Official Slanted B Watermark on Certificate -->
+                                <div class="cert-watermark">
+                                    <svg viewBox="0 0 64 64" class="cert-watermark-svg">
+                                        <path d="m46.103,27.444c0.637-4.258-2.605-6.547-7.038-8.074l1.438-5.768-3.511-0.875-1.4,5.616c-0.923-0.23-1.871-0.447-2.813-0.662l1.41-5.653-3.509-0.875-1.439,5.766c-0.764-0.174-1.514-0.346-2.242-0.527l0.004-0.018-4.842-1.209-0.934,3.75s2.605,0.597,2.55,0.634c1.422,0.355,1.679,1.296,1.636,2.042l-1.638,6.571c0.098,0.025,0.225,0.061,0.365,0.117-0.117-0.029-0.242-0.061-0.371-0.092l-2.296,9.205c-0.174,0.432-0.615,1.08-1.609,0.834,0.035,0.051-2.552-0.637-2.552-0.637l-1.743,4.019,4.569,1.139c0.85,0.213,1.683,0.436,2.503,0.646l-1.453,5.834,3.507,0.875,1.439-5.772c0.958,0.26,1.888,0.5,2.798,0.726l-1.434,5.745,3.511,0.875,1.453-5.823c5.987,1.133,10.489,0.676,12.384-4.739,1.527-4.36-0.076-6.875-3.226-8.515,2.294-0.529,4.022-2.038,4.483-5.155zm-8.022,11.249c-1.085,4.36-8.426,2.003-10.806,1.412l1.928-7.729c2.38,0.594,10.012,1.77,8.878,6.317zm1.086-11.312c-0.99,3.966-7.1,1.951-9.082,1.457l1.748-7.01c1.982,0.494,8.365,1.416,7.334,5.553z"/>
+                                    </svg>
+                                </div>
+
+                                <h2 class="cert-title">Bitcoin Vows</h2>
+
+                                <p class="cert-date-line"><span id="cert-date-display">-</span> · <span id="cert-place-display">-</span></p>
+
+                                <div class="cert-body">
+                                    <p class="cert-intro-text" id="cert-intro-text"></p>
+
+                                    <div class="cert-rules-container">
+                                        <ul id="prenup-output-list" class="cert-list">
+                                            <!-- Dynamic Rules Inserted Here -->
+                                        </ul>
+                                    </div>
+
+                                    <p class="cert-pledge">This is a symbolic keepsake, not legal or financial advice. Never type a seed phrase into any website.</p>
+                                </div>
+
+                                <!-- Timechain Timestamp Block -->
+                                <div class="cert-block-height-wrapper">
+                                    <span class="cert-block-label">Timechain Block Timestamp</span>
+                                    <span id="cert-block-height">Unsealed</span>
+                                </div>
+
+                                <div class="cert-signatures-section" id="cert-signatures-section">
+                                    <!-- Signature Pad A -->
+                                    <div class="signature-box" id="sig-box-a">
+                                        <span class="sig-label">Partner A Signature</span>
+                                        <div class="canvas-wrapper">
+                                            <canvas id="sig-canvas-a" width="300" height="80"></canvas>
+                                            <button type="button" class="btn-clear-sig" id="clear-sig-a" aria-label="Clear Partner A Signature">Clear</button>
+                                        </div>
+                                        <span class="sig-name" id="sig-name-display-a">Satoshi</span>
+                                    </div>
+
+                                    <!-- Signature Pad B -->
+                                    <div class="signature-box hidden" id="sig-box-b">
+                                        <span class="sig-label">Partner B Signature</span>
+                                        <div class="canvas-wrapper">
+                                            <canvas id="sig-canvas-b" width="300" height="80"></canvas>
+                                            <button type="button" class="btn-clear-sig" id="clear-sig-b" aria-label="Clear Partner B Signature">Clear</button>
+                                        </div>
+                                        <span class="sig-name" id="sig-name-display-b">Hal Finney</span>
+                                    </div>
+
+                                    <!-- Signature Pad Witness -->
+                                    <div class="signature-box hidden" id="sig-box-witness">
+                                        <span class="sig-label">Witness Signature</span>
+                                        <div class="canvas-wrapper">
+                                            <canvas id="sig-canvas-witness" width="300" height="80"></canvas>
+                                            <button type="button" class="btn-clear-sig" id="clear-sig-witness" aria-label="Clear Witness Signature">Clear</button>
+                                        </div>
+                                        <span class="sig-name" id="sig-name-display-witness">Witness</span>
+                                    </div>
+                                </div>
+
+                                <!-- Wax Seal Overlay with Official Slanted B Path -->
+                                <div class="wax-seal" id="cert-wax-seal">
+                                    <svg viewBox="0 0 100 100" class="wax-seal-svg">
+                                        <defs>
+                                            <radialGradient id="sealGrad" cx="50%" cy="50%" r="50%">
+                                                <stop offset="0%" stop-color="#ffd700" />
+                                                <stop offset="70%" stop-color="#d4af37" />
+                                                <stop offset="100%" stop-color="#9a7b1c" />
+                                            </radialGradient>
+                                            <filter id="shadow">
+                                                <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.3"/>
+                                            </filter>
+                                            <filter id="wax-depth" x="-10%" y="-10%" width="120%" height="120%">
+                                                <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blur" />
+                                                <feSpecularLighting in="blur" surfaceScale="3.2" specularConstant="1.2" specularExponent="16" lighting-color="#ffffff" result="light">
+                                                    <fePointLight x="-20" y="-30" z="60" />
+                                                </feSpecularLighting>
+                                                <feComposite in="light" in2="SourceAlpha" operator="in" result="lightComposite" />
+                                                <feBlend in="SourceGraphic" in2="lightComposite" mode="multiply" />
+                                            </filter>
+                                        </defs>
+                                        <!-- Applied 3D depth and shadow filters to the circle -->
+                                        <circle cx="50" cy="50" r="46" fill="url(#sealGrad)" filter="url(#shadow) url(#wax-depth)"/>
+                                        <circle cx="50" cy="50" r="41" fill="none" stroke="#b89326" stroke-width="1.5" stroke-dasharray="3 2"/>
+                                        <circle cx="50" cy="50" r="37" fill="none" stroke="#795f12" stroke-width="1"/>
+                                        <!-- Outer text path -->
+                                        <path id="textPath" d="M 50,50 m -30,0 a 30,30 0 1,1 60,0 a 30,30 0 1,1 -60,0" fill="none" />
+                                        <text font-family="'Plus Jakarta Sans', sans-serif" font-size="5.5" font-weight="800" fill="#634d0b" letter-spacing="1">
+                                            <textPath href="#textPath" startOffset="50%" text-anchor="middle">
+                                                • HODL FOREVER • SECURE CUSTODY
+                                            </textPath>
+                                        </text>
+                                        <!-- Official Slanted B inside wax seal -->
+                                        <g transform="translate(18, 18) scale(1)">
+                                            <!-- Bitcoin Symbol in center -->
+                                            <circle cx="32" cy="32" r="28" fill="#a4821c" opacity="0.15"/>
+                                            <path fill="#584408" d="m46.103,27.444c0.637-4.258-2.605-6.547-7.038-8.074l1.438-5.768-3.511-0.875-1.4,5.616c-0.923-0.23-1.871-0.447-2.813-0.662l1.41-5.653-3.509-0.875-1.439,5.766c-0.764-0.174-1.514-0.346-2.242-0.527l0.004-0.018-4.842-1.209-0.934,3.75s2.605,0.597,2.55,0.634c1.422,0.355,1.679,1.296,1.636,2.042l-1.638,6.571c0.098,0.025,0.225,0.061,0.365,0.117-0.117-0.029-0.242-0.061-0.371-0.092l-2.296,9.205c-0.174,0.432-0.615,1.08-1.609,0.834,0.035,0.051-2.552-0.637-2.552-0.637l-1.743,4.019,4.569,1.139c0.85,0.213,1.683,0.436,2.503,0.646l-1.453,5.834,3.507,0.875,1.439-5.772c0.958,0.26,1.888,0.5,2.798,0.726l-1.434,5.745,3.511,0.875,1.453-5.823c5.987,1.133,10.489,0.676,12.384-4.739,1.527-4.36-0.076-6.875-3.226-8.515,2.294-0.529,4.022-2.038,4.483-5.155zm-8.022,11.249c-1.085,4.36-8.426,2.003-10.806,1.412l1.928-7.729c2.38,0.594,10.012,1.77,8.878,6.317zm1.086-11.312c-0.99,3.966-7.1,1.951-9.082,1.457l1.748-7.01c1.982,0.494,8.365,1.416,7.334,5.553z"/>
+                                        </g>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button class="button primary glow-effect" type="button" id="btn-seal">
+                            <span class="btn-text">Sign & Seal Vows</span>
+                        </button>
+                        <button class="button secondary" type="button" id="copy-prenup">Copy</button>
+                        <button class="button secondary" type="button" id="print-prenup">Print</button>
+                        <button class="button danger" type="button" id="reset-prenup">Reset</button>
                     </div>
                 </aside>
             </div>
         </section>
 
-        <!-- Stack Vow Section -->
-        <section id="planner" class="tool-section">
-            <div class="container">
-                <div class="section-heading">
-                    <span class="eyebrow"><span class="badge-dot"></span> Accumulation Vow</span>
-                    <h2>Stack Vow & Projections</h2>
-                    <p>Convert a vague intention to hold Bitcoin into a recurring contribution rhythm, target stack, and future-value record.</p>
-                </div>
+        <!-- Certificate flow section -->
+        <section class="education-section">
+            <div class="section-container">
+                <span class="eyebrow">How it becomes yours</span>
+                <h2>From Vows To Certificate</h2>
+                <p class="section-subtitle">The page is built around one flow: personalize the wedding details, choose the Bitcoin promises, then sign and print the finished keepsake.</p>
 
-                <div class="workspace-grid">
-                    <!-- Control Column: Inputs & Visualizations -->
-                    <div class="planner-control-column">
-                        <form class="tool-panel" id="dca-form">
-                            <!-- Card 1: Core Settings -->
-                            <div class="form-group-card">
-                                <span class="group-badge">1. Contribution Rhythm</span>
-                                <div class="field-grid">
-                                    <label class="field">
-                                        <span>Recurring Purchase Amount</span>
-                                        <div class="input-shell">
-                                            <span>$</span>
-                                            <input id="dca-amount" type="number" min="1" step="1" value="100">
-                                        </div>
-                                    </label>
-                                    <label class="field">
-                                            <span>Commitment Horizon</span>
-                                        <div class="input-shell">
-                                            <input id="dca-years" type="number" min="1" max="40" step="1" value="5">
-                                            <span>years</span>
-                                        </div>
-                                    </label>
-                                </div>
-                                
-                                <div class="field mt-16">
-                                    <span>Contribution Frequency</span>
-                                    <div class="segmented-control">
-                                        <div class="segmented-indicator" id="freq-indicator"></div>
-                                        
-                                        <input type="radio" name="dca-frequency" id="freq-daily" value="365">
-                                        <label for="freq-daily">Daily</label>
-
-                                        <input type="radio" name="dca-frequency" id="freq-weekly" value="52">
-                                        <label for="freq-weekly">Weekly</label>
-
-                                        <input type="radio" name="dca-frequency" id="freq-biweekly" value="26">
-                                        <label for="freq-biweekly">Bi-weekly</label>
-
-                                        <input type="radio" name="dca-frequency" id="freq-monthly" value="12" checked>
-                                        <label for="freq-monthly">Monthly</label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Accordion Toggle -->
-                            <button type="button" class="advanced-toggle-btn" id="advanced-toggle" aria-expanded="false" aria-controls="advanced-panel">
-                                Vow Details
-                                <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                            </button>
-
-                            <!-- Advanced Panel -->
-                            <div class="advanced-panel" id="advanced-panel">
-                                <!-- Card 2: Initial Stack & Target -->
-                                <div class="form-group-card">
-                                    <span class="group-badge">2. Existing Stack & Vow Target</span>
-                                    <div class="field-grid">
-                                        <label class="field">
-                                            <span>Starting Stack <span class="info-trigger" data-tooltip="Existing Bitcoin already in your possession.">ⓘ</span></span>
-                                            <div class="input-shell">
-                                                <input id="starting-btc" type="number" min="0" step="0.0001" value="0">
-                                                <span>BTC</span>
-                                            </div>
-                                        </label>
-                                        <label class="field">
-                                            <span>Vow Target <span class="info-trigger" data-tooltip="The Bitcoin stack size this commitment is aiming toward.">ⓘ</span></span>
-                                            <div class="input-shell">
-                                                <input id="target-btc" type="number" min="0.001" step="0.001" value="1">
-                                                <span>BTC</span>
-                                            </div>
-                                        </label>
-                                    </div>
-                                    
-                                    <div class="preset-pills-row" aria-label="Target BTC presets">
-                                        <span>Quick Vows</span>
-                                        <button type="button" class="preset-btn" data-target-btc="0.1">0.1 BTC</button>
-                                        <button type="button" class="preset-btn" data-target-btc="0.21">0.21 BTC</button>
-                                        <button type="button" class="preset-btn" data-target-btc="1">1.0 BTC</button>
-                                        <button type="button" class="preset-btn" data-target-btc="2.1">2.1 BTC</button>
-                                    </div>
-                                </div>
-
-                                <!-- Card 3: Market Metrics -->
-                                <div class="form-group-card">
-                                    <span class="group-badge">3. Price Assumptions</span>
-                                    <label class="field">
-                                        <span>Average Buy Price <span class="info-trigger" data-tooltip="Estimated average purchase price of Bitcoin during this commitment. Defaults to live market price.">ⓘ</span></span>
-                                        <div class="input-shell">
-                                            <span>$</span>
-                                            <input id="avg-price" type="number" min="1" step="100" value="100000">
-                                        </div>
-                                    </label>
-                                    
-                                    <div class="slider-field mt-16">
-                                        <div>
-                                            <span>Projected Terminal Price <span class="info-trigger" data-tooltip="Expected Bitcoin price at the end of the time horizon, used to calculate future valuation.">ⓘ</span></span>
-                                            <strong id="future-price-label">$250,000</strong>
-                                        </div>
-                                        <input id="future-price" type="range" min="25000" max="1000000" step="5000" value="250000">
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-
-                        <!-- Projections Visual Graph -->
-                        <div class="chart-panel">
-                            <span class="group-badge">Commitment Trajectory</span>
-                            <div class="chart-wrapper">
-                                <canvas id="dca-chart"></canvas>
-                            </div>
+                <div class="education-grid">
+                    <div class="education-card">
+                        <div class="edu-card-header">
+                            <span class="edu-icon">Names</span>
+                            <h3>Personalized Keepsake</h3>
                         </div>
+                        <p>Put the couple's names, ceremony date, and location directly on the certificate so the result feels like a real commemorative artifact rather than a generic checklist.</p>
                     </div>
 
-                    <!-- Right Column: Results Dashboard -->
-                    <div class="planner-results-column">
-                        <div class="results-panel">
-                            <div class="result-hero">
-                                <span>Promised Stack</span>
-                                <strong id="projected-btc">0.00000000 BTC</strong>
-                                <em id="projected-sats">0 sats</em>
-                                
-                                <div class="progress-bar-container">
-                                    <div id="progress-bar-fill" class="progress-bar-fill"></div>
-                                </div>
-                                <p id="target-status" class="target-status-text">Set a target to see progress.</p>
-                            </div>
-
-                            <div class="results-grid">
-                                <div class="result-card">
-                                    <span>Committed Outlay</span>
-                                    <strong id="total-invested">$0</strong>
-                                </div>
-                                <div class="result-card">
-                                    <span>Future Value</span>
-                                    <strong id="future-value">$0</strong>
-                                </div>
-                                <div class="result-card">
-                                    <span>Estimated Gain/Loss</span>
-                                    <strong id="estimated-return">$0</strong>
-                                </div>
-                                <div class="result-card">
-                                    <span>Time to Vow</span>
-                                    <strong id="time-to-target">N/A</strong>
-                                </div>
-                            </div>
-
-                            <div class="scenario-table" aria-label="Price scenarios">
-                                <div class="scenario-row header">
-                                    <span>Price Scenario</span>
-                                    <span>Terminal Value</span>
-                                    <span>ROI Multiplier</span>
-                                </div>
-                                <div class="scenario-row">
-                                    <span>$50,000</span>
-                                    <strong id="scenario-50">$0</strong>
-                                    <span id="multiple-50">0.0x</span>
-                                </div>
-                                <div class="scenario-row">
-                                    <span>$100,000</span>
-                                    <strong id="scenario-100">$0</strong>
-                                    <span id="multiple-100">0.0x</span>
-                                </div>
-                                <div class="scenario-row">
-                                    <span>$250,000</span>
-                                    <strong id="scenario-250">$0</strong>
-                                    <span id="multiple-250">0.0x</span>
-                                </div>
-                                <div class="scenario-row">
-                                    <span>$1,000,000</span>
-                                    <strong id="scenario-1000">$0</strong>
-                                    <span id="multiple-1000">0.0x</span>
-                                </div>
-                            </div>
+                    <div class="education-card">
+                        <div class="edu-card-header">
+                            <span class="edu-icon">Vows</span>
+                            <h3>Bitcoin Promises</h3>
                         </div>
+                        <p>Choose the Bitcoin commitments that belong in the ceremony: steady stacking, no panic selling, no leverage, cold storage, and any custom promise you want to preserve.</p>
+                    </div>
+
+                    <div class="education-card">
+                        <div class="edu-card-header">
+                            <span class="edu-icon">Print</span>
+                            <h3>Sign And Seal</h3>
+                        </div>
+                        <p>Sign the certificate in-browser, seal it with a Bitcoin timestamp, then print the finished page as a private memento for your records or ceremony table.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Custody Vow Section -->
-        <section id="storage" class="tool-section alt">
-            <div class="container">
-                <div class="section-heading">
-                    <span class="eyebrow"><span class="badge-dot"></span> Custody Vow</span>
-                    <h2>Cold Storage Commitment Check</h2>
-                    <p>A bigger stack deserves a stronger promise: offline seeds, durable backups, tested recovery, and instructions someone trusted can understand.</p>
-                </div>
+        <!-- FAQ Section: Accordion -->
+        <section class="faq-section">
+            <div class="section-container">
+                <span class="eyebrow">Questions</span>
+                <h2>Frequently Answered</h2>
 
-                <div class="workspace-grid">
-                    <!-- Checklist Card -->
-                    <div class="checklist-panel" id="checklist">
-                        <div class="check-group-title">Private Key Hygiene</div>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="14" data-priority="Generate the seed offline on hardware">
-                            <span>Seed phrase generated offline on a hardware device</span>
-                        </label>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="14" data-priority="Remove every digital seed copy">
-                            <span>No digital storage (no images, notes, or typing online)</span>
-                        </label>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="10" data-priority="Move the backup to durable offline material">
-                            <span>Seed stored on physical, offline material (steel/metal/paper)</span>
-                        </label>
-
-                        <div class="check-group-title">Backup Durability</div>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="10" data-priority="Separate backups across two physical locations">
-                            <span>Backups stored in two or more physical locations</span>
-                        </label>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="8" data-priority="Remove any single-device failure point">
-                            <span>Single platform failure cannot compromise the total balance</span>
-                        </label>
-
-                        <div class="check-group-title">Recovery Rehearsal</div>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="14" data-priority="Rehearse a full wallet recovery">
-                            <span>Full recovery verification successfully completed</span>
-                        </label>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="8" data-priority="Document wallet model and derivation path">
-                            <span>Wallet model and specific derivation paths documented</span>
-                        </label>
-
-                        <div class="check-group-title">Legacy Promise</div>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="14" data-priority="Write emergency access instructions">
-                            <span>Dead-man setup or inheritance guidelines established</span>
-                        </label>
-                        <label class="check-item">
-                            <input type="checkbox" data-points="10" data-priority="Schedule the annual custody anniversary review">
-                            <span>Custody vow scheduled to be renewed annually</span>
-                        </label>
+                <div class="faq-accordion">
+                    <div class="faq-item">
+                        <button class="faq-question" type="button" aria-expanded="false">
+                            <span>Is this document legally binding?</span>
+                            <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        <div class="faq-answer">
+                            <p>No, this is a personal covenant or an agreement of mutual conviction rather than a registered legal contract. It is designed to act as a clear, written record of your joint or individual intentions before volatility tests your behavior. Many users print and sign it to keep alongside their physical cold storage backups.</p>
+                        </div>
                     </div>
 
-                    <!-- Score Dashboard -->
-                    <aside class="score-panel">
-                        <div class="score-ring-container">
-                            <svg class="score-ring-svg" width="150" height="150" viewBox="0 0 150 150">
-                                <circle class="score-ring-track" cx="75" cy="75" r="62"></circle>
-                                <circle id="score-ring-progress" class="score-ring-progress" cx="75" cy="75" r="62"></circle>
-                            </svg>
-                            <div class="score-ring-text" aria-live="polite">
-                                <span id="storage-score">0</span>
-                                <small>/ 100</small>
-                            </div>
+                    <div class="faq-item">
+                        <button class="faq-question" type="button" aria-expanded="false">
+                            <span>Where is my data sent? Is it private?</span>
+                            <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        <div class="faq-answer">
+                            <p>Your privacy is absolute. This website runs entirely client-side. We have no databases, no analytics, and no tracking scripts. All inputs, names, and signature coordinates are saved locally in your browser's <code>localStorage</code>. It never leaves your machine.</p>
                         </div>
-                        
-                        <h3 id="storage-grade">Evaluating...</h3>
-                        <p id="storage-advice" class="storage-advice-text">Review your custody checklist to analyze gaps.</p>
-
-                        <div class="priority-list">
-                            <h4>Vows to Tighten</h4>
-                            <ul id="priority-items">
-                                <li>Select items to reveal the next custody promise.</li>
-                            </ul>
-                        </div>
-
-                        <div class="danger-list">
-                            <h4>Never Break These</h4>
-                            <ul>
-                                <li>Never input your recovery seed online.</li>
-                                <li>Never capture photos or keep digital text backups.</li>
-                                <li>Never transfer large assets to a wallet without test recovery.</li>
-                            </ul>
-                        </div>
-                    </aside>
-                </div>
-            </div>
-        </section>
-
-        <!-- Summary & Snapshot Section -->
-        <section id="summary" class="summary-section">
-            <div class="container">
-                <div class="summary-card">
-                    <div class="summary-info">
-                        <span class="eyebrow"><span class="badge-dot"></span> Commitment Record</span>
-                        <h2>Bitcoin Wedding Snapshot</h2>
-                        <p id="summary-text">Complete the stack vow and custody check to compile your private commitment record.</p>
                     </div>
-                    <div class="summary-actions">
-                        <button class="btn btn-secondary" id="copy-summary">Copy Keepsake</button>
-                        <button class="btn btn-secondary danger" id="reset-summary">Reset Vows</button>
-                        <button class="btn btn-primary" id="print-summary">Print Vow</button>
+
+                    <div class="faq-item">
+                        <button class="faq-question" type="button" aria-expanded="false">
+                            <span>What does "Timechain Block Timestamp" mean?</span>
+                            <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        <div class="faq-answer">
+                            <p>When you click "Sign & Seal Vows," the page communicates with the public Bitcoin block explorer API (mempool.space) to fetch the latest block height of the Bitcoin network. It writes this block number onto your document as a cryptographic timestamp of when your covenant was sealed.</p>
+                        </div>
+                    </div>
+
+                    <div class="faq-item">
+                        <button class="faq-question" type="button" aria-expanded="false">
+                            <span>How should I store my generated prenup?</span>
+                            <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        <div class="faq-answer">
+                            <p>Once you fill out the details and sign the canvas, you can print the document. Our print stylesheet will automatically format it as a clean, elegant paper certificate without the web buttons. We recommend keeping a physical printed copy inside a fireproof safe, ideally in the same secure location as your cold wallet hardware or seed backups.</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
+    <!-- Canvas for fullscreen gold confetti particles -->
+    <canvas id="confetti-canvas"></canvas>
+
     <footer class="site-footer">
-        <div class="container footer-wrap">
-            <div class="footer-logo"><span>₿</span>.wedding</div>
-            <p>© 2026 btc.wedding. Local execution. Commitment records are calculated strictly client-side. No seeds, nodes or wallet connections are initiated.</p>
-        </div>
+        <p>Static page. Local browser state only. Never enter a seed phrase into any website.</p>
     </footer>
 
-    <script src="js/chart.js"></script>
+    <!-- Custom Premium Confirm Modal -->
+    <div id="confirm-modal" class="modal-overlay hidden" aria-modal="true" role="dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-icon">⚠️</span>
+                <h3>Reset Vows</h3>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to reset all wedding vows and signatures? This action cannot be undone.</p>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="button secondary" id="modal-cancel">Cancel</button>
+                <button type="button" class="button danger" id="modal-confirm">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service worker (optional support check in app.js) -->
     <script src="js/app.js"></script>
 </body>
 </html>
