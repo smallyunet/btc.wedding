@@ -1465,6 +1465,7 @@ body {
     .document-sheet {
         position: static;
         width: 210mm !important;
+        max-width: none !important;
         height: 297mm !important;
         aspect-ratio: 210 / 297 !important;
         background: #fff !important;
@@ -1472,7 +1473,7 @@ body {
         box-shadow: none !important;
         border: 0 !important;
         border-radius: 0 !important;
-        padding: 14mm !important;
+        padding: 12mm !important;
         display: flex !important;
         flex-direction: column !important;
         overflow: hidden !important;
@@ -1495,7 +1496,8 @@ body {
 
     .cert-frame-inner {
         border: 3px double #796e5e !important;
-        padding: 18mm 16mm 14mm !important;
+        padding: 16mm 18mm 13mm !important;
+        margin: 3mm !important;
         min-height: 0 !important;
         height: 100% !important;
         display: flex !important;
@@ -1505,16 +1507,16 @@ body {
     }
 
     .cert-title {
-        font-size: 24pt !important;
+        font-size: 28pt !important;
         color: #111 !important;
         letter-spacing: 0.08em !important;
-        margin-bottom: 2mm !important;
+        margin-bottom: 3mm !important;
     }
 
     .cert-date-line {
-        font-size: 9pt !important;
+        font-size: 10pt !important;
         color: #4b4032 !important;
-        margin-bottom: 8mm !important;
+        margin-bottom: 13mm !important;
     }
 
     .cert-date-line span {
@@ -1528,9 +1530,9 @@ body {
     }
 
     .cert-intro-text {
-        font-size: 13pt !important;
+        font-size: 13.5pt !important;
         line-height: 1.45 !important;
-        margin-bottom: 7mm !important;
+        margin-bottom: 8mm !important;
         color: #17120d !important;
     }
 
@@ -1546,9 +1548,9 @@ body {
     }
 
     .cert-list li {
-        font-size: 12pt !important;
+        font-size: 12.5pt !important;
         line-height: 1.42 !important;
-        margin-bottom: 3.2mm !important;
+        margin-bottom: 3.6mm !important;
         padding-left: 8mm !important;
         color: #17120d !important;
     }
@@ -1568,7 +1570,7 @@ body {
     }
 
     .cert-block-height-wrapper {
-        margin: 6mm auto 3mm !important;
+        margin: 8mm auto 5mm !important;
         padding: 2.5mm 5mm !important;
         max-width: 100mm !important;
         color: #4b4032 !important;
@@ -1591,7 +1593,7 @@ body {
         display: grid !important;
         grid-template-columns: 1fr !important;
         gap: 5mm !important;
-        margin: 6mm auto 0 0 !important;
+        margin: 7mm auto 0 0 !important;
     }
 
     .cert-signatures-section.two-cols {
