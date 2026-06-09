@@ -1429,6 +1429,7 @@ body {
     main {
         display: block !important;
         width: 210mm !important;
+        max-width: none !important;
         height: 297mm !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -1448,6 +1449,7 @@ body {
     .workspace {
         display: block;
         width: 210mm !important;
+        max-width: none !important;
         height: 297mm !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -1456,6 +1458,8 @@ body {
     .output-panel-wrapper,
     .output-panel {
         position: static;
+        width: 210mm !important;
+        max-width: none !important;
         background: none !important;
         border: 0 !important;
         padding: 0 !important;
@@ -1473,7 +1477,7 @@ body {
         box-shadow: none !important;
         border: 0 !important;
         border-radius: 0 !important;
-        padding: 12mm !important;
+        padding: 7mm !important;
         display: flex !important;
         flex-direction: column !important;
         overflow: hidden !important;
@@ -1488,6 +1492,8 @@ body {
 
     .cert-frame {
         border: 1px solid #796e5e !important;
+        width: 100% !important;
+        max-width: none !important;
         height: 100% !important;
         display: flex !important;
         flex-direction: column !important;
@@ -1496,8 +1502,10 @@ body {
 
     .cert-frame-inner {
         border: 3px double #796e5e !important;
-        padding: 16mm 18mm 13mm !important;
-        margin: 3mm !important;
+        padding: 15mm 16mm 12mm !important;
+        margin: 2mm !important;
+        width: auto !important;
+        max-width: none !important;
         min-height: 0 !important;
         height: 100% !important;
         display: flex !important;
