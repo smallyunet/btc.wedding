@@ -1100,14 +1100,14 @@ function initScrollspy() {
 // Scroll Reveal animation observer
 // -------------------------------------------------------------
 function initScrollReveal() {
-    const targets = document.querySelectorAll(".education-section, .faq-section, .workspace");
+    const targets = document.querySelectorAll(".education-section, .faq-section");
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add("reveal-active");
             }
         });
-    }, { threshold: 0.08 });
+    }, { threshold: 0.02 });
 
     targets.forEach(t => {
         t.classList.add("reveal-hidden");

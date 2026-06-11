@@ -1232,6 +1232,18 @@ body {
     line-height: 1.5;
 }
 
+.site-footer a {
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.site-footer a:hover {
+    color: var(--gold-bright);
+    text-decoration: underline;
+}
+
 /* Glow Effect for Button */
 .glow-effect {
     position: relative;
