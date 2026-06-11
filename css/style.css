@@ -1232,7 +1232,8 @@ body {
     line-height: 1.5;
 }
 
-.site-footer a {
+.site-footer a,
+.site-footer a:visited {
     color: var(--gold);
     text-decoration: none;
     font-weight: 500;

@@ -1,4 +1,4 @@
-const CACHE_NAME = "btc-wedding-v8";
+const CACHE_NAME = "btc-wedding-v9";
 const ASSETS = [
   "./",
   "./index.html",
