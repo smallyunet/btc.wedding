@@ -1241,8 +1241,8 @@ body {
 }
 
 .site-footer a:hover {
-    color: var(--gold-bright);
-    text-decoration: underline;
+    color: var(--gold-bright) !important;
+    text-decoration: underline !important;
 }
 
 /* Glow Effect for Button */
