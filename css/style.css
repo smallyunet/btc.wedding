@@ -1360,10 +1360,31 @@ body {
         grid-template-columns: 1fr;
     }
 
-    .rules-panel,
-    .output-panel {
+    .rules-panel {
         padding: 24px;
         border-radius: var(--radius-md);
+    }
+
+    .output-panel {
+        padding: 20px 14px;
+        border-radius: var(--radius-md);
+    }
+
+    .output-panel-wrapper,
+    .output-panel,
+    .document-sheet,
+    .cert-frame,
+    .cert-frame-inner {
+        min-width: 0;
+    }
+
+    .document-sheet {
+        padding: 12px;
+    }
+
+    .output-header {
+        flex-wrap: wrap;
+        gap: 12px;
     }
 
     .certificate-details-grid,
@@ -1376,7 +1397,7 @@ body {
     }
 
     .cert-frame-inner {
-        padding: 28px 14px;
+        padding: 24px 10px;
     }
 
     .cert-title {
@@ -1388,6 +1409,11 @@ body {
     .cert-list li {
         font-size: 1.02rem;
         line-height: 1.55;
+    }
+
+    #prenup-output-list {
+        display: block;
+        width: 100%;
     }
 
     .cert-signatures-section.two-cols {
