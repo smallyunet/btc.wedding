@@ -271,7 +271,7 @@ function initHeroTilt() {
     });
 
     wrapper.addEventListener("mouseleave", () => {
-        card.style.transform = "rotateY(-8deg) rotateX(4deg) rotateZ(1deg) scale(1)";
+        card.style.transform = "";
     });
 }
 

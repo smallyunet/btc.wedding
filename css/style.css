@@ -286,7 +286,7 @@ body {
     border-radius: 6px;
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(139, 107, 33, 0.08);
     border: 1px solid var(--parchment-border);
-    transform: rotateY(-8deg) rotateX(4deg) rotateZ(1deg);
+    transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg);
     transition: var(--transition);
     position: relative;
     overflow: hidden;
