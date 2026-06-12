@@ -1,4 +1,5 @@
 const STORAGE_KEY = "btc_wedding_prenup_v3";
+const LEGACY_CACHE_PREFIX = "btc-wedding-";
 
 const FIELD_IDS = [
     "buy-amount",
@@ -23,6 +24,8 @@ let savedBlockHeight = "";
 let confettiSystem = null;
 
 document.addEventListener("DOMContentLoaded", () => {
+    clearLegacyServiceWorkerCache();
+
     // Initialize Confetti
     const confettiCanvas = document.getElementById("confetti-canvas");
     if (confettiCanvas) {
@@ -63,6 +66,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }, { passive: true });
 });
+
+function clearLegacyServiceWorkerCache() {
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations()
+            .then((registrations) => {
+                registrations.forEach((registration) => registration.unregister());
+            })
+            .catch((error) => {
+                console.warn("Unable to unregister legacy service worker", error);
+            });
+    }
+
+    if ("caches" in window) {
+        caches.keys()
+            .then((keys) => {
+                keys
+                    .filter((key) => key.startsWith(LEGACY_CACHE_PREFIX))
+                    .forEach((key) => caches.delete(key));
+            })
+            .catch((error) => {
+                console.warn("Unable to clear legacy cache storage", error);
+            });
+    }
+}
 
 // Setup Joint/Solo Radio Toggles
 function bindSetupTypeToggles() {
