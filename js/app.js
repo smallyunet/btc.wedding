@@ -2,6 +2,7 @@ const STORAGE_KEY = "btc_wedding_prenup_v3";
 const LEGACY_CACHE_PREFIX = "btc-wedding-";
 
 const FIELD_IDS = [
+    "enable-stacking",
     "buy-amount",
     "buy-frequency",
     "no-panic",
@@ -37,34 +38,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Bind inputs, toggles, signatures, actions, faq
     bindSetupTypeToggles();
+    bindStackingPlan();
+    bindMobilePreview();
     bindInputs();
     bindSignatures();
     bindActions();
     bindFAQ();
 
     // Initial render & setups
-    initHeroTilt();
     updateWitnessVisibility();
+    updateStackingVisibility();
     updatePrenup();
     updateCardClasses();
     renderBlockHeight();
 
-    // Interactive detail setups
+    // Navigation detail setup
     initScrollspy();
-    initScrollReveal();
-    initBackgroundParallax();
-
-    // Bind mouse gold dust trail
-    window.addEventListener("mousemove", (e) => {
-        if (confettiSystem) {
-            confettiSystem.spawnSparkle(e.clientX, e.clientY);
-        }
-    });
-    window.addEventListener("touchmove", (e) => {
-        if (confettiSystem && e.touches.length > 0) {
-            confettiSystem.spawnSparkle(e.touches[0].clientX, e.touches[0].clientY);
-        }
-    }, { passive: true });
 });
 
 function clearLegacyServiceWorkerCache() {
@@ -98,16 +87,66 @@ function bindSetupTypeToggles() {
     const inputSolo = btnSolo.querySelector("input");
     const inputJoint = btnJoint.querySelector("input");
 
-    btnSolo.addEventListener("click", () => {
-        if (isSealed) return; // Prevent changing layout when sealed
-        inputSolo.checked = true;
-        setSetupType("solo");
+    inputSolo.addEventListener("change", () => {
+        if (inputSolo.checked) setSetupType("solo");
     });
 
-    btnJoint.addEventListener("click", () => {
-        if (isSealed) return; // Prevent changing layout when sealed
-        inputJoint.checked = true;
-        setSetupType("joint");
+    inputJoint.addEventListener("change", () => {
+        if (inputJoint.checked) setSetupType("joint");
+    });
+}
+
+function bindStackingPlan() {
+    document.getElementById("enable-stacking")?.addEventListener("change", updateStackingVisibility);
+}
+
+function updateStackingVisibility() {
+    const enabled = document.getElementById("enable-stacking")?.checked;
+    const fields = document.getElementById("stacking-fields");
+    fields?.classList.toggle("hidden", !enabled);
+}
+
+function bindMobilePreview() {
+    const workspace = document.getElementById("rules");
+    const customizeTab = document.getElementById("tab-customize");
+    const previewTab = document.getElementById("tab-preview");
+    const previewCta = document.getElementById("open-mobile-preview");
+    const createNavLink = document.querySelector('a[href="#rules"]');
+    const certificateNavLink = document.querySelector('a[href="#prenup"]');
+    if (!workspace || !customizeTab || !previewTab) return;
+
+    const setView = (view, shouldScroll = true) => {
+        const showPreview = view === "preview";
+        workspace.classList.toggle("show-preview", showPreview);
+        customizeTab.classList.toggle("active", !showPreview);
+        previewTab.classList.toggle("active", showPreview);
+        customizeTab.setAttribute("aria-selected", String(!showPreview));
+        previewTab.setAttribute("aria-selected", String(showPreview));
+        customizeTab.tabIndex = showPreview ? -1 : 0;
+        previewTab.tabIndex = showPreview ? 0 : -1;
+        if (shouldScroll && window.innerWidth <= 1024) {
+            const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+            workspace.scrollIntoView({ behavior, block: "start" });
+        }
+    };
+
+    customizeTab.addEventListener("click", () => setView("customize"));
+    previewTab.addEventListener("click", () => setView("preview"));
+    previewCta?.addEventListener("click", () => setView("preview"));
+    createNavLink?.addEventListener("click", () => setView("customize", false));
+    certificateNavLink?.addEventListener("click", (event) => {
+        if (window.innerWidth > 1024) return;
+        event.preventDefault();
+        setView("preview");
+    });
+    [customizeTab, previewTab].forEach((tab) => {
+        tab.addEventListener("keydown", (event) => {
+            if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+            event.preventDefault();
+            const nextView = tab === customizeTab ? "preview" : "customize";
+            setView(nextView, false);
+            (nextView === "preview" ? previewTab : customizeTab).focus();
+        });
     });
 }
 
@@ -197,10 +236,12 @@ function updateWitnessVisibility() {
     const witnessNameWrapper = document.getElementById("witness-name-wrapper");
     const sigBoxWitness = document.getElementById("sig-box-witness");
     const sigSection = document.getElementById("cert-signatures-section");
+    const optionalDetails = document.querySelector(".optional-details");
 
     if (enableWitness) {
         witnessNameWrapper?.classList.remove("hidden");
         sigBoxWitness?.classList.remove("hidden");
+        if (optionalDetails) optionalDetails.open = true;
     } else {
         witnessNameWrapper?.classList.add("hidden");
         sigBoxWitness?.classList.add("hidden");
@@ -235,43 +276,24 @@ function bindFAQ() {
             document.querySelectorAll(".faq-item").forEach(otherItem => {
                 if (otherItem !== item) {
                     otherItem.querySelector(".faq-question").setAttribute("aria-expanded", "false");
-                    otherItem.querySelector(".faq-answer").style.maxHeight = null;
+                    const otherAnswer = otherItem.querySelector(".faq-answer");
+                    otherAnswer.style.maxHeight = null;
+                    otherAnswer.hidden = true;
                 }
             });
 
             if (isOpen) {
                 btn.setAttribute("aria-expanded", "false");
-                item.querySelector(".faq-answer").style.maxHeight = null;
+                const answer = item.querySelector(".faq-answer");
+                answer.style.maxHeight = null;
+                answer.hidden = true;
             } else {
                 btn.setAttribute("aria-expanded", "true");
                 const answer = item.querySelector(".faq-answer");
+                answer.hidden = false;
                 answer.style.maxHeight = answer.scrollHeight + "px";
             }
         });
-    });
-}
-
-function initHeroTilt() {
-    const wrapper = document.querySelector(".hero-document-wrapper");
-    const card = document.querySelector(".hero-document");
-    if (!wrapper || !card) return;
-
-    wrapper.addEventListener("mousemove", (e) => {
-        const rect = wrapper.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-
-        const rotateX = ((centerY - y) / centerY) * 12;
-        const rotateY = ((x - centerX) / centerX) * 12;
-
-        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.04)`;
-    });
-
-    wrapper.addEventListener("mouseleave", () => {
-        card.style.transform = "";
     });
 }
 
@@ -449,8 +471,10 @@ function updatePrenup() {
     // Form Vow Bullet Points
     const rules = [];
 
-    // Accumulation Vow
-    rules.push(`Promise to stack <strong>${formatCurrency(values.buyAmount)}</strong> of Bitcoin <strong>${values.buyFrequency}</strong> with patience and care.`);
+    // Optional accumulation vow
+    if (values.enableStacking) {
+        rules.push(`Promise to stack <strong>${formatCurrency(values.buyAmount)}</strong> of Bitcoin <strong>${values.buyFrequency}</strong> with patience and care.`);
+    }
 
     // Panic Sell Vow
     if (values.noPanic) {
@@ -483,6 +507,7 @@ function updatePrenup() {
 
 function readValues() {
     return {
+        enableStacking: readChecked("enable-stacking"),
         buyAmount: readNumber("buy-amount"),
         buyFrequency: readSelect("buy-frequency"),
         noPanic: readChecked("no-panic"),
@@ -523,10 +548,13 @@ async function fetchBlockHeight() {
     const el = document.getElementById("cert-block-height");
     if (!el) return;
 
-    el.textContent = "Connecting to Timechain...";
+    el.textContent = "Retrieving latest block...";
 
     try {
-        const response = await fetch("https://mempool.space/api/blocks/tip/height");
+        const controller = new AbortController();
+        const timeout = window.setTimeout(() => controller.abort(), 4000);
+        const response = await fetch("https://mempool.space/api/blocks/tip/height", { signal: controller.signal });
+        window.clearTimeout(timeout);
         if (response.ok) {
             const height = await response.text();
             savedBlockHeight = height.trim();
@@ -535,12 +563,8 @@ async function fetchBlockHeight() {
             throw new Error("HTTP error status");
         }
     } catch (e) {
-        console.warn("Could not retrieve block height, estimating...", e);
-        // Estimate based on standard block intervals
-        const genesisTimestamp = 1231006505000;
-        const elapsedMinutes = (Date.now() - genesisTimestamp) / 60000;
-        const estHeight = Math.floor(elapsedMinutes / 10.02);
-        savedBlockHeight = `${estHeight} (Est.)`;
+        console.warn("Could not retrieve block height", e);
+        savedBlockHeight = "";
         renderBlockHeight();
     }
 }
@@ -549,8 +573,10 @@ function renderBlockHeight() {
     const el = document.getElementById("cert-block-height");
     if (!el) return;
 
-    if (isSealed && savedBlockHeight) {
-        el.innerHTML = `Block <strong>#${savedBlockHeight}</strong>`;
+    if (isSealed) {
+        el.innerHTML = savedBlockHeight
+            ? `Block <strong>#${savedBlockHeight}</strong>`
+            : "Reference unavailable";
     } else {
         el.textContent = "Unsealed";
     }
@@ -575,15 +601,20 @@ async function toggleSeal() {
     if (!isSealed) {
         // Start melting wax loader
         sealBtn.classList.add("loading-wax");
+        sealBtn.disabled = true;
+        sealBtn.setAttribute("aria-busy", "true");
         if (btnText) btnText.textContent = "Melting Wax...";
 
-        await new Promise(r => setTimeout(r, 900)); // wait for wax melting
+        await new Promise(r => setTimeout(r, 250));
 
-        sealBtn.classList.remove("loading-wax");
         isSealed = true;
 
         // Fetch block height at the moment of sealing
         await fetchBlockHeight();
+
+        sealBtn.classList.remove("loading-wax");
+        sealBtn.disabled = false;
+        sealBtn.removeAttribute("aria-busy");
 
         // Lock Document & trigger animations
         docSheet?.classList.add("sealed-lock");
@@ -608,7 +639,7 @@ async function toggleSeal() {
         sealBtn?.classList.add("secondary");
 
         // Trigger Confetti
-        if (confettiSystem) {
+        if (confettiSystem && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
             confettiSystem.spawn();
         }
     } else {
@@ -645,7 +676,9 @@ async function copyContractText() {
         : `${nameA} marks this day at ${ceremonyPlace} with these Bitcoin vows:`;
 
     const rules = [];
-    rules.push(`- Promise to stack ${formatCurrency(values.buyAmount)} of Bitcoin ${values.buyFrequency} with patience and care.`);
+    if (values.enableStacking) {
+        rules.push(`- Promise to stack ${formatCurrency(values.buyAmount)} of Bitcoin ${values.buyFrequency} with patience and care.`);
+    }
     if (values.noPanic) rules.push("- Hold firm through volatility and never panic sell under market pressure.");
     if (values.noLeverage) rules.push("- Reject derivative trading and never use leverage against shared peace of mind.");
     if (values.coldStorage) rules.push("- Keep private keys offline in secure cold storage, away from temptation and hurry.");
@@ -660,7 +693,9 @@ async function copyContractText() {
         "=========================================",
         `Date: ${ceremonyDate}`,
         `Place: ${ceremonyPlace}`,
-        isSealed && savedBlockHeight ? `Timechain Block: #${savedBlockHeight}` : "Timechain Status: Unsealed",
+        isSealed
+            ? (savedBlockHeight ? `Bitcoin Block Reference: #${savedBlockHeight}` : "Bitcoin Block Reference: unavailable")
+            : "Seal Status: Unsealed",
         "",
         intro,
         "",
@@ -748,6 +783,7 @@ function restoreState() {
 
         // Trigger view switches for Setup Type
         setSetupType(type);
+        updateStackingVisibility();
 
         // Restore Block height
         savedBlockHeight = data.savedBlockHeight || "";
@@ -831,6 +867,7 @@ async function resetState() {
     setSetupType("solo");
 
     updateWitnessVisibility();
+    updateStackingVisibility();
     updatePrenup();
     updateCardClasses();
     showSavedToast("Reset complete");
@@ -938,29 +975,6 @@ class ConfettiSystem {
         }
     }
 
-    spawnSparkle(x, y) {
-        if (Math.random() > 0.25) return; // subtle trailing
-
-        this.particles.push({
-            x: x + window.scrollX,
-            y: y + window.scrollY,
-            size: 1.2 + Math.random() * 2.8,
-            color: this.colors[Math.floor(Math.random() * this.colors.length)],
-            speedX: -0.4 + Math.random() * 0.8,
-            speedY: 0.3 + Math.random() * 0.7,
-            rotation: Math.random() * 360,
-            rotationSpeed: -2 + Math.random() * 4,
-            isCoin: false,
-            opacity: 0.75 + Math.random() * 0.25,
-            isSparkle: true
-        });
-
-        if (!this.isActive) {
-            this.isActive = true;
-            this.animate();
-        }
-    }
-
     animate() {
         if (this.particles.length === 0) {
             this.isActive = false;
@@ -1049,7 +1063,9 @@ function showConfirmModal() {
             return;
         }
 
-        // Show modal
+        const previousFocus = document.activeElement;
+        const focusable = [btnCancel, btnConfirm];
+
         modal.classList.remove("hidden");
         btnConfirm.focus();
 
@@ -1063,14 +1079,38 @@ function showConfirmModal() {
             resolve(true);
         }
 
+        function handleKeydown(event) {
+            if (event.key === "Escape") {
+                event.preventDefault();
+                handleCancel();
+                return;
+            }
+
+            if (event.key !== "Tab") return;
+            const currentIndex = focusable.indexOf(document.activeElement);
+            const direction = event.shiftKey ? -1 : 1;
+            const nextIndex = (currentIndex + direction + focusable.length) % focusable.length;
+            event.preventDefault();
+            focusable[nextIndex].focus();
+        }
+
+        function handleOverlayClick(event) {
+            if (event.target === modal) handleCancel();
+        }
+
         function cleanup() {
             modal.classList.add("hidden");
             btnCancel.removeEventListener("click", handleCancel);
             btnConfirm.removeEventListener("click", handleConfirm);
+            modal.removeEventListener("click", handleOverlayClick);
+            document.removeEventListener("keydown", handleKeydown);
+            if (previousFocus instanceof HTMLElement) previousFocus.focus();
         }
 
         btnCancel.addEventListener("click", handleCancel);
         btnConfirm.addEventListener("click", handleConfirm);
+        modal.addEventListener("click", handleOverlayClick);
+        document.addEventListener("keydown", handleKeydown);
     });
 }
 
@@ -1119,44 +1159,6 @@ function initScrollspy() {
                 rulesLink?.classList.remove("active-nav");
                 prenupLink?.classList.remove("active-nav");
             }
-        }
-    });
-}
-
-// -------------------------------------------------------------
-// Scroll Reveal animation observer
-// -------------------------------------------------------------
-function initScrollReveal() {
-    const targets = document.querySelectorAll(".education-section, .faq-section");
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add("reveal-active");
-            }
-        });
-    }, { threshold: 0.02 });
-
-    targets.forEach(t => {
-        t.classList.add("reveal-hidden");
-        observer.observe(t);
-    });
-}
-
-// -------------------------------------------------------------
-// Cursor-driven background blobs parallax animation
-// -------------------------------------------------------------
-function initBackgroundParallax() {
-    let ticked = false;
-    window.addEventListener("mousemove", (e) => {
-        if (!ticked) {
-            window.requestAnimationFrame(() => {
-                const x = (e.clientX / window.innerWidth) - 0.5;
-                const y = (e.clientY / window.innerHeight) - 0.5;
-                document.body.style.setProperty("--mx", `${x * 35}px`);
-                document.body.style.setProperty("--my", `${y * 35}px`);
-                ticked = false;
-            });
-            ticked = true;
         }
     });
 }

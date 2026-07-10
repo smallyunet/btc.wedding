@@ -18,11 +18,12 @@
     <!-- Premium Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800;900&amp;family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <a class="skip-link" href="#rules">Skip to certificate builder</a>
     <!-- Faint glowing blobs in background -->
     <div class="glow-bg">
         <div class="blob gold"></div>
@@ -39,8 +40,8 @@
             <span class="brand-text">btc.wedding</span>
         </a>
         <nav aria-label="Primary navigation">
-            <a href="#rules" class="nav-link">Rules</a>
-            <a href="#prenup" class="nav-link">Prenup</a>
+            <a href="#rules" class="nav-link">Create</a>
+            <a href="#prenup" class="nav-link">Certificate</a>
         </nav>
     </header>
 
@@ -52,16 +53,16 @@
                     <span>Local-only</span>
                 </div>
                 <h1>Bitcoin Vow Certificate</h1>
-                <p class="hero-text">Create a symbolic wedding certificate for shared Bitcoin rules. Add names, ceremony details, vows, signatures, and print a keepsake without sending anything to a server.</p>
+                <p class="hero-text">Turn shared Bitcoin principles into a private, printable keepsake. Choose the vows, add your ceremony details, sign together, and seal the certificate in your browser.</p>
                 <div class="promise-row" aria-label="Privacy promises">
                     <div class="promise-item">
-                        <span>No login</span>
+                        <span>Details stay local</span>
                     </div>
                     <div class="promise-item">
-                        <span>No seed input</span>
+                        <span>No wallet connection</span>
                     </div>
                     <div class="promise-item">
-                        <span>Printable</span>
+                        <span>Print-ready</span>
                     </div>
                 </div>
                 <div class="hero-actions">
@@ -107,6 +108,10 @@
         </section>
 
         <section id="rules" class="workspace" aria-label="Bitcoin prenup rules">
+            <div class="workspace-mobile-tabs" role="tablist" aria-label="Certificate builder view">
+                <button type="button" class="workspace-tab active" id="tab-customize" role="tab" aria-selected="true" aria-controls="prenup-form">Customize</button>
+                <button type="button" class="workspace-tab" id="tab-preview" role="tab" aria-selected="false" aria-controls="prenup" tabindex="-1">Preview</button>
+            </div>
             <form class="rules-panel" id="prenup-form" onsubmit="return false;">
                 <div class="panel-heading">
                     <span class="eyebrow">Certificate details</span>
@@ -115,7 +120,7 @@
 
                 <!-- Setup Type Selector -->
                 <div class="form-section">
-                    <label class="section-label">Certificate Type</label>
+                    <span class="section-label">Certificate Type</span>
                     <div class="toggle-group">
                         <label class="toggle-btn active" id="btn-solo">
                             <input type="radio" name="setup-type" value="solo" checked class="sr-only">
@@ -133,32 +138,13 @@
                     <div class="field" id="partner-a-wrapper">
                         <label for="partner-a-name" class="field-label">Name on Certificate</label>
                         <div class="input-shell">
-                            <input id="partner-a-name" type="text" placeholder="e.g. Satoshi" value="Satoshi">
+                            <input id="partner-a-name" type="text" placeholder="e.g. Satoshi" value="Satoshi" autocomplete="name">
                         </div>
                     </div>
                     <div class="field hidden" id="partner-b-wrapper">
                         <label for="partner-b-name" class="field-label">Partner's Name</label>
                         <div class="input-shell">
-                            <input id="partner-b-name" type="text" placeholder="e.g. Hal Finney" value="Hal Finney">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Witness Toggle Option -->
-                <div class="form-section">
-                    <div class="witness-toggle-container">
-                        <label class="witness-checkbox-label" for="enable-witness">
-                            <div class="checkbox-witness-wrapper">
-                                <input type="checkbox" id="enable-witness" class="checkbox-witness sr-only">
-                                <span class="custom-witness-checkbox"></span>
-                            </div>
-                            <span class="witness-label-text">Include Witness / Notary signature</span>
-                        </label>
-                    </div>
-                    <div class="field hidden" id="witness-name-wrapper">
-                        <label for="witness-name" class="field-label">Witness Name</label>
-                        <div class="input-shell">
-                            <input id="witness-name" type="text" placeholder="e.g. Nick Szabo" value="Nick Szabo">
+                            <input id="partner-b-name" type="text" placeholder="e.g. Hal Finney" value="Hal Finney" autocomplete="name">
                         </div>
                     </div>
                 </div>
@@ -178,10 +164,17 @@
                     </label>
                 </div>
 
-                <!-- DCA Setup -->
+                <!-- Optional stacking plan -->
                 <fieldset class="form-fieldset">
-                    <legend>Bitcoin Rule</legend>
-                    <div class="field-grid">
+                    <legend>Stacking Plan</legend>
+                    <label class="witness-checkbox-label stacking-toggle" for="enable-stacking">
+                        <span class="checkbox-witness-wrapper">
+                            <input type="checkbox" id="enable-stacking" class="checkbox-witness sr-only" checked>
+                            <span class="custom-witness-checkbox"></span>
+                        </span>
+                        <span class="witness-label-text">Include a recurring Bitcoin purchase vow</span>
+                    </label>
+                    <div class="field-grid stacking-fields" id="stacking-fields">
                         <label class="field">
                             <span class="field-label">Amount</span>
                             <div class="input-shell amount-input">
@@ -264,6 +257,29 @@
                         </div>
                     </div>
                 </fieldset>
+
+                <details class="optional-details">
+                    <summary>Optional witness</summary>
+                    <div class="optional-details-body">
+                        <div class="witness-toggle-container">
+                            <label class="witness-checkbox-label" for="enable-witness">
+                                <span class="checkbox-witness-wrapper">
+                                    <input type="checkbox" id="enable-witness" class="checkbox-witness sr-only">
+                                    <span class="custom-witness-checkbox"></span>
+                                </span>
+                                <span class="witness-label-text">Add a witness signature</span>
+                            </label>
+                        </div>
+                        <div class="field hidden" id="witness-name-wrapper">
+                            <label for="witness-name" class="field-label">Witness Name</label>
+                            <div class="input-shell">
+                                <input id="witness-name" type="text" placeholder="e.g. Nick Szabo" value="Nick Szabo" autocomplete="name">
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <button type="button" class="mobile-preview-cta" id="open-mobile-preview">Preview Certificate</button>
             </form>
 
             <div class="output-panel-wrapper">
@@ -273,7 +289,7 @@
                             <span class="eyebrow">Live certificate</span>
                             <h2>Your Bitcoin Vows</h2>
                         </div>
-                        <span id="saved-status" class="saved-status">Saved locally</span>
+                        <span id="saved-status" class="saved-status" role="status" aria-live="polite">Saved locally</span>
                     </div>
 
                     <!-- Certificate layout -->
@@ -307,12 +323,12 @@
                                         </ul>
                                     </div>
 
-                                    <p class="cert-pledge">This is a symbolic keepsake, not legal or financial advice. Never type a seed phrase into any website.</p>
+                                    <p class="cert-pledge">A symbolic keepsake, not a legal contract or financial advice. Never type a seed phrase into any website.</p>
                                 </div>
 
                                 <!-- Timechain Timestamp Block -->
                                 <div class="cert-block-height-wrapper">
-                                    <span class="cert-block-label">Timechain Block Timestamp</span>
+                                    <span class="cert-block-label">Bitcoin Block Reference</span>
                                     <span id="cert-block-height">Unsealed</span>
                                 </div>
 
@@ -321,7 +337,7 @@
                                     <div class="signature-box" id="sig-box-a">
                                         <span class="sig-label">Partner A Signature</span>
                                         <div class="canvas-wrapper">
-                                            <canvas id="sig-canvas-a" width="300" height="80"></canvas>
+                                            <canvas id="sig-canvas-a" width="300" height="80" tabindex="0" role="img" aria-label="Draw Partner A signature here; the typed certificate name below is also retained"></canvas>
                                             <button type="button" class="btn-clear-sig" id="clear-sig-a" aria-label="Clear Partner A Signature">Clear</button>
                                         </div>
                                         <span class="sig-name" id="sig-name-display-a">Satoshi</span>
@@ -331,7 +347,7 @@
                                     <div class="signature-box hidden" id="sig-box-b">
                                         <span class="sig-label">Partner B Signature</span>
                                         <div class="canvas-wrapper">
-                                            <canvas id="sig-canvas-b" width="300" height="80"></canvas>
+                                            <canvas id="sig-canvas-b" width="300" height="80" tabindex="0" role="img" aria-label="Draw Partner B signature here; the typed certificate name below is also retained"></canvas>
                                             <button type="button" class="btn-clear-sig" id="clear-sig-b" aria-label="Clear Partner B Signature">Clear</button>
                                         </div>
                                         <span class="sig-name" id="sig-name-display-b">Hal Finney</span>
@@ -341,7 +357,7 @@
                                     <div class="signature-box hidden" id="sig-box-witness">
                                         <span class="sig-label">Witness Signature</span>
                                         <div class="canvas-wrapper">
-                                            <canvas id="sig-canvas-witness" width="300" height="80"></canvas>
+                                            <canvas id="sig-canvas-witness" width="300" height="80" tabindex="0" role="img" aria-label="Draw witness signature here; the typed witness name below is also retained"></canvas>
                                             <button type="button" class="btn-clear-sig" id="clear-sig-witness" aria-label="Clear Witness Signature">Clear</button>
                                         </div>
                                         <span class="sig-name" id="sig-name-display-witness">Witness</span>
@@ -396,44 +412,43 @@
                         <button class="button primary glow-effect" type="button" id="btn-seal">
                             <span class="btn-text">Sign & Seal Vows</span>
                         </button>
-                        <button class="button secondary" type="button" id="copy-prenup">Copy</button>
-                        <button class="button secondary" type="button" id="print-prenup">Print</button>
+                        <button class="button secondary" type="button" id="copy-prenup">Copy Text</button>
+                        <button class="button secondary" type="button" id="print-prenup">Print Certificate</button>
                         <button class="button danger" type="button" id="reset-prenup">Reset</button>
                     </div>
                 </aside>
             </div>
         </section>
 
-        <!-- Certificate flow section -->
+        <!-- Compact certificate flow -->
         <section class="education-section">
             <div class="section-container">
-                <span class="eyebrow">How it becomes yours</span>
-                <h2>From Vows To Certificate</h2>
-                <p class="section-subtitle">The page is built around one flow: personalize the wedding details, choose the Bitcoin promises, then sign and print the finished keepsake.</p>
+                <span class="eyebrow">Three simple steps</span>
+                <h2>Create A Keepsake Together</h2>
 
                 <div class="education-grid">
                     <div class="education-card">
                         <div class="edu-card-header">
-                            <span class="edu-icon">Names</span>
-                            <h3>Personalized Keepsake</h3>
+                            <span class="edu-icon">01</span>
+                            <h3>Personalize</h3>
                         </div>
-                        <p>Put the couple's names, ceremony date, and location directly on the certificate so the result feels like a real commemorative artifact rather than a generic checklist.</p>
+                        <p>Add names and ceremony details.</p>
                     </div>
 
                     <div class="education-card">
                         <div class="edu-card-header">
-                            <span class="edu-icon">Vows</span>
-                            <h3>Bitcoin Promises</h3>
+                            <span class="edu-icon">02</span>
+                            <h3>Choose Vows</h3>
                         </div>
-                        <p>Choose the Bitcoin commitments that belong in the ceremony: steady stacking, no panic selling, no leverage, cold storage, and any custom promise you want to preserve.</p>
+                        <p>Select the Bitcoin principles you share.</p>
                     </div>
 
                     <div class="education-card">
                         <div class="edu-card-header">
-                            <span class="edu-icon">Print</span>
-                            <h3>Sign And Seal</h3>
+                            <span class="edu-icon">03</span>
+                            <h3>Sign &amp; Print</h3>
                         </div>
-                        <p>Sign the certificate in-browser, seal it with a Bitcoin timestamp, then print the finished page as a private memento for your records or ceremony table.</p>
+                        <p>Seal it with a block reference and print.</p>
                     </div>
                 </div>
             </div>
@@ -443,46 +458,46 @@
         <section class="faq-section">
             <div class="section-container">
                 <span class="eyebrow">Questions</span>
-                <h2>Frequently Answered</h2>
+                <h2>Frequently Asked Questions</h2>
 
                 <div class="faq-accordion">
                     <div class="faq-item">
-                        <button class="faq-question" type="button" aria-expanded="false">
+                        <button class="faq-question" type="button" aria-expanded="false" aria-controls="faq-legal">
                             <span>Is this document legally binding?</span>
                             <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </button>
-                        <div class="faq-answer">
-                            <p>No, this is a personal covenant or an agreement of mutual conviction rather than a registered legal contract. It is designed to act as a clear, written record of your joint or individual intentions before volatility tests your behavior. Many users print and sign it to keep alongside their physical cold storage backups.</p>
+                        <div class="faq-answer" id="faq-legal" hidden>
+                            <p>No. This is a symbolic personal keepsake, not a registered legal contract or financial advice. It records your shared or individual intentions, but it does not create enforceable obligations.</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
-                        <button class="faq-question" type="button" aria-expanded="false">
+                        <button class="faq-question" type="button" aria-expanded="false" aria-controls="faq-privacy">
                             <span>Where is my data sent? Is it private?</span>
                             <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </button>
-                        <div class="faq-answer">
-                            <p>Your privacy is absolute. This website runs entirely client-side. We have no databases, no analytics, and no tracking scripts. All inputs, names, and signature coordinates are saved locally in your browser's <code>localStorage</code>. It never leaves your machine.</p>
+                        <div class="faq-answer" id="faq-privacy" hidden>
+                            <p>Your certificate details and signatures stay in your browser's <code>localStorage</code>. The site has no account, database, analytics, or tracking scripts. If you seal the certificate, it contacts mempool.space only to retrieve the latest public block height; no certificate content is included in that request.</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
-                        <button class="faq-question" type="button" aria-expanded="false">
-                            <span>What does "Timechain Block Timestamp" mean?</span>
+                        <button class="faq-question" type="button" aria-expanded="false" aria-controls="faq-block">
+                            <span>What does "Bitcoin Block Reference" mean?</span>
                             <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </button>
-                        <div class="faq-answer">
-                            <p>When you click "Sign & Seal Vows," the page communicates with the public Bitcoin block explorer API (mempool.space) to fetch the latest block height of the Bitcoin network. It writes this block number onto your document as a cryptographic timestamp of when your covenant was sealed.</p>
+                        <div class="faq-answer" id="faq-block" hidden>
+                            <p>When you click "Sign & Seal Vows," the page retrieves the latest public Bitcoin block height from mempool.space and prints that number on the certificate as a time reference. The certificate itself is not hashed or written to Bitcoin, so this is not an on-chain proof or cryptographic timestamp.</p>
                         </div>
                     </div>
 
                     <div class="faq-item">
-                        <button class="faq-question" type="button" aria-expanded="false">
+                        <button class="faq-question" type="button" aria-expanded="false" aria-controls="faq-storage">
                             <span>How should I store my generated prenup?</span>
                             <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                         </button>
-                        <div class="faq-answer">
-                            <p>Once you fill out the details and sign the canvas, you can print the document. Our print stylesheet will automatically format it as a clean, elegant paper certificate without the web buttons. We recommend keeping a physical printed copy inside a fireproof safe, ideally in the same secure location as your cold wallet hardware or seed backups.</p>
+                        <div class="faq-answer" id="faq-storage" hidden>
+                            <p>Print the finished certificate or copy its text for your records. Treat it as a keepsake rather than recovery material, and store it separately from seed phrases and private-key backups.</p>
                         </div>
                     </div>
                 </div>
@@ -491,24 +506,26 @@
     </main>
 
     <!-- Canvas for fullscreen gold confetti particles -->
-    <canvas id="confetti-canvas"></canvas>
+    <canvas id="confetti-canvas" aria-hidden="true"></canvas>
 
     <footer class="site-footer">
-        <p>Static page. Local browser state only. Never enter a seed phrase into any website.</p>
-        <p class="footer-links" style="margin-top: 12px;">
-            Read the <a href="https://bitcoin.org/bitcoin.pdf" target="_blank" rel="noopener noreferrer" style="color: #d4af37; text-decoration: none; font-weight: 500;">Bitcoin Whitepaper</a>
+        <p>Certificate content stays local. Sealing requests only the latest public block height. Never enter a seed phrase into any website.</p>
+        <p class="footer-links">
+            Read the <a href="https://bitcoin.org/bitcoin.pdf" target="_blank" rel="noopener noreferrer">Bitcoin Whitepaper</a>
         </p>
     </footer>
 
     <!-- Custom Premium Confirm Modal -->
-    <div id="confirm-modal" class="modal-overlay hidden" aria-modal="true" role="dialog">
+    <div id="confirm-modal" class="modal-overlay hidden" aria-modal="true" role="dialog" aria-labelledby="confirm-title" aria-describedby="confirm-description">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-icon">⚠️</span>
-                <h3>Reset Vows</h3>
+                <span class="modal-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 2.9 1.8 17a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+                </span>
+                <h3 id="confirm-title">Reset Vows</h3>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to reset all wedding vows and signatures? This action cannot be undone.</p>
+                <p id="confirm-description">Are you sure you want to reset all wedding vows and signatures? This action cannot be undone.</p>
             </div>
             <div class="modal-actions">
                 <button type="button" class="button secondary" id="modal-cancel">Cancel</button>

@@ -72,14 +72,14 @@ body {
     background: radial-gradient(circle, var(--gold) 0%, transparent 70%);
     top: -10%;
     left: 10%;
-    animation: float-slow 15s infinite alternate;
+    animation: none;
 }
 
 .glow-bg .blob.orange {
     background: radial-gradient(circle, var(--orange) 0%, transparent 70%);
     bottom: -10%;
     right: 10%;
-    animation: float-slow 18s infinite alternate-reverse;
+    animation: none;
 }
 
 @keyframes float-slow {
@@ -101,6 +101,29 @@ body {
 
 .hidden {
     display: none !important;
+}
+
+.skip-link {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 2000;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--gold-bright);
+    color: #050608;
+    font-weight: 800;
+    text-decoration: none;
+    transform: translateY(-150%);
+}
+
+.skip-link:focus {
+    transform: translateY(0);
+}
+
+:where(a, button, input, select, summary, canvas):focus-visible {
+    outline: 3px solid var(--gold-bright);
+    outline-offset: 3px;
 }
 
 /* Header styling */
@@ -207,10 +230,11 @@ body {
 }
 
 .hero-copy h1 {
+    font-family: var(--font-serif-title);
     font-size: clamp(2.5rem, 5vw, 4.2rem);
     line-height: 1.05;
     font-weight: 800;
-    letter-spacing: -0.03em;
+    letter-spacing: 0.01em;
     background: linear-gradient(135deg, #ffffff 40%, var(--gold-bright) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -305,7 +329,7 @@ body {
 }
 
 .hero-document:hover {
-    transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg) scale(1.02);
+    transform: none;
 }
 
 .gold-frame-inner {
@@ -467,6 +491,11 @@ body {
     width: min(1200px, calc(100% - 48px));
     margin: 0 auto;
     padding-bottom: 100px;
+}
+
+.workspace-mobile-tabs,
+.mobile-preview-cta {
+    display: none;
 }
 
 /* Form Panel */
@@ -693,6 +722,52 @@ body {
     letter-spacing: 0.08em;
 }
 
+.stacking-toggle {
+    margin-bottom: 16px;
+}
+
+.stacking-fields {
+    grid-template-columns: 1fr 1fr;
+}
+
+.optional-details {
+    margin-bottom: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.015);
+}
+
+.optional-details summary {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    color: var(--text-white);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+}
+
+.optional-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.optional-details summary::after {
+    content: "+";
+    color: var(--gold);
+    font-size: 1.2rem;
+}
+
+.optional-details[open] summary::after {
+    content: "−";
+}
+
+.optional-details-body {
+    padding: 0 18px 18px;
+}
+
 /* Vow Card Checklist Grid */
 .vows-card-grid {
     display: grid;
@@ -727,7 +802,7 @@ body {
 .vow-card:hover {
     background: rgba(255, 255, 255, 0.04);
     border-color: rgba(212, 175, 55, 0.3);
-    transform: translateY(-2px);
+    transform: none;
 }
 
 .vow-card:hover::before {
@@ -1087,6 +1162,20 @@ body {
     opacity: 1;
 }
 
+.canvas-wrapper:focus-within .btn-clear-sig {
+    opacity: 1;
+}
+
+@media (hover: none), (pointer: coarse) {
+    .btn-clear-sig {
+        top: 6px;
+        right: 0;
+        min-width: 44px;
+        min-height: 44px;
+        opacity: 1;
+    }
+}
+
 .btn-clear-sig:hover {
     background: rgba(28, 24, 19, 0.12);
     color: var(--ink);
@@ -1245,6 +1334,10 @@ body {
     text-decoration: underline !important;
 }
 
+.footer-links {
+    margin-top: 12px;
+}
+
 /* Glow Effect for Button */
 .glow-effect {
     position: relative;
@@ -1295,8 +1388,68 @@ body {
         gap: 40px;
     }
 
+    .workspace-mobile-tabs {
+        position: sticky;
+        top: 92px;
+        z-index: 45;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px;
+        padding: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 999px;
+        background: rgba(8, 9, 12, 0.94);
+        backdrop-filter: blur(16px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .workspace-tab {
+        min-height: 44px;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--text-muted);
+        font: 700 0.9rem var(--font-sans);
+        cursor: pointer;
+    }
+
+    .workspace-tab.active {
+        background: rgba(212, 175, 55, 0.14);
+        color: var(--gold-bright);
+    }
+
+    .workspace .output-panel-wrapper {
+        display: none;
+    }
+
+    .workspace.show-preview .rules-panel {
+        display: none;
+    }
+
+    .workspace.show-preview .output-panel-wrapper {
+        display: block;
+    }
+
     .output-panel-wrapper {
         position: static;
+    }
+
+    .mobile-preview-cta {
+        position: sticky;
+        bottom: max(12px, env(safe-area-inset-bottom));
+        z-index: 35;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 52px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: var(--radius-sm);
+        background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+        color: #050608;
+        font: 800 1rem var(--font-sans);
+        cursor: pointer;
     }
 }
 
@@ -1324,6 +1477,10 @@ body {
     .hero {
         gap: 28px;
         padding: 34px 0 44px;
+    }
+
+    .hero-document-wrapper {
+        display: none;
     }
 
     .hero-copy h1 {
@@ -1357,6 +1514,10 @@ body {
     }
 
     .vows-card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stacking-fields {
         grid-template-columns: 1fr;
     }
 
@@ -1394,6 +1555,11 @@ body {
 
     .form-fieldset {
         padding: 20px;
+    }
+
+    .input-shell input,
+    .select-shell select {
+        font-size: 1rem;
     }
 
     .cert-frame-inner {
@@ -1904,7 +2070,7 @@ body {
 
 /* Certificate flow section */
 .education-section {
-    padding: 70px 0;
+    padding: 52px 0;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     background: radial-gradient(circle at bottom center, rgba(212, 175, 55, 0.02), transparent 75%);
     position: relative;
@@ -1938,15 +2104,15 @@ body {
 .education-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin-top: 20px;
+    gap: 16px;
+    margin-top: 28px;
 }
 
 .education-card {
     background: var(--panel-dark);
     border: 1px solid var(--panel-border);
     border-radius: var(--radius-lg);
-    padding: 30px;
+    padding: 22px;
     text-align: left;
     transition: var(--transition);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
@@ -1964,7 +2130,7 @@ body {
 }
 
 .education-card:hover {
-    transform: translateY(-6px);
+    transform: none;
     border-color: rgba(212, 175, 55, 0.22);
     box-shadow: 0 20px 45px rgba(212, 175, 55, 0.05);
 }
@@ -1977,11 +2143,11 @@ body {
     display: flex;
     align-items: center;
     gap: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .edu-icon {
-    min-width: 58px;
+    min-width: 42px;
     min-height: 34px;
     padding: 7px 10px;
     border: 1px solid rgba(212, 175, 55, 0.2);
@@ -2019,7 +2185,7 @@ body {
 
 /* FAQ Section & Accordion Styles */
 .faq-section {
-    padding: 90px 0 110px;
+    padding: 72px 0 96px;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     background: radial-gradient(circle at top center, rgba(247, 147, 26, 0.01), transparent 70%);
 }
@@ -2062,6 +2228,12 @@ body {
     transition: var(--transition);
     font-family: var(--font-sans);
     outline: 0;
+}
+
+.faq-question:focus-visible {
+    outline: 3px solid var(--gold-bright);
+    outline-offset: 6px;
+    border-radius: 4px;
 }
 
 .faq-question:hover {
@@ -2117,7 +2289,7 @@ body {
     transition: filter 0.3s ease;
 }
 .hero-document-wrapper:hover {
-    filter: drop-shadow(0 20px 50px rgba(212, 175, 55, 0.12));
+    filter: none;
 }
 
 /* Print Overrides for Three Columns */
@@ -2199,9 +2371,60 @@ body {
     border: 1px solid transparent !important;
     background: linear-gradient(#090a0d, #090a0d) padding-box,
                 linear-gradient(90deg, var(--gold), var(--orange), var(--gold-bright), var(--orange), var(--gold)) border-box !important;
-    background-size: 200% auto !important;
-    animation: border-glow-run 3s linear infinite;
+    background-size: 100% auto !important;
+    animation: none;
     box-shadow: 0 0 14px var(--gold-glow);
+}
+
+.toggle-btn:has(input:focus-visible),
+.vow-card:has(input:focus-visible),
+.witness-checkbox-label:has(input:focus-visible) {
+    outline: 3px solid var(--gold-bright);
+    outline-offset: 3px;
+}
+
+.witness-checkbox-label {
+    min-height: 44px;
+}
+
+.modal-actions button {
+    min-height: 44px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .reveal-hidden {
+        opacity: 1;
+        transform: none;
+    }
+
+    #confetti-canvas {
+        display: none;
+    }
+}
+
+@media print {
+    .workspace-mobile-tabs,
+    .mobile-preview-cta,
+    .optional-details {
+        display: none !important;
+    }
+
+    .output-panel-wrapper {
+        display: block !important;
+    }
 }
 
 /* Melting Wax Loader Button State */
