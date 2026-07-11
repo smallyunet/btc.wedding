@@ -43,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
     bindStackingPlan();
     bindMobilePreview();
     bindInputs();
+    bindInputEnhancements();
     bindSignatures();
     bindActions();
     bindFAQ();
@@ -53,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateStackingVisibility();
     updatePrenup();
     updateCardClasses();
+    updateInputEnhancements();
     renderBlockHeight();
 
     // Navigation detail setup
@@ -115,7 +117,9 @@ function bindStackingPlan() {
 function updateStackingVisibility() {
     const enabled = document.getElementById("enable-stacking")?.checked;
     const fields = document.getElementById("stacking-fields");
+    const presets = document.getElementById("amount-presets");
     fields?.classList.toggle("hidden", !enabled);
+    presets?.classList.toggle("hidden", !enabled);
 }
 
 function bindMobilePreview() {
@@ -144,7 +148,9 @@ function bindMobilePreview() {
 
     customizeTab.addEventListener("click", () => setView("customize"));
     previewTab.addEventListener("click", () => setView("preview"));
-    previewCta?.addEventListener("click", () => setView("preview"));
+    previewCta?.addEventListener("click", () => {
+        if (validateCertificateForm({ focusFirst: true })) setView("preview");
+    });
     createNavLink?.addEventListener("click", () => setView("customize", false));
     certificateNavLink?.addEventListener("click", (event) => {
         if (window.innerWidth > 1024) return;
@@ -225,6 +231,93 @@ function bindInputs() {
     }
 }
 
+function bindInputEnhancements() {
+    document.querySelectorAll(".amount-preset").forEach((button) => {
+        button.addEventListener("click", () => {
+            const amountInput = document.getElementById("buy-amount");
+            if (!amountInput) return;
+            amountInput.value = button.dataset.amount || "";
+            amountInput.dispatchEvent(new Event("input", { bubbles: true }));
+            amountInput.focus();
+        });
+    });
+
+    ["partner-a-name", "partner-b-name", "ceremony-date", "ceremony-place", "buy-amount", "witness-name"].forEach((id) => {
+        document.getElementById(id)?.addEventListener("blur", () => validateInput(id, true));
+    });
+}
+
+function getInputRequirement(id) {
+    const isJoint = getSetupType() === "joint";
+    const hasWitness = document.getElementById("enable-witness")?.checked;
+    const hasStacking = document.getElementById("enable-stacking")?.checked;
+    const requirements = {
+        "partner-a-name": { required: true, message: "Add the first name for the certificate." },
+        "partner-b-name": { required: isJoint, message: "Add the second name for the couple certificate." },
+        "ceremony-date": { required: true, message: "Choose the ceremony date." },
+        "ceremony-place": { required: true, message: "Add a ceremony place." },
+        "buy-amount": { required: hasStacking, message: "Enter an amount greater than zero." },
+        "witness-name": { required: hasWitness, message: "Add the witness name." }
+    };
+    return requirements[id];
+}
+
+function validateInput(id, showError = false) {
+    const field = document.getElementById(id);
+    const requirement = getInputRequirement(id);
+    if (!field || !requirement) return true;
+
+    const value = field.value.trim();
+    const amountInvalid = id === "buy-amount" && requirement.required && Number(value) <= 0;
+    const invalid = requirement.required && (!value || amountInvalid);
+    const error = document.getElementById(`${id}-error`);
+    const wrapper = field.closest(".field");
+
+    field.setAttribute("aria-invalid", String(invalid));
+    wrapper?.classList.toggle("has-error", invalid && showError);
+    if (error) error.textContent = invalid && showError ? requirement.message : "";
+    return !invalid;
+}
+
+function validateCertificateForm({ focusFirst = false } = {}) {
+    const ids = ["partner-a-name", "partner-b-name", "ceremony-date", "ceremony-place", "buy-amount", "witness-name"];
+    const invalidIds = ids.filter((id) => !validateInput(id, true));
+
+    if (invalidIds.length && focusFirst) {
+        if (window.innerWidth <= 1024) document.getElementById("tab-customize")?.click();
+        document.getElementById(invalidIds[0])?.focus();
+    }
+    return invalidIds.length === 0;
+}
+
+function updateInputEnhancements() {
+    const customVow = document.getElementById("custom-vow");
+    const customVowCount = document.getElementById("custom-vow-count");
+    if (customVow && customVowCount) {
+        customVowCount.textContent = `${customVow.value.length} / ${customVow.maxLength}`;
+    }
+
+    const amount = document.getElementById("buy-amount")?.value;
+    document.querySelectorAll(".amount-preset").forEach((button) => {
+        button.classList.toggle("active", button.dataset.amount === amount);
+        button.setAttribute("aria-pressed", String(button.dataset.amount === amount));
+    });
+
+    const requiredIds = ["partner-a-name", "ceremony-date", "ceremony-place"];
+    if (getSetupType() === "joint") requiredIds.push("partner-b-name");
+    if (document.getElementById("enable-stacking")?.checked) requiredIds.push("buy-amount");
+    if (document.getElementById("enable-witness")?.checked) requiredIds.push("witness-name");
+    const completeCount = requiredIds.filter((id) => validateInput(id, false)).length;
+    const status = document.getElementById("form-completion-status");
+    const progress = status?.closest(".form-progress");
+    if (status) {
+        status.textContent = completeCount === requiredIds.length
+            ? "Essential details complete"
+            : `${completeCount} of ${requiredIds.length} essential details complete`;
+    }
+    progress?.classList.toggle("complete", completeCount === requiredIds.length);
+}
+
 function updateCardClasses() {
     const checkboxes = ["no-panic", "no-leverage", "cold-storage", "no-shitcoins"];
     checkboxes.forEach((id) => {
@@ -240,6 +333,7 @@ function updateCardClasses() {
 function handleChange() {
     saveState();
     updatePrenup();
+    updateInputEnhancements();
 }
 
 
@@ -617,6 +711,7 @@ async function toggleSeal() {
     const btnText = sealBtn?.querySelector(".btn-text");
 
     if (!isSealed) {
+        if (!validateCertificateForm({ focusFirst: true })) return;
         // Start melting wax loader
         sealBtn.classList.add("loading-wax");
         sealBtn.disabled = true;

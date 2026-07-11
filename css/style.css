@@ -567,6 +567,28 @@ body {
     line-height: 1.5;
 }
 
+.form-progress {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.form-progress-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 8px var(--gold-glow);
+}
+
+.form-progress.complete {
+    color: #d8c982;
+}
+
 .form-section {
     margin-bottom: 24px;
 }
@@ -660,6 +682,31 @@ body {
 .input-shell:focus-within {
     border-color: var(--gold);
     box-shadow: 0 0 12px var(--gold-glow);
+}
+
+.field.has-error .input-shell,
+.field.has-error .select-shell select {
+    border-color: #e57373;
+    box-shadow: 0 0 0 3px rgba(229, 115, 115, 0.12);
+}
+
+.field-error {
+    min-height: 0;
+    color: #ff9b9b;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.field-error:empty {
+    display: none;
+}
+
+.field-meta {
+    align-self: flex-end;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
 }
 
 .input-shell input {
@@ -760,6 +807,45 @@ body {
 
 .stacking-fields {
     grid-template-columns: 1fr 1fr;
+}
+
+.amount-presets {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.amount-presets > span {
+    margin-right: 2px;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.amount-preset {
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.025);
+    color: var(--text-muted);
+    font: 700 0.78rem var(--font-sans);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.amount-preset:hover,
+.amount-preset:focus-visible {
+    border-color: rgba(212, 175, 55, 0.45);
+    color: var(--text-white);
+}
+
+.amount-preset.active {
+    border-color: rgba(212, 175, 55, 0.45);
+    background: rgba(212, 175, 55, 0.13);
+    color: var(--gold-bright);
 }
 
 .optional-details {

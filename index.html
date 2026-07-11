@@ -25,7 +25,7 @@
 
     <link rel="preload" href="fonts/cinzel-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="css/style.css?v=4">
+    <link rel="stylesheet" href="css/style.css?v=5">
 </head>
 <body>
     <a class="skip-link" href="#rules">Skip to certificate builder</a>
@@ -121,6 +121,10 @@
                 <div class="panel-heading">
                     <span class="eyebrow">Certificate details</span>
                     <h2>Personalize The Vows</h2>
+                    <div class="form-progress" aria-live="polite">
+                        <span class="form-progress-dot" aria-hidden="true"></span>
+                        <span id="form-completion-status">Ready to personalize</span>
+                    </div>
                 </div>
 
                 <!-- Setup Type Selector -->
@@ -143,14 +147,16 @@
                     <div class="field" id="partner-a-wrapper">
                         <label for="partner-a-name" class="field-label">Name on Certificate</label>
                         <div class="input-shell">
-                            <input id="partner-a-name" type="text" placeholder="e.g. Satoshi" value="Satoshi" autocomplete="name">
+                            <input id="partner-a-name" type="text" placeholder="e.g. Satoshi" value="Satoshi" autocomplete="name" maxlength="60" required aria-describedby="partner-a-error">
                         </div>
+                        <span class="field-error" id="partner-a-error" role="alert"></span>
                     </div>
                     <div class="field" id="partner-b-wrapper">
                         <label for="partner-b-name" class="field-label">Partner's Name</label>
                         <div class="input-shell">
-                            <input id="partner-b-name" type="text" placeholder="e.g. Hal Finney" value="Hal Finney" autocomplete="name">
+                            <input id="partner-b-name" type="text" placeholder="e.g. Hal Finney" value="Hal Finney" autocomplete="name" maxlength="60" aria-describedby="partner-b-error">
                         </div>
+                        <span class="field-error" id="partner-b-error" role="alert"></span>
                     </div>
                 </div>
 
@@ -158,14 +164,16 @@
                     <label class="field">
                         <span class="field-label">Ceremony Date</span>
                         <div class="input-shell">
-                            <input id="ceremony-date" type="date">
+                            <input id="ceremony-date" type="date" required aria-describedby="ceremony-date-error">
                         </div>
+                        <span class="field-error" id="ceremony-date-error" role="alert"></span>
                     </label>
                     <label class="field">
                         <span class="field-label">Ceremony Place</span>
                         <div class="input-shell">
-                            <input id="ceremony-place" type="text" placeholder="e.g. Cyberspace Chapel" value="Cyberspace Chapel">
+                            <input id="ceremony-place" type="text" placeholder="e.g. Cyberspace Chapel" value="Cyberspace Chapel" maxlength="80" required aria-describedby="ceremony-place-error">
                         </div>
+                        <span class="field-error" id="ceremony-place-error" role="alert"></span>
                     </label>
                 </div>
 
@@ -184,8 +192,9 @@
                             <span class="field-label">Amount</span>
                             <div class="input-shell amount-input">
                                 <span class="input-prefix">$</span>
-                                <input id="buy-amount" type="number" min="0" step="1" value="100">
+                                <input id="buy-amount" type="number" min="1" step="1" inputmode="decimal" value="100" aria-describedby="buy-amount-error">
                             </div>
+                            <span class="field-error" id="buy-amount-error" role="alert"></span>
                         </label>
                         <label class="field">
                             <span class="field-label">Frequency</span>
@@ -198,6 +207,13 @@
                                 </select>
                             </div>
                         </label>
+                    </div>
+                    <div class="amount-presets" id="amount-presets" aria-label="Quick amount choices">
+                        <span>Quick select</span>
+                        <button type="button" class="amount-preset" data-amount="25">$25</button>
+                        <button type="button" class="amount-preset" data-amount="50">$50</button>
+                        <button type="button" class="amount-preset active" data-amount="100">$100</button>
+                        <button type="button" class="amount-preset" data-amount="250">$250</button>
                     </div>
                 </fieldset>
 
@@ -258,8 +274,9 @@
                     <div class="field custom-vow-container" style="margin-top: 20px;">
                         <label for="custom-vow" class="field-label">Custom Wedding Line (Optional)</label>
                         <div class="input-shell">
-                            <input id="custom-vow" type="text" placeholder="e.g. We will protect our keys and our future together" value="">
+                            <input id="custom-vow" type="text" placeholder="e.g. We will protect our keys and our future together" value="" maxlength="120" aria-describedby="custom-vow-count">
                         </div>
+                        <span class="field-meta" id="custom-vow-count">0 / 120</span>
                     </div>
                 </fieldset>
 
@@ -278,8 +295,9 @@
                         <div class="field hidden" id="witness-name-wrapper">
                             <label for="witness-name" class="field-label">Witness Name</label>
                             <div class="input-shell">
-                                <input id="witness-name" type="text" placeholder="e.g. Nick Szabo" value="Nick Szabo" autocomplete="name">
+                                <input id="witness-name" type="text" placeholder="e.g. Nick Szabo" value="Nick Szabo" autocomplete="name" maxlength="60" aria-describedby="witness-name-error">
                             </div>
+                            <span class="field-error" id="witness-name-error" role="alert"></span>
                         </div>
                         <label class="witness-checkbox-label typed-signature-toggle" for="use-typed-signatures">
                             <span class="checkbox-witness-wrapper">
@@ -549,6 +567,6 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=4"></script>
+    <script src="js/app.js?v=5"></script>
 </body>
 </html>
