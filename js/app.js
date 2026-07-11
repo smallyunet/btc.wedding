@@ -15,7 +15,8 @@ const FIELD_IDS = [
     "ceremony-place",
     "custom-vow",
     "witness-name",
-    "enable-witness"
+    "enable-witness",
+    "use-typed-signatures"
 ];
 
 // Canvas storage & sealed state
@@ -26,6 +27,7 @@ let confettiSystem = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     clearLegacyServiceWorkerCache();
+    setDefaultCeremonyDate();
 
     // Initialize Confetti
     const confettiCanvas = document.getElementById("confetti-canvas");
@@ -47,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initial render & setups
     updateWitnessVisibility();
+    updateSignatureMode();
     updateStackingVisibility();
     updatePrenup();
     updateCardClasses();
@@ -55,6 +58,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // Navigation detail setup
     initScrollspy();
 });
+
+function setDefaultCeremonyDate() {
+    const dateInput = document.getElementById("ceremony-date");
+    if (!dateInput?.value) {
+        const today = new Date();
+        const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
+        dateInput.value = localDate.toISOString().slice(0, 10);
+    }
+}
 
 function clearLegacyServiceWorkerCache() {
     if ("serviceWorker" in navigator) {
@@ -304,6 +316,12 @@ function bindSignatures() {
     setupSignaturePad("sig-canvas-a", "clear-sig-a");
     setupSignaturePad("sig-canvas-b", "clear-sig-b");
     setupSignaturePad("sig-canvas-witness", "clear-sig-witness");
+    document.getElementById("use-typed-signatures")?.addEventListener("change", updateSignatureMode);
+}
+
+function updateSignatureMode() {
+    const useTypedSignatures = document.getElementById("use-typed-signatures")?.checked ?? true;
+    document.getElementById("cert-signatures-section")?.classList.toggle("typed-signatures", useTypedSignatures);
 }
 
 function setupSignaturePad(canvasId, clearBtnId) {
@@ -861,12 +879,15 @@ async function resetState() {
     // Reset Form
     document.getElementById("prenup-form")?.reset();
 
-    // Set Default Radio View (Solo)
-    const btnSolo = document.getElementById("btn-solo");
-    if (btnSolo) btnSolo.querySelector("input").checked = true;
-    setSetupType("solo");
+    setDefaultCeremonyDate();
+
+    // Return to the wedding-first default.
+    const btnJoint = document.getElementById("btn-joint");
+    if (btnJoint) btnJoint.querySelector("input").checked = true;
+    setSetupType("joint");
 
     updateWitnessVisibility();
+    updateSignatureMode();
     updateStackingVisibility();
     updatePrenup();
     updateCardClasses();

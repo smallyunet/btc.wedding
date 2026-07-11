@@ -1,3 +1,35 @@
+@font-face {
+    font-family: 'Cinzel';
+    font-style: normal;
+    font-weight: 500 900;
+    font-display: swap;
+    src: url('../fonts/cinzel-latin.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Cormorant Garamond';
+    font-style: normal;
+    font-weight: 300 700;
+    font-display: swap;
+    src: url('../fonts/cormorant-garamond-latin.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Cormorant Garamond';
+    font-style: italic;
+    font-weight: 300 700;
+    font-display: swap;
+    src: url('../fonts/cormorant-garamond-italic-latin.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 300 800;
+    font-display: swap;
+    src: url('../fonts/plus-jakarta-sans-latin.woff2') format('woff2');
+}
+
 :root {
     --bg-dark: #050608;
     --panel-dark: rgba(16, 18, 22, 0.85);
@@ -768,6 +800,23 @@ body {
     padding: 0 18px 18px;
 }
 
+.typed-signature-toggle {
+    margin-top: 18px;
+    align-items: flex-start;
+}
+
+.typed-signature-toggle .witness-label-text {
+    display: grid;
+    gap: 3px;
+}
+
+.typed-signature-toggle small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.45;
+}
+
 /* Vow Card Checklist Grid */
 .vows-card-grid {
     display: grid;
@@ -1188,6 +1237,22 @@ body {
     color: var(--ink);
     margin-top: 6px;
     font-weight: 600;
+}
+
+.cert-signatures-section.typed-signatures .canvas-wrapper {
+    display: none;
+}
+
+.cert-signatures-section.typed-signatures .sig-name {
+    width: min(100%, 240px);
+    min-height: 56px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 8px 8px;
+    border-bottom: 1.5px solid rgba(28, 24, 19, 0.45);
+    font-size: 1.25rem;
+    margin-top: 0;
 }
 
 /* Wax Seal Overlay Styles */
