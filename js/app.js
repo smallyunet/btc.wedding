@@ -232,6 +232,57 @@ function bindInputs() {
 }
 
 function bindInputEnhancements() {
+    document.querySelectorAll("[data-clear-target]").forEach((button) => {
+        button.addEventListener("click", () => {
+            const field = document.getElementById(button.dataset.clearTarget);
+            if (!field) return;
+            field.value = "";
+            field.dispatchEvent(new Event("input", { bubbles: true }));
+            field.focus();
+        });
+    });
+
+    document.querySelectorAll("[data-amount-step]").forEach((button) => {
+        button.addEventListener("click", () => {
+            const amountInput = document.getElementById("buy-amount");
+            if (!amountInput) return;
+            const nextAmount = Math.max(Number(amountInput.min) || 1, (Number(amountInput.value) || 0) + Number(button.dataset.amountStep));
+            amountInput.value = String(nextAmount);
+            amountInput.dispatchEvent(new Event("input", { bubbles: true }));
+            amountInput.focus();
+        });
+    });
+
+    document.querySelectorAll(".frequency-options button").forEach((button) => {
+        button.addEventListener("click", () => {
+            const frequency = document.getElementById("buy-frequency");
+            if (!frequency) return;
+            frequency.value = button.dataset.frequency || "monthly";
+            frequency.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+    });
+
+    document.getElementById("open-date-picker")?.addEventListener("click", () => {
+        const dateInput = document.getElementById("ceremony-date");
+        if (!dateInput) return;
+        if (typeof dateInput.showPicker === "function") dateInput.showPicker();
+        else dateInput.focus();
+    });
+
+    document.querySelectorAll("[data-date-action]").forEach((button) => {
+        button.addEventListener("click", () => {
+            const dateInput = document.getElementById("ceremony-date");
+            if (!dateInput) return;
+            const date = new Date();
+            if (button.dataset.dateAction === "month") date.setMonth(date.getMonth() + 1);
+            if (button.dataset.dateAction === "year") date.setFullYear(date.getFullYear() + 1);
+            const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+            dateInput.value = localDate.toISOString().slice(0, 10);
+            dateInput.dispatchEvent(new Event("input", { bubbles: true }));
+            dateInput.focus();
+        });
+    });
+
     document.querySelectorAll(".amount-preset").forEach((button) => {
         button.addEventListener("click", () => {
             const amountInput = document.getElementById("buy-amount");
@@ -291,6 +342,11 @@ function validateCertificateForm({ focusFirst = false } = {}) {
 }
 
 function updateInputEnhancements() {
+    document.querySelectorAll("[data-clear-target]").forEach((button) => {
+        const field = document.getElementById(button.dataset.clearTarget);
+        button.classList.toggle("is-empty", !field?.value);
+    });
+
     const customVow = document.getElementById("custom-vow");
     const customVowCount = document.getElementById("custom-vow-count");
     if (customVow && customVowCount) {
@@ -301,6 +357,13 @@ function updateInputEnhancements() {
     document.querySelectorAll(".amount-preset").forEach((button) => {
         button.classList.toggle("active", button.dataset.amount === amount);
         button.setAttribute("aria-pressed", String(button.dataset.amount === amount));
+    });
+
+    const frequency = document.getElementById("buy-frequency")?.value;
+    document.querySelectorAll(".frequency-options button").forEach((button) => {
+        const isActive = button.dataset.frequency === frequency;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-pressed", String(isActive));
     });
 
     const requiredIds = ["partner-a-name", "ceremony-date", "ceremony-place"];

@@ -25,7 +25,7 @@
 
     <link rel="preload" href="fonts/cinzel-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
     <a class="skip-link" href="#rules">Skip to certificate builder</a>
@@ -146,32 +146,44 @@
                 <div class="form-section field-grid name-inputs two-cols">
                     <div class="field" id="partner-a-wrapper">
                         <label for="partner-a-name" class="field-label">Name on Certificate</label>
-                        <div class="input-shell">
+                        <div class="input-shell has-trailing-action">
                             <input id="partner-a-name" type="text" placeholder="e.g. Satoshi" value="Satoshi" autocomplete="name" maxlength="60" required aria-describedby="partner-a-error">
+                            <button type="button" class="input-clear" data-clear-target="partner-a-name" aria-label="Clear first certificate name">×</button>
                         </div>
                         <span class="field-error" id="partner-a-error" role="alert"></span>
                     </div>
                     <div class="field" id="partner-b-wrapper">
                         <label for="partner-b-name" class="field-label">Partner's Name</label>
-                        <div class="input-shell">
+                        <div class="input-shell has-trailing-action">
                             <input id="partner-b-name" type="text" placeholder="e.g. Hal Finney" value="Hal Finney" autocomplete="name" maxlength="60" aria-describedby="partner-b-error">
+                            <button type="button" class="input-clear" data-clear-target="partner-b-name" aria-label="Clear partner name">×</button>
                         </div>
                         <span class="field-error" id="partner-b-error" role="alert"></span>
                     </div>
                 </div>
 
                 <div class="form-section field-grid certificate-details-grid">
-                    <label class="field">
-                        <span class="field-label">Ceremony Date</span>
-                        <div class="input-shell">
-                            <input id="ceremony-date" type="date" required aria-describedby="ceremony-date-error">
+                    <div class="field">
+                        <label class="field-label" for="ceremony-date">Ceremony Date</label>
+                        <div class="date-control">
+                            <div class="input-shell date-input-shell">
+                                <span class="calendar-mark" aria-hidden="true"></span>
+                                <input id="ceremony-date" type="date" required aria-describedby="ceremony-date-error">
+                            </div>
+                            <button type="button" class="date-picker-trigger" id="open-date-picker" aria-label="Open ceremony date picker">Choose</button>
+                        </div>
+                        <div class="date-shortcuts" aria-label="Quick ceremony date choices">
+                            <button type="button" data-date-action="today">Today</button>
+                            <button type="button" data-date-action="month">+1 month</button>
+                            <button type="button" data-date-action="year">+1 year</button>
                         </div>
                         <span class="field-error" id="ceremony-date-error" role="alert"></span>
-                    </label>
+                    </div>
                     <label class="field">
                         <span class="field-label">Ceremony Place</span>
-                        <div class="input-shell">
+                        <div class="input-shell has-trailing-action">
                             <input id="ceremony-place" type="text" placeholder="e.g. Cyberspace Chapel" value="Cyberspace Chapel" maxlength="80" required aria-describedby="ceremony-place-error">
+                            <button type="button" class="input-clear" data-clear-target="ceremony-place" aria-label="Clear ceremony place">×</button>
                         </div>
                         <span class="field-error" id="ceremony-place-error" role="alert"></span>
                     </label>
@@ -193,20 +205,28 @@
                             <div class="input-shell amount-input">
                                 <span class="input-prefix">$</span>
                                 <input id="buy-amount" type="number" min="1" step="1" inputmode="decimal" value="100" aria-describedby="buy-amount-error">
+                                <div class="amount-stepper" aria-label="Adjust purchase amount">
+                                    <button type="button" data-amount-step="-25" aria-label="Decrease amount by 25">−</button>
+                                    <button type="button" data-amount-step="25" aria-label="Increase amount by 25">+</button>
+                                </div>
                             </div>
                             <span class="field-error" id="buy-amount-error" role="alert"></span>
                         </label>
-                        <label class="field">
+                        <div class="field">
                             <span class="field-label">Frequency</span>
-                            <div class="select-shell">
-                                <select id="buy-frequency">
+                            <select id="buy-frequency" class="sr-only" tabindex="-1" aria-hidden="true">
                                     <option value="daily">Daily</option>
                                     <option value="weekly">Weekly</option>
                                     <option value="bi-weekly">Bi-weekly</option>
                                     <option value="monthly" selected>Monthly</option>
-                                </select>
+                            </select>
+                            <div class="frequency-options" role="group" aria-label="Bitcoin purchase frequency">
+                                <button type="button" data-frequency="daily" aria-pressed="false">Daily</button>
+                                <button type="button" data-frequency="weekly" aria-pressed="false">Weekly</button>
+                                <button type="button" data-frequency="bi-weekly" aria-pressed="false">Bi-weekly</button>
+                                <button type="button" data-frequency="monthly" class="active" aria-pressed="true">Monthly</button>
                             </div>
-                        </label>
+                        </div>
                     </div>
                     <div class="amount-presets" id="amount-presets" aria-label="Quick amount choices">
                         <span>Quick select</span>
@@ -273,8 +293,9 @@
                     <!-- Custom Vow Field -->
                     <div class="field custom-vow-container" style="margin-top: 20px;">
                         <label for="custom-vow" class="field-label">Custom Wedding Line (Optional)</label>
-                        <div class="input-shell">
-                            <input id="custom-vow" type="text" placeholder="e.g. We will protect our keys and our future together" value="" maxlength="120" aria-describedby="custom-vow-count">
+                        <div class="textarea-shell">
+                            <textarea id="custom-vow" rows="3" placeholder="e.g. We will protect our keys and our future together" maxlength="120" aria-describedby="custom-vow-count"></textarea>
+                            <button type="button" class="input-clear textarea-clear" data-clear-target="custom-vow" aria-label="Clear custom wedding line">×</button>
                         </div>
                         <span class="field-meta" id="custom-vow-count">0 / 120</span>
                     </div>
@@ -294,8 +315,9 @@
                         </div>
                         <div class="field hidden" id="witness-name-wrapper">
                             <label for="witness-name" class="field-label">Witness Name</label>
-                            <div class="input-shell">
+                            <div class="input-shell has-trailing-action">
                                 <input id="witness-name" type="text" placeholder="e.g. Nick Szabo" value="Nick Szabo" autocomplete="name" maxlength="60" aria-describedby="witness-name-error">
+                                <button type="button" class="input-clear" data-clear-target="witness-name" aria-label="Clear witness name">×</button>
                             </div>
                             <span class="field-error" id="witness-name-error" role="alert"></span>
                         </div>
@@ -567,6 +589,6 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=5"></script>
+    <script src="js/app.js?v=7"></script>
 </body>
 </html>
