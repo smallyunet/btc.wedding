@@ -24,6 +24,7 @@ const canvasState = {};
 let isSealed = false;
 let savedBlockHeight = "";
 let confettiSystem = null;
+let saveStateTimer = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
     clearLegacyServiceWorkerCache();
@@ -59,6 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Navigation detail setup
     initScrollspy();
+
+    window.addEventListener("pagehide", flushScheduledStateSave);
 });
 
 function setDefaultCeremonyDate() {
@@ -394,7 +397,7 @@ function updateCardClasses() {
 }
 
 function handleChange() {
-    saveState();
+    scheduleStateSave();
     updatePrenup();
     updateInputEnhancements();
 }
@@ -732,12 +735,14 @@ async function fetchBlockHeight() {
         window.clearTimeout(timeout);
         if (response.ok) {
             const height = await response.text();
+            if (!isSealed) return;
             savedBlockHeight = height.trim();
             renderBlockHeight();
         } else {
             throw new Error("HTTP error status");
         }
     } catch (e) {
+        if (!isSealed) return;
         console.warn("Could not retrieve block height", e);
         savedBlockHeight = "";
         renderBlockHeight();
@@ -785,9 +790,6 @@ async function toggleSeal() {
 
         isSealed = true;
 
-        // Fetch block height at the moment of sealing
-        await fetchBlockHeight();
-
         sealBtn.classList.remove("loading-wax");
         sealBtn.disabled = false;
         sealBtn.removeAttribute("aria-busy");
@@ -818,6 +820,10 @@ async function toggleSeal() {
         if (confettiSystem && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
             confettiSystem.spawn();
         }
+
+        // The certificate is local-first: do not make the seal wait for an
+        // optional public block-height lookup.
+        void fetchBlockHeight().then(saveState);
     } else {
         // Unlock Document
         isSealed = false;
@@ -928,6 +934,21 @@ function saveState() {
     } catch (error) {
         console.warn("Unable to save prenup state", error);
     }
+}
+
+function scheduleStateSave() {
+    window.clearTimeout(saveStateTimer);
+    saveStateTimer = window.setTimeout(() => {
+        saveStateTimer = 0;
+        saveState();
+    }, 200);
+}
+
+function flushScheduledStateSave() {
+    if (!saveStateTimer) return;
+    window.clearTimeout(saveStateTimer);
+    saveStateTimer = 0;
+    saveState();
 }
 
 function restoreState() {
@@ -1130,7 +1151,8 @@ class ConfettiSystem {
 
     spawn() {
         this.particles = [];
-        const count = 180;
+        const prefersLighterEffects = window.matchMedia("(max-width: 640px), (pointer: coarse)").matches;
+        const count = prefersLighterEffects ? 72 : 140;
 
         for (let i = 0; i < count; i++) {
             this.particles.push({
@@ -1299,15 +1321,24 @@ function showConfirmModal() {
 function initScrollspy() {
     const rulesLink = document.querySelector('a[href="#rules"]');
     const prenupLink = document.querySelector('a[href="#prenup"]');
+    const rulesSec = document.getElementById("rules");
+    const prenupSec = document.getElementById("prenup");
+    const eduSec = document.querySelector(".education-section");
+    let updateScheduled = false;
+    let activeSection = "";
 
-    window.addEventListener("scroll", () => {
+    if (!rulesSec) return;
+
+    function setActiveSection(nextSection) {
+        if (nextSection === activeSection) return;
+        activeSection = nextSection;
+        rulesLink?.classList.toggle("active-nav", nextSection === "rules");
+        prenupLink?.classList.toggle("active-nav", nextSection === "prenup");
+    }
+
+    function updateScrollspy() {
+        updateScheduled = false;
         const scrollPos = window.scrollY + 180;
-        const rulesSec = document.getElementById("rules");
-        const prenupSec = document.getElementById("prenup");
-        const eduSec = document.querySelector(".education-section");
-
-        if (!rulesSec) return;
-
         const isDesktop = window.innerWidth > 1024;
 
         if (isDesktop) {
@@ -1316,11 +1347,9 @@ function initScrollspy() {
             const workspaceBottom = rulesSec.offsetTop + rulesSec.offsetHeight;
 
             if (scrollPos >= workspaceTop && scrollPos < workspaceBottom) {
-                rulesLink?.classList.add("active-nav");
-                prenupLink?.classList.remove("active-nav");
+                setActiveSection("rules");
             } else {
-                rulesLink?.classList.remove("active-nav");
-                prenupLink?.classList.remove("active-nav");
+                setActiveSection("");
             }
         } else {
             // On mobile, modules stack vertically. Track bounds dynamically.
@@ -1329,15 +1358,22 @@ function initScrollspy() {
             const eduTop = eduSec ? eduSec.offsetTop : document.body.scrollHeight;
 
             if (prenupTop && scrollPos >= prenupTop && scrollPos < eduTop) {
-                prenupLink?.classList.add("active-nav");
-                rulesLink?.classList.remove("active-nav");
+                setActiveSection("prenup");
             } else if (scrollPos >= rulesTop && scrollPos < prenupTop) {
-                rulesLink?.classList.add("active-nav");
-                prenupLink?.classList.remove("active-nav");
+                setActiveSection("rules");
             } else {
-                rulesLink?.classList.remove("active-nav");
-                prenupLink?.classList.remove("active-nav");
+                setActiveSection("");
             }
         }
-    });
+    }
+
+    function scheduleScrollspyUpdate() {
+        if (updateScheduled) return;
+        updateScheduled = true;
+        window.requestAnimationFrame(updateScrollspy);
+    }
+
+    window.addEventListener("scroll", scheduleScrollspyUpdate, { passive: true });
+    window.addEventListener("resize", scheduleScrollspyUpdate, { passive: true });
+    updateScrollspy();
 }
