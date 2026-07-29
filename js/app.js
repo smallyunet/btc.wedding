@@ -1,1379 +1,353 @@
-const STORAGE_KEY = "btc_wedding_prenup_v3";
-const LEGACY_CACHE_PREFIX = "btc-wedding-";
-
-const FIELD_IDS = [
-    "enable-stacking",
-    "buy-amount",
-    "buy-frequency",
-    "no-panic",
-    "no-leverage",
-    "cold-storage",
-    "no-shitcoins",
-    "partner-a-name",
-    "partner-b-name",
-    "ceremony-date",
-    "ceremony-place",
-    "custom-vow",
-    "witness-name",
-    "enable-witness",
-    "use-typed-signatures"
-];
-
-// Canvas storage & sealed state
-const canvasState = {};
-let isSealed = false;
-let savedBlockHeight = "";
-let confettiSystem = null;
-let saveStateTimer = 0;
-
-document.addEventListener("DOMContentLoaded", () => {
-    clearLegacyServiceWorkerCache();
-    setDefaultCeremonyDate();
-
-    // Initialize Confetti
-    const confettiCanvas = document.getElementById("confetti-canvas");
-    if (confettiCanvas) {
-        confettiSystem = new ConfettiSystem(confettiCanvas);
-    }
-
-    // Restore state first
-    restoreState();
-
-    // Bind inputs, toggles, signatures, actions, faq
-    bindSetupTypeToggles();
-    bindStackingPlan();
-    bindMobilePreview();
-    bindInputs();
-    bindInputEnhancements();
-    bindSignatures();
-    bindActions();
-    bindFAQ();
-
-    // Initial render & setups
-    updateWitnessVisibility();
-    updateSignatureMode();
-    updateStackingVisibility();
-    updatePrenup();
-    updateCardClasses();
-    updateInputEnhancements();
-    renderBlockHeight();
-
-    // Navigation detail setup
-    initScrollspy();
-
-    window.addEventListener("pagehide", flushScheduledStateSave);
-});
-
-function setDefaultCeremonyDate() {
-    const dateInput = document.getElementById("ceremony-date");
-    if (!dateInput?.value) {
-        const today = new Date();
-        const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000);
-        dateInput.value = localDate.toISOString().slice(0, 10);
-    }
-}
-
-function clearLegacyServiceWorkerCache() {
-    if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.getRegistrations()
-            .then((registrations) => {
-                registrations.forEach((registration) => registration.unregister());
-            })
-            .catch((error) => {
-                console.warn("Unable to unregister legacy service worker", error);
-            });
-    }
-
-    if ("caches" in window) {
-        caches.keys()
-            .then((keys) => {
-                keys
-                    .filter((key) => key.startsWith(LEGACY_CACHE_PREFIX))
-                    .forEach((key) => caches.delete(key));
-            })
-            .catch((error) => {
-                console.warn("Unable to clear legacy cache storage", error);
-            });
-    }
-}
-
-// Setup Joint/Solo Radio Toggles
-function bindSetupTypeToggles() {
-    const btnSolo = document.getElementById("btn-solo");
-    const btnJoint = document.getElementById("btn-joint");
-    const inputSolo = btnSolo.querySelector("input");
-    const inputJoint = btnJoint.querySelector("input");
-
-    inputSolo.addEventListener("change", () => {
-        if (inputSolo.checked) setSetupType("solo");
-    });
-
-    inputJoint.addEventListener("change", () => {
-        if (inputJoint.checked) setSetupType("joint");
-    });
-}
-
-function bindStackingPlan() {
-    document.getElementById("enable-stacking")?.addEventListener("change", updateStackingVisibility);
-}
-
-function updateStackingVisibility() {
-    const enabled = document.getElementById("enable-stacking")?.checked;
-    const fields = document.getElementById("stacking-fields");
-    const presets = document.getElementById("amount-presets");
-    fields?.classList.toggle("hidden", !enabled);
-    presets?.classList.toggle("hidden", !enabled);
-}
-
-function bindMobilePreview() {
-    const workspace = document.getElementById("rules");
-    const customizeTab = document.getElementById("tab-customize");
-    const previewTab = document.getElementById("tab-preview");
-    const previewCta = document.getElementById("open-mobile-preview");
-    const createNavLink = document.querySelector('a[href="#rules"]');
-    const certificateNavLink = document.querySelector('a[href="#prenup"]');
-    if (!workspace || !customizeTab || !previewTab) return;
-
-    const setView = (view, shouldScroll = true) => {
-        const showPreview = view === "preview";
-        workspace.classList.toggle("show-preview", showPreview);
-        customizeTab.classList.toggle("active", !showPreview);
-        previewTab.classList.toggle("active", showPreview);
-        customizeTab.setAttribute("aria-selected", String(!showPreview));
-        previewTab.setAttribute("aria-selected", String(showPreview));
-        customizeTab.tabIndex = showPreview ? -1 : 0;
-        previewTab.tabIndex = showPreview ? 0 : -1;
-        if (shouldScroll && window.innerWidth <= 1024) {
-            const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
-            workspace.scrollIntoView({ behavior, block: "start" });
-        }
-    };
-
-    customizeTab.addEventListener("click", () => setView("customize"));
-    previewTab.addEventListener("click", () => setView("preview"));
-    previewCta?.addEventListener("click", () => {
-        if (validateCertificateForm({ focusFirst: true })) setView("preview");
-    });
-    createNavLink?.addEventListener("click", () => setView("customize", false));
-    certificateNavLink?.addEventListener("click", (event) => {
-        if (window.innerWidth > 1024) return;
-        event.preventDefault();
-        setView("preview");
-    });
-    [customizeTab, previewTab].forEach((tab) => {
-        tab.addEventListener("keydown", (event) => {
-            if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
-            event.preventDefault();
-            const nextView = tab === customizeTab ? "preview" : "customize";
-            setView(nextView, false);
-            (nextView === "preview" ? previewTab : customizeTab).focus();
-        });
-    });
-}
-
-function setSetupType(type) {
-    const btnSolo = document.getElementById("btn-solo");
-    const btnJoint = document.getElementById("btn-joint");
-    const wrapperB = document.getElementById("partner-b-wrapper");
-    const sigBoxB = document.getElementById("sig-box-b");
-    const nameInputs = document.querySelector(".name-inputs");
-
-    if (type === "solo") {
-        btnSolo.classList.add("active");
-        btnJoint.classList.remove("active");
-        wrapperB.classList.add("hidden");
-        sigBoxB.classList.add("hidden");
-        nameInputs.classList.remove("two-cols");
-    } else {
-        btnSolo.classList.remove("active");
-        btnJoint.classList.add("active");
-        wrapperB.classList.remove("hidden");
-        sigBoxB.classList.remove("hidden");
-        nameInputs.classList.add("two-cols");
-    }
-
-    updateWitnessVisibility();
-    handleChange();
-}
-
-function getSetupType() {
-    const btnJoint = document.getElementById("btn-joint");
-    return btnJoint && btnJoint.classList.contains("active") ? "joint" : "solo";
-}
-
-function bindInputs() {
-    // Normal fields
-    FIELD_IDS.forEach((id) => {
-        const field = document.getElementById(id);
-        if (!field) return;
-
-        const eventName = (field.tagName === "SELECT" || field.type === "checkbox") ? "change" : "input";
-        field.addEventListener(eventName, handleChange);
-    });
-
-    // Checkbox cards
-    const checkboxes = ["no-panic", "no-leverage", "cold-storage", "no-shitcoins"];
-    checkboxes.forEach((id) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.addEventListener("change", () => {
-            const card = el.closest(".vow-card");
-            if (card) {
-                card.classList.toggle("card-active", el.checked);
-            }
-            handleChange();
-        });
-    });
-
-    // Witness toggle specific action
-    const enableWitnessCheckbox = document.getElementById("enable-witness");
-    if (enableWitnessCheckbox) {
-        enableWitnessCheckbox.addEventListener("change", () => {
-            updateWitnessVisibility();
-        });
-    }
-}
-
-function bindInputEnhancements() {
-    document.querySelectorAll("[data-clear-target]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const field = document.getElementById(button.dataset.clearTarget);
-            if (!field) return;
-            field.value = "";
-            field.dispatchEvent(new Event("input", { bubbles: true }));
-            field.focus();
-        });
-    });
-
-    document.querySelectorAll("[data-amount-step]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const amountInput = document.getElementById("buy-amount");
-            if (!amountInput) return;
-            const nextAmount = Math.max(Number(amountInput.min) || 1, (Number(amountInput.value) || 0) + Number(button.dataset.amountStep));
-            amountInput.value = String(nextAmount);
-            amountInput.dispatchEvent(new Event("input", { bubbles: true }));
-            amountInput.focus();
-        });
-    });
-
-    document.querySelectorAll(".frequency-options button").forEach((button) => {
-        button.addEventListener("click", () => {
-            const frequency = document.getElementById("buy-frequency");
-            if (!frequency) return;
-            frequency.value = button.dataset.frequency || "monthly";
-            frequency.dispatchEvent(new Event("change", { bubbles: true }));
-        });
-    });
-
-    document.getElementById("open-date-picker")?.addEventListener("click", () => {
-        const dateInput = document.getElementById("ceremony-date");
-        if (!dateInput) return;
-        if (typeof dateInput.showPicker === "function") dateInput.showPicker();
-        else dateInput.focus();
-    });
-
-    document.querySelectorAll("[data-date-action]").forEach((button) => {
-        button.addEventListener("click", () => {
-            const dateInput = document.getElementById("ceremony-date");
-            if (!dateInput) return;
-            const date = new Date();
-            if (button.dataset.dateAction === "month") date.setMonth(date.getMonth() + 1);
-            if (button.dataset.dateAction === "year") date.setFullYear(date.getFullYear() + 1);
-            const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-            dateInput.value = localDate.toISOString().slice(0, 10);
-            dateInput.dispatchEvent(new Event("input", { bubbles: true }));
-            dateInput.focus();
-        });
-    });
-
-    document.querySelectorAll(".amount-preset").forEach((button) => {
-        button.addEventListener("click", () => {
-            const amountInput = document.getElementById("buy-amount");
-            if (!amountInput) return;
-            amountInput.value = button.dataset.amount || "";
-            amountInput.dispatchEvent(new Event("input", { bubbles: true }));
-            amountInput.focus();
-        });
-    });
-
-    ["partner-a-name", "partner-b-name", "ceremony-date", "ceremony-place", "buy-amount", "witness-name"].forEach((id) => {
-        document.getElementById(id)?.addEventListener("blur", () => validateInput(id, true));
-    });
-}
-
-function getInputRequirement(id) {
-    const isJoint = getSetupType() === "joint";
-    const hasWitness = document.getElementById("enable-witness")?.checked;
-    const hasStacking = document.getElementById("enable-stacking")?.checked;
-    const requirements = {
-        "partner-a-name": { required: true, message: "Add the first name for the certificate." },
-        "partner-b-name": { required: isJoint, message: "Add the second name for the couple certificate." },
-        "ceremony-date": { required: true, message: "Choose the ceremony date." },
-        "ceremony-place": { required: true, message: "Add a ceremony place." },
-        "buy-amount": { required: hasStacking, message: "Enter an amount greater than zero." },
-        "witness-name": { required: hasWitness, message: "Add the witness name." }
-    };
-    return requirements[id];
-}
-
-function validateInput(id, showError = false) {
-    const field = document.getElementById(id);
-    const requirement = getInputRequirement(id);
-    if (!field || !requirement) return true;
-
-    const value = field.value.trim();
-    const amountInvalid = id === "buy-amount" && requirement.required && Number(value) <= 0;
-    const invalid = requirement.required && (!value || amountInvalid);
-    const error = document.getElementById(`${id}-error`);
-    const wrapper = field.closest(".field");
-
-    field.setAttribute("aria-invalid", String(invalid));
-    wrapper?.classList.toggle("has-error", invalid && showError);
-    if (error) error.textContent = invalid && showError ? requirement.message : "";
-    return !invalid;
-}
-
-function validateCertificateForm({ focusFirst = false } = {}) {
-    const ids = ["partner-a-name", "partner-b-name", "ceremony-date", "ceremony-place", "buy-amount", "witness-name"];
-    const invalidIds = ids.filter((id) => !validateInput(id, true));
-
-    if (invalidIds.length && focusFirst) {
-        if (window.innerWidth <= 1024) document.getElementById("tab-customize")?.click();
-        document.getElementById(invalidIds[0])?.focus();
-    }
-    return invalidIds.length === 0;
-}
-
-function updateInputEnhancements() {
-    document.querySelectorAll("[data-clear-target]").forEach((button) => {
-        const field = document.getElementById(button.dataset.clearTarget);
-        button.classList.toggle("is-empty", !field?.value);
-    });
-
-    const customVow = document.getElementById("custom-vow");
-    const customVowCount = document.getElementById("custom-vow-count");
-    if (customVow && customVowCount) {
-        customVowCount.textContent = `${customVow.value.length} / ${customVow.maxLength}`;
-    }
-
-    const amount = document.getElementById("buy-amount")?.value;
-    document.querySelectorAll(".amount-preset").forEach((button) => {
-        button.classList.toggle("active", button.dataset.amount === amount);
-        button.setAttribute("aria-pressed", String(button.dataset.amount === amount));
-    });
-
-    const frequency = document.getElementById("buy-frequency")?.value;
-    document.querySelectorAll(".frequency-options button").forEach((button) => {
-        const isActive = button.dataset.frequency === frequency;
-        button.classList.toggle("active", isActive);
-        button.setAttribute("aria-pressed", String(isActive));
-    });
-
-    const requiredIds = ["partner-a-name", "ceremony-date", "ceremony-place"];
-    if (getSetupType() === "joint") requiredIds.push("partner-b-name");
-    if (document.getElementById("enable-stacking")?.checked) requiredIds.push("buy-amount");
-    if (document.getElementById("enable-witness")?.checked) requiredIds.push("witness-name");
-    const completeCount = requiredIds.filter((id) => validateInput(id, false)).length;
-    const status = document.getElementById("form-completion-status");
-    const progress = status?.closest(".form-progress");
-    if (status) {
-        status.textContent = completeCount === requiredIds.length
-            ? "Essential details complete"
-            : `${completeCount} of ${requiredIds.length} essential details complete`;
-    }
-    progress?.classList.toggle("complete", completeCount === requiredIds.length);
-}
-
-function updateCardClasses() {
-    const checkboxes = ["no-panic", "no-leverage", "cold-storage", "no-shitcoins"];
-    checkboxes.forEach((id) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        const card = el.closest(".vow-card");
-        if (card) {
-            card.classList.toggle("card-active", el.checked);
-        }
-    });
-}
-
-function handleChange() {
-    scheduleStateSave();
-    updatePrenup();
-    updateInputEnhancements();
-}
-
-
-function updateWitnessVisibility() {
-    const enableWitness = document.getElementById("enable-witness")?.checked;
-    const witnessNameWrapper = document.getElementById("witness-name-wrapper");
-    const sigBoxWitness = document.getElementById("sig-box-witness");
-    const sigSection = document.getElementById("cert-signatures-section");
-    const optionalDetails = document.querySelector(".optional-details");
-
-    if (enableWitness) {
-        witnessNameWrapper?.classList.remove("hidden");
-        sigBoxWitness?.classList.remove("hidden");
-        if (optionalDetails) optionalDetails.open = true;
-    } else {
-        witnessNameWrapper?.classList.add("hidden");
-        sigBoxWitness?.classList.add("hidden");
-    }
-
-    const isJoint = getSetupType() === "joint";
-    let activeSigs = 1;
-    if (isJoint) activeSigs++;
-    if (enableWitness) activeSigs++;
-
-    if (sigSection) {
-        if (activeSigs >= 3) {
-            sigSection.classList.remove("two-cols");
-            sigSection.classList.add("three-cols");
-        } else if (activeSigs === 2) {
-            sigSection.classList.remove("three-cols");
-            sigSection.classList.add("two-cols");
-        } else {
-            sigSection.classList.remove("three-cols");
-            sigSection.classList.remove("two-cols");
-        }
-    }
-}
-
-function bindFAQ() {
-    const faqQuestions = document.querySelectorAll(".faq-question");
-    faqQuestions.forEach(btn => {
-        btn.addEventListener("click", () => {
-            const item = btn.closest(".faq-item");
-            const isOpen = btn.getAttribute("aria-expanded") === "true";
-
-            document.querySelectorAll(".faq-item").forEach(otherItem => {
-                if (otherItem !== item) {
-                    otherItem.querySelector(".faq-question").setAttribute("aria-expanded", "false");
-                    const otherAnswer = otherItem.querySelector(".faq-answer");
-                    otherAnswer.style.maxHeight = null;
-                    otherAnswer.hidden = true;
-                }
-            });
-
-            if (isOpen) {
-                btn.setAttribute("aria-expanded", "false");
-                const answer = item.querySelector(".faq-answer");
-                answer.style.maxHeight = null;
-                answer.hidden = true;
-            } else {
-                btn.setAttribute("aria-expanded", "true");
-                const answer = item.querySelector(".faq-answer");
-                answer.hidden = false;
-                answer.style.maxHeight = answer.scrollHeight + "px";
-            }
-        });
-    });
-}
-
-// -------------------------------------------------------------
-// Signature Pad Canvas Engine
-// -------------------------------------------------------------
-function bindSignatures() {
-    setupSignaturePad("sig-canvas-a", "clear-sig-a");
-    setupSignaturePad("sig-canvas-b", "clear-sig-b");
-    setupSignaturePad("sig-canvas-witness", "clear-sig-witness");
-    document.getElementById("use-typed-signatures")?.addEventListener("change", updateSignatureMode);
-}
-
-function updateSignatureMode() {
-    const useTypedSignatures = document.getElementById("use-typed-signatures")?.checked ?? true;
-    document.getElementById("cert-signatures-section")?.classList.toggle("typed-signatures", useTypedSignatures);
-}
-
-function setupSignaturePad(canvasId, clearBtnId) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-
-    // Set line styles for ink pen look
-    ctx.strokeStyle = "#121824"; // deep midnight ink
-    ctx.lineWidth = 2.2;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-
-    let isDrawing = false;
-    let points = [];
-    let lastTime = Date.now();
-
-    function getCoordinates(e) {
-        const rect = canvas.getBoundingClientRect();
-        let clientX, clientY;
-
-        if (e.touches && e.touches.length > 0) {
-            clientX = e.touches[0].clientX;
-            clientY = e.touches[0].clientY;
-        } else {
-            clientX = e.clientX;
-            clientY = e.clientY;
-        }
-
-        // Project coordinate scaling
-        const x = (clientX - rect.left) * (canvas.width / rect.width);
-        const y = (clientY - rect.top) * (canvas.height / rect.height);
-        return { x, y };
-    }
-
-    function startDrawing(e) {
-        if (isSealed) return; // Prevent drawing if sealed
-        isDrawing = true;
-        const coords = getCoordinates(e);
-        points = [coords];
-        lastTime = Date.now();
-        ctx.lineWidth = 2.2;
-
-        // Draw a tiny starting dot
-        ctx.beginPath();
-        ctx.arc(coords.x, coords.y, ctx.lineWidth / 2, 0, Math.PI * 2);
-        ctx.fillStyle = ctx.strokeStyle;
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(coords.x, coords.y);
-    }
-
-    function draw(e) {
-        if (!isDrawing) return;
-        if (isSealed) return;
-        e.preventDefault(); // Stop screen dragging/scrolling on mobile
-
-        const coords = getCoordinates(e);
-        const p1 = points[points.length - 1];
-        points.push(coords);
-
-        const dx = coords.x - p1.x;
-        const dy = coords.y - p1.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const now = Date.now();
-        const dt = now - lastTime || 1;
-        lastTime = now;
-        const velocity = dist / dt;
-
-        // Calligraphy dynamics: draw slower = thicker, faster = thinner
-        const targetWidth = Math.max(1.1, Math.min(3.2, 4.2 - velocity * 1.6));
-        ctx.lineWidth = ctx.lineWidth * 0.6 + targetWidth * 0.4;
-
-        if (points.length === 2) {
-            ctx.beginPath();
-            ctx.moveTo(points[0].x, points[0].y);
-            ctx.lineTo(points[1].x, points[1].y);
-            ctx.stroke();
-        } else if (points.length > 2) {
-            const p0 = points[points.length - 3];
-            const p1_pt = points[points.length - 2];
-            const p2 = points[points.length - 1];
-
-            const mid1 = { x: (p0.x + p1_pt.x) / 2, y: (p0.y + p1_pt.y) / 2 };
-            const mid2 = { x: (p1_pt.x + p2.x) / 2, y: (p1_pt.y + p2.y) / 2 };
-
-            ctx.beginPath();
-            ctx.moveTo(mid1.x, mid1.y);
-            ctx.quadraticCurveTo(p1_pt.x, p1_pt.y, mid2.x, mid2.y);
-            ctx.stroke();
-        }
-    }
-
-    function stopDrawing() {
-        if (isDrawing) {
-            isDrawing = false;
-            canvasState[canvasId] = canvas.toDataURL();
-            saveState();
-        }
-    }
-
-    // Mouse listeners
-    canvas.addEventListener("mousedown", startDrawing);
-    canvas.addEventListener("mousemove", draw);
-    canvas.addEventListener("mouseup", stopDrawing);
-    canvas.addEventListener("mouseleave", stopDrawing);
-
-    // Touch listeners
-    canvas.addEventListener("touchstart", startDrawing, { passive: false });
-    canvas.addEventListener("touchmove", draw, { passive: false });
-    canvas.addEventListener("touchend", stopDrawing);
-
-    // Clear listener
-    const clearBtn = document.getElementById(clearBtnId);
-    if (clearBtn) {
-        clearBtn.addEventListener("click", () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            delete canvasState[canvasId];
-            saveState();
-        });
-    }
-}
-
-// -------------------------------------------------------------
-// Document Generation and Rendering
-// -------------------------------------------------------------
-function updatePrenup() {
-    const list = document.getElementById("prenup-output-list");
-    const dateDisp = document.getElementById("cert-date-display");
-    const placeDisp = document.getElementById("cert-place-display");
-    const introText = document.getElementById("cert-intro-text");
-    const sigNameA = document.getElementById("sig-name-display-a");
-    const sigNameB = document.getElementById("sig-name-display-b");
-    const sigNameWitness = document.getElementById("sig-name-display-witness");
-
-    if (!list) return;
-
-    const values = readValues();
-    const isJoint = getSetupType() === "joint";
-
-    const ceremonyDate = formatCeremonyDate(values.ceremonyDate);
-    const ceremonyPlace = values.ceremonyPlace.trim() || "Cyberspace Chapel";
-    dateDisp.textContent = ceremonyDate;
-    if (placeDisp) placeDisp.textContent = ceremonyPlace;
-
-    // Intro Text
-    const nameA = values.partnerAName.trim() || "Satoshi";
-    const nameB = values.partnerBName.trim() || "Hal Finney";
-    const witnessName = values.witnessName.trim() || "Nick Szabo";
-
-    if (isJoint) {
-        introText.innerHTML = `<strong>${escapeHtml(nameA)}</strong> and <strong>${escapeHtml(nameB)}</strong> mark this day at <strong>${escapeHtml(ceremonyPlace)}</strong> with these Bitcoin vows:`;
-        sigNameA.textContent = nameA;
-        sigNameB.textContent = nameB;
-    } else {
-        introText.innerHTML = `<strong>${escapeHtml(nameA)}</strong> marks this day at <strong>${escapeHtml(ceremonyPlace)}</strong> with these Bitcoin vows:`;
-        sigNameA.textContent = nameA;
-    }
-
-    if (sigNameWitness) {
-        sigNameWitness.textContent = witnessName;
-    }
-
-    // Form Vow Bullet Points
-    const rules = [];
-
-    // Optional accumulation vow
-    if (values.enableStacking) {
-        rules.push(`Promise to stack <strong>${formatCurrency(values.buyAmount)}</strong> of Bitcoin <strong>${values.buyFrequency}</strong> with patience and care.`);
-    }
-
-    // Panic Sell Vow
-    if (values.noPanic) {
-        rules.push("Hold firm through volatility and <strong>never panic sell</strong> under market pressure.");
-    }
-
-    // Leverage Vow
-    if (values.noLeverage) {
-        rules.push("Reject derivative trading and <strong>never use leverage</strong> against shared peace of mind.");
-    }
-
-    // Custody Vow
-    if (values.coldStorage) {
-        rules.push("Keep private keys offline in <strong>secure cold storage</strong>, away from temptation and hurry.");
-    }
-
-    // Bitcoin Only Vow
-    if (values.noShitcoins) {
-        rules.push("Stay faithful to Bitcoin and <strong>ignore altcoin noise</strong>.");
-    }
-
-    // Custom Vow
-    if (values.customVow && values.customVow.trim() !== "") {
-        rules.push(escapeHtml(values.customVow.trim()));
-    }
-
-    // Render list
-    list.innerHTML = rules.map(rule => `<li>${rule}</li>`).join("");
-}
-
-function readValues() {
+const STORAGE_KEY = "btc_wedding_household_plan_v1";
+
+const DEFAULT_PLAN = {
+    personA: "",
+    personB: "",
+    ownership: "mixed",
+    recurringEnabled: false,
+    buyAmount: "",
+    buyFrequency: "monthly",
+    noMarketReactions: true,
+    custody: "individual",
+    separateSecrets: true,
+    emergencyGuide: true,
+    annualReview: true
+};
+
+const OWNERSHIP_COPY = {
+    separate: "We treat our bitcoin as separate property. Each person remains responsible for their own purchases, records, custody, and decisions.",
+    shared: "We treat our bitcoin plan as part of one household reserve. We discuss material purchases, sales, and custody changes together.",
+    mixed: "We may each hold personal bitcoin while also maintaining a shared household plan. We keep those purposes and records clearly separated."
+};
+
+const CUSTODY_COPY = {
+    individual: "Our primary approach is individual self-custody. Each person is responsible for maintaining their own keys and verified backups.",
+    multisig: "Our primary approach is shared multisignature custody. We document participants, device locations, and recovery procedures offline."
+};
+
+let currentStep = 0;
+let saveTimer = 0;
+let resetArmed = false;
+let resetTimer = 0;
+
+const form = document.getElementById("plan-form");
+const planner = document.getElementById("planner");
+const stepTabs = Array.from(document.querySelectorAll(".step-tab"));
+const stepPanels = Array.from(document.querySelectorAll(".step-panel"));
+const previousButton = document.getElementById("previous-step");
+const nextButton = document.getElementById("next-step");
+const previewButton = document.getElementById("show-preview");
+const recurringToggle = document.getElementById("recurring-enabled");
+const recurringFields = document.getElementById("recurring-fields");
+const saveState = document.getElementById("save-state");
+const actionStatus = document.getElementById("action-status");
+
+function readPlan() {
+    const data = new FormData(form);
     return {
-        enableStacking: readChecked("enable-stacking"),
-        buyAmount: readNumber("buy-amount"),
-        buyFrequency: readSelect("buy-frequency"),
-        noPanic: readChecked("no-panic"),
-        noLeverage: readChecked("no-leverage"),
-        coldStorage: readChecked("cold-storage"),
-        noShitcoins: readChecked("no-shitcoins"),
-        partnerAName: readText("partner-a-name"),
-        partnerBName: readText("partner-b-name"),
-        ceremonyDate: readText("ceremony-date"),
-        ceremonyPlace: readText("ceremony-place"),
-        customVow: readText("custom-vow"),
-        witnessName: readText("witness-name"),
-        enableWitness: readChecked("enable-witness")
+        personA: String(data.get("personA") || "").trim(),
+        personB: String(data.get("personB") || "").trim(),
+        ownership: String(data.get("ownership") || DEFAULT_PLAN.ownership),
+        recurringEnabled: data.has("recurringEnabled"),
+        buyAmount: String(data.get("buyAmount") || "").trim(),
+        buyFrequency: String(data.get("buyFrequency") || DEFAULT_PLAN.buyFrequency),
+        noMarketReactions: data.has("noMarketReactions"),
+        custody: String(data.get("custody") || DEFAULT_PLAN.custody),
+        separateSecrets: data.has("separateSecrets"),
+        emergencyGuide: data.has("emergencyGuide"),
+        annualReview: data.has("annualReview")
     };
 }
 
-function readNumber(id) {
-    const value = Number(document.getElementById(id)?.value || 0);
-    return Number.isFinite(value) ? value : 0;
-}
-
-function readSelect(id) {
-    return document.getElementById(id)?.value || "";
-}
-
-function readChecked(id) {
-    return Boolean(document.getElementById(id)?.checked);
-}
-
-function readText(id) {
-    return document.getElementById(id)?.value || "";
-}
-
-// -------------------------------------------------------------
-// Timechain Block Height fetching
-// -------------------------------------------------------------
-async function fetchBlockHeight() {
-    const el = document.getElementById("cert-block-height");
-    if (!el) return;
-
-    el.textContent = "Retrieving latest block...";
-
-    try {
-        const controller = new AbortController();
-        const timeout = window.setTimeout(() => controller.abort(), 4000);
-        const response = await fetch("https://mempool.space/api/blocks/tip/height", { signal: controller.signal });
-        window.clearTimeout(timeout);
-        if (response.ok) {
-            const height = await response.text();
-            if (!isSealed) return;
-            savedBlockHeight = height.trim();
-            renderBlockHeight();
-        } else {
-            throw new Error("HTTP error status");
-        }
-    } catch (e) {
-        if (!isSealed) return;
-        console.warn("Could not retrieve block height", e);
-        savedBlockHeight = "";
-        renderBlockHeight();
-    }
-}
-
-function renderBlockHeight() {
-    const el = document.getElementById("cert-block-height");
-    if (!el) return;
-
-    if (isSealed) {
-        el.innerHTML = savedBlockHeight
-            ? `Block <strong>#${savedBlockHeight}</strong>`
-            : "Reference unavailable";
-    } else {
-        el.textContent = "Unsealed";
-    }
-}
-
-// -------------------------------------------------------------
-// Buttons & UI Actions
-// -------------------------------------------------------------
-function bindActions() {
-    document.getElementById("btn-seal")?.addEventListener("click", toggleSeal);
-    document.getElementById("copy-prenup")?.addEventListener("click", copyContractText);
-    document.getElementById("print-prenup")?.addEventListener("click", () => window.print());
-    document.getElementById("reset-prenup")?.addEventListener("click", resetState);
-}
-
-async function toggleSeal() {
-    const docSheet = document.querySelector(".document-sheet");
-    const waxSeal = document.getElementById("cert-wax-seal");
-    const sealBtn = document.getElementById("btn-seal");
-    const btnText = sealBtn?.querySelector(".btn-text");
-
-    if (!isSealed) {
-        if (!validateCertificateForm({ focusFirst: true })) return;
-        // Start melting wax loader
-        sealBtn.classList.add("loading-wax");
-        sealBtn.disabled = true;
-        sealBtn.setAttribute("aria-busy", "true");
-        if (btnText) btnText.textContent = "Melting Wax...";
-
-        await new Promise(r => setTimeout(r, 250));
-
-        isSealed = true;
-
-        sealBtn.classList.remove("loading-wax");
-        sealBtn.disabled = false;
-        sealBtn.removeAttribute("aria-busy");
-
-        // Lock Document & trigger animations
-        docSheet?.classList.add("sealed-lock");
-
-        // Add vibration feedback impact shake
-        docSheet?.classList.remove("shake-effect");
-        void docSheet?.offsetWidth; // Trigger reflow to restart animation
-        docSheet?.classList.add("shake-effect");
-
-        waxSeal?.classList.add("sealed");
-
-        // Trigger ripple shockwave
-        const ripple = document.getElementById("stamp-ripple");
-        if (ripple) {
-            ripple.classList.remove("active");
-            void ripple.offsetWidth;
-            ripple.classList.add("active");
-        }
-
-        if (btnText) btnText.textContent = "Unlock Vows";
-        sealBtn?.classList.remove("glow-effect");
-        sealBtn?.classList.add("secondary");
-
-        // Trigger Confetti
-        if (confettiSystem && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-            confettiSystem.spawn();
-        }
-
-        // The certificate is local-first: do not make the seal wait for an
-        // optional public block-height lookup.
-        void fetchBlockHeight().then(saveState);
-    } else {
-        // Unlock Document
-        isSealed = false;
-        docSheet?.classList.remove("sealed-lock");
-        docSheet?.classList.remove("shake-effect");
-        waxSeal?.classList.remove("sealed");
-
-        const ripple = document.getElementById("stamp-ripple");
-        ripple?.classList.remove("active");
-
-        savedBlockHeight = "";
-        renderBlockHeight();
-
-        if (btnText) btnText.textContent = "Sign & Seal Vows";
-        sealBtn?.classList.add("glow-effect");
-        sealBtn?.classList.remove("secondary");
-    }
-
-    saveState();
-}
-
-async function copyContractText() {
-    const values = readValues();
-    const isJoint = getSetupType() === "joint";
-    const nameA = values.partnerAName.trim() || "Satoshi";
-    const nameB = values.partnerBName.trim() || "Hal Finney";
-    const ceremonyDate = formatCeremonyDate(values.ceremonyDate);
-    const ceremonyPlace = values.ceremonyPlace.trim() || "Cyberspace Chapel";
-
-    const intro = isJoint
-        ? `${nameA} and ${nameB} mark this day at ${ceremonyPlace} with these Bitcoin vows:`
-        : `${nameA} marks this day at ${ceremonyPlace} with these Bitcoin vows:`;
-
-    const rules = [];
-    if (values.enableStacking) {
-        rules.push(`- Promise to stack ${formatCurrency(values.buyAmount)} of Bitcoin ${values.buyFrequency} with patience and care.`);
-    }
-    if (values.noPanic) rules.push("- Hold firm through volatility and never panic sell under market pressure.");
-    if (values.noLeverage) rules.push("- Reject derivative trading and never use leverage against shared peace of mind.");
-    if (values.coldStorage) rules.push("- Keep private keys offline in secure cold storage, away from temptation and hurry.");
-    if (values.noShitcoins) rules.push("- Stay faithful to Bitcoin and ignore altcoin noise.");
-    if (values.customVow && values.customVow.trim() !== "") {
-        rules.push(`- ${values.customVow.trim()}`);
-    }
-
-    const text = [
-        "=========================================",
-        "            BITCOIN VOW CERTIFICATE",
-        "=========================================",
-        `Date: ${ceremonyDate}`,
-        `Place: ${ceremonyPlace}`,
-        isSealed
-            ? (savedBlockHeight ? `Bitcoin Block Reference: #${savedBlockHeight}` : "Bitcoin Block Reference: unavailable")
-            : "Seal Status: Unsealed",
-        "",
-        intro,
-        "",
-        ...rules,
-        "",
-        "Symbolic keepsake only. Never type a recovery seed into any website.",
-        "",
-        isJoint ? `Signed (Partner A): ${nameA}` : `Signed: ${nameA}`,
-        isJoint ? `Signed (Partner B): ${nameB}` : "",
-        values.enableWitness ? `Witnessed by: ${values.witnessName.trim() || "Witness"}` : "",
-        "========================================="
-    ].filter(line => line !== "").join("\n");
-
-    try {
-        await navigator.clipboard.writeText(text);
-        showSavedToast("Copied");
-    } catch (error) {
-        fallbackCopy(text);
-        showSavedToast("Copied");
-    }
-}
-
-function fallbackCopy(text) {
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    textarea.setAttribute("readonly", "");
-    textarea.style.position = "fixed";
-    textarea.style.left = "-9999px";
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textarea);
-}
-
-// -------------------------------------------------------------
-// State Management (LocalStorage)
-// -------------------------------------------------------------
-function saveState() {
-    try {
-        const data = {
-            setupType: getSetupType(),
-            isSealed: isSealed,
-            savedBlockHeight: savedBlockHeight,
-            canvasState: canvasState
-        };
-
-        FIELD_IDS.forEach((id) => {
-            const field = document.getElementById(id);
-            if (!field) return;
-            data[id] = field.type === "checkbox" ? field.checked : field.value;
-        });
-
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch (error) {
-        console.warn("Unable to save prenup state", error);
-    }
-}
-
-function scheduleStateSave() {
-    window.clearTimeout(saveStateTimer);
-    saveStateTimer = window.setTimeout(() => {
-        saveStateTimer = 0;
-        saveState();
-    }, 200);
-}
-
-function flushScheduledStateSave() {
-    if (!saveStateTimer) return;
-    window.clearTimeout(saveStateTimer);
-    saveStateTimer = 0;
-    saveState();
-}
-
-function restoreState() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        const data = JSON.parse(raw);
-
-        // Restore Setup Type Solo/Joint
-        const type = data.setupType || "solo";
-        const btnSolo = document.getElementById("btn-solo");
-        const btnJoint = document.getElementById("btn-joint");
-        if (type === "solo" && btnSolo) {
-            btnSolo.querySelector("input").checked = true;
-        } else if (btnJoint) {
-            btnJoint.querySelector("input").checked = true;
-        }
-
-        // Restore standard field values
-        FIELD_IDS.forEach((id) => {
-            const field = document.getElementById(id);
-            if (!field || !(id in data)) return;
-            if (field.type === "checkbox") {
-                field.checked = Boolean(data[id]);
+function applyPlan(plan) {
+    Object.entries(plan).forEach(([name, value]) => {
+        const fields = Array.from(form.elements).filter((field) => field.name === name);
+        fields.forEach((field) => {
+            if (field.type === "radio") {
+                field.checked = field.value === value;
+            } else if (field.type === "checkbox") {
+                field.checked = Boolean(value);
             } else {
-                field.value = data[id];
+                field.value = String(value ?? "");
             }
         });
-
-        // Trigger view switches for Setup Type
-        setSetupType(type);
-        updateStackingVisibility();
-
-        // Restore Block height
-        savedBlockHeight = data.savedBlockHeight || "";
-
-        // Restore canvas state
-        if (data.canvasState) {
-            Object.assign(canvasState, data.canvasState);
-            Object.keys(canvasState).forEach((canvasId) => {
-                const canvas = document.getElementById(canvasId);
-                if (canvas && canvasState[canvasId]) {
-                    const ctx = canvas.getContext("2d");
-                    const img = new Image();
-                    img.onload = function () {
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        ctx.drawImage(img, 0, 0);
-                    };
-                    img.src = canvasState[canvasId];
-                }
-            });
-        }
-
-        // Restore Sealed Lock state
-        if (data.isSealed) {
-            isSealed = true;
-            document.querySelector(".document-sheet")?.classList.add("sealed-lock");
-            document.getElementById("cert-wax-seal")?.classList.add("sealed");
-            const sealBtn = document.getElementById("btn-seal");
-            const btnText = sealBtn?.querySelector(".btn-text");
-            if (btnText) btnText.textContent = "Unlock Vows";
-            sealBtn?.classList.remove("glow-effect");
-            sealBtn?.classList.add("secondary");
-        }
-    } catch (error) {
-        console.warn("Unable to restore prenup state", error);
-    }
-}
-
-async function resetState() {
-    const confirmed = await showConfirmModal();
-    if (!confirmed) return;
-
-    try {
-        localStorage.removeItem(STORAGE_KEY);
-    } catch (error) {
-        console.warn("Unable to reset prenup state", error);
-    }
-
-    // Reset canvasses
-    const canvases = ["sig-canvas-a", "sig-canvas-b", "sig-canvas-witness"];
-    canvases.forEach(id => {
-        const canvas = document.getElementById(id);
-        if (canvas) {
-            const ctx = canvas.getContext("2d");
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
-        delete canvasState[id];
     });
 
-    // Reset seal & block state
-    isSealed = false;
-    savedBlockHeight = "";
-    renderBlockHeight();
-
-    const docSheet = document.querySelector(".document-sheet");
-    docSheet?.classList.remove("sealed-lock");
-    docSheet?.classList.remove("shake-effect");
-    document.getElementById("cert-wax-seal")?.classList.remove("sealed");
-
-    const sealBtn = document.getElementById("btn-seal");
-    const btnText = sealBtn?.querySelector(".btn-text");
-    if (btnText) btnText.textContent = "Sign & Seal Vows";
-    sealBtn?.classList.add("glow-effect");
-    sealBtn?.classList.remove("secondary");
-
-    // Reset Form
-    document.getElementById("prenup-form")?.reset();
-
-    setDefaultCeremonyDate();
-
-    // Return to the wedding-first default.
-    const btnJoint = document.getElementById("btn-joint");
-    if (btnJoint) btnJoint.querySelector("input").checked = true;
-    setSetupType("joint");
-
-    updateWitnessVisibility();
-    updateSignatureMode();
-    updateStackingVisibility();
-    updatePrenup();
-    updateCardClasses();
-    showSavedToast("Reset complete");
+    updateRecurringFields();
+    renderPlan();
 }
 
-function showSavedToast(text) {
-    const status = document.getElementById("saved-status");
-    if (!status) return;
-    status.textContent = text;
-    window.clearTimeout(showSavedToast.timeout);
-    showSavedToast.timeout = window.setTimeout(() => {
-        status.textContent = "Saved locally";
-    }, 1800);
+function restorePlan() {
+    try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        applyPlan({ ...DEFAULT_PLAN, ...(stored || {}) });
+    } catch {
+        applyPlan(DEFAULT_PLAN);
+    }
 }
 
-// -------------------------------------------------------------
-// Formatting Helpers
-// -------------------------------------------------------------
-function formatCurrency(value) {
+function scheduleSave() {
+    window.clearTimeout(saveTimer);
+    saveState.textContent = "Saving…";
+    saveState.classList.add("saving");
+    saveTimer = window.setTimeout(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(readPlan()));
+        saveState.textContent = "Saved locally";
+        saveState.classList.remove("saving");
+    }, 250);
+}
+
+function updateRecurringFields() {
+    recurringFields.hidden = !recurringToggle.checked;
+}
+
+function formatFrequency(value) {
+    return {
+        weekly: "every week",
+        biweekly: "every two weeks",
+        monthly: "every month",
+        quarterly: "every quarter"
+    }[value] || "on a regular schedule";
+}
+
+function formatAmount(value) {
+    const amount = Number(value);
+    if (!Number.isFinite(amount) || amount <= 0) return "";
     return new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: "USD",
         maximumFractionDigits: 0
-    }).format(Math.max(0, value));
+    }).format(amount);
 }
 
-function formatCeremonyDate(value) {
-    if (!value) {
-        return new Date().toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric"
+function setText(id, text) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = text;
+}
+
+function getPartiesIntro(plan) {
+    if (plan.personA && plan.personB) {
+        return `${plan.personA} and ${plan.personB} made this plan to keep household Bitcoin decisions calm, explicit, and recoverable.`;
+    }
+    if (plan.personA) {
+        return `${plan.personA} made this plan to keep Bitcoin decisions calm, explicit, and recoverable.`;
+    }
+    return "A plan made with patience, clear responsibilities, and no secrets stored online.";
+}
+
+function getRhythmCopy(plan) {
+    const amount = formatAmount(plan.buyAmount);
+    if (!plan.recurringEnabled) {
+        return plan.noMarketReactions
+            ? "We have not set a recurring purchase. Any future change will be discussed on a schedule, not made in reaction to a single market day."
+            : "We have not set a recurring purchase. We will document a buying rhythm before treating it as a household commitment.";
+    }
+
+    const target = amount || "an agreed amount";
+    const discipline = plan.noMarketReactions
+        ? " We review this rhythm deliberately, not in reaction to a single market day."
+        : "";
+    return `Our current planning target is ${target} ${formatFrequency(plan.buyFrequency)}.${discipline}`;
+}
+
+function getSafetyRules(plan) {
+    const rules = [];
+    if (plan.separateSecrets) {
+        rules.push("Seed phrases and private keys remain offline and separate from this document.");
+    }
+    if (plan.emergencyGuide) {
+        rules.push("We maintain an offline emergency guide that the right person can find.");
+    }
+    if (plan.annualReview) {
+        rules.push("We review custody, backups, and access once a year.");
+    }
+    if (rules.length === 0) {
+        rules.push("We will document household safety and recovery responsibilities offline.");
+    }
+    return rules;
+}
+
+function renderPlan() {
+    const plan = readPlan();
+    setText("document-date", new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+    }).format(new Date()));
+    setText("document-parties", getPartiesIntro(plan));
+    setText("ownership-output", OWNERSHIP_COPY[plan.ownership] || OWNERSHIP_COPY.mixed);
+    setText("rhythm-output", getRhythmCopy(plan));
+    setText("custody-output", CUSTODY_COPY[plan.custody] || CUSTODY_COPY.individual);
+    setText("signature-a", plan.personA || "Your name");
+    setText("signature-b", plan.personB || "Partner");
+
+    const signatureB = document.getElementById("signature-b-wrap");
+    signatureB.classList.toggle("hidden", !plan.personB);
+
+    const list = document.getElementById("safety-output");
+    list.replaceChildren(...getSafetyRules(plan).map((rule) => {
+        const item = document.createElement("li");
+        item.textContent = rule;
+        return item;
+    }));
+}
+
+function setStep(step, focusPanel = false) {
+    currentStep = Math.max(0, Math.min(stepPanels.length - 1, step));
+
+    stepTabs.forEach((tab, index) => {
+        const active = index === currentStep;
+        tab.classList.toggle("active", active);
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+    });
+
+    stepPanels.forEach((panel, index) => {
+        const active = index === currentStep;
+        panel.classList.toggle("active", active);
+        panel.hidden = !active;
+    });
+
+    previousButton.hidden = currentStep === 0;
+    nextButton.hidden = currentStep === stepPanels.length - 1;
+    previewButton.hidden = currentStep !== stepPanels.length - 1;
+
+    if (focusPanel) {
+        stepPanels[currentStep].querySelector("h3")?.setAttribute("tabindex", "-1");
+        stepPanels[currentStep].querySelector("h3")?.focus({ preventScroll: true });
+    }
+}
+
+function setMobileView(view, scroll = true) {
+    const showPreview = view === "preview";
+    planner.classList.toggle("show-preview", showPreview);
+
+    const planTab = document.getElementById("view-plan");
+    const previewTab = document.getElementById("view-preview");
+    planTab.classList.toggle("active", !showPreview);
+    previewTab.classList.toggle("active", showPreview);
+    planTab.setAttribute("aria-selected", String(!showPreview));
+    previewTab.setAttribute("aria-selected", String(showPreview));
+    planTab.tabIndex = showPreview ? -1 : 0;
+    previewTab.tabIndex = showPreview ? 0 : -1;
+
+    if (scroll && window.matchMedia("(max-width: 820px)").matches) {
+        planner.scrollIntoView({
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+            block: "start"
         });
     }
+}
 
-    const date = new Date(`${value}T00:00:00`);
-    if (Number.isNaN(date.getTime())) return value;
+function getPlanText() {
+    const plan = readPlan();
+    const names = plan.personA && plan.personB
+        ? `${plan.personA} and ${plan.personB}`
+        : plan.personA || "Household";
+    const safety = getSafetyRules(plan).map((rule) => `- ${rule}`).join("\n");
 
-    return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric"
+    return `OUR BITCOIN PLAN
+${names}
+
+1. OWNERSHIP
+${OWNERSHIP_COPY[plan.ownership] || OWNERSHIP_COPY.mixed}
+
+2. BUYING RHYTHM
+${getRhythmCopy(plan)}
+
+3. CUSTODY & CONTINUITY
+${CUSTODY_COPY[plan.custody] || CUSTODY_COPY.individual}
+${safety}
+
+This is a personal planning document, not a legal contract or financial advice. It contains no wallet credentials or recovery material.
+
+Created with btc.wedding`;
+}
+
+async function copyPlan() {
+    try {
+        await navigator.clipboard.writeText(getPlanText());
+        actionStatus.textContent = "Plan copied to clipboard.";
+    } catch {
+        const textarea = document.createElement("textarea");
+        textarea.value = getPlanText();
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        textarea.remove();
+        actionStatus.textContent = "Plan copied to clipboard.";
+    }
+}
+
+function resetPlan() {
+    const button = document.getElementById("reset-plan");
+    if (!resetArmed) {
+        resetArmed = true;
+        button.textContent = "Reset now";
+        button.classList.add("confirm-reset");
+        actionStatus.textContent = "Press “Reset now” to clear this device’s draft.";
+        window.clearTimeout(resetTimer);
+        resetTimer = window.setTimeout(disarmReset, 5000);
+        return;
+    }
+
+    window.clearTimeout(resetTimer);
+    localStorage.removeItem(STORAGE_KEY);
+    form.reset();
+    applyPlan(DEFAULT_PLAN);
+    setStep(0);
+    setMobileView("plan");
+    disarmReset();
+    actionStatus.textContent = "Plan reset.";
+}
+
+function disarmReset() {
+    resetArmed = false;
+    const button = document.getElementById("reset-plan");
+    button.textContent = "Reset plan";
+    button.classList.remove("confirm-reset");
+}
+
+form.addEventListener("input", () => {
+    updateRecurringFields();
+    renderPlan();
+    scheduleSave();
+});
+
+form.addEventListener("change", () => {
+    updateRecurringFields();
+    renderPlan();
+    scheduleSave();
+});
+
+stepTabs.forEach((tab) => {
+    tab.addEventListener("click", () => setStep(Number(tab.dataset.step), true));
+    tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+        event.preventDefault();
+        const delta = event.key === "ArrowRight" ? 1 : -1;
+        setStep((currentStep + delta + stepTabs.length) % stepTabs.length, true);
+        stepTabs[currentStep].focus();
     });
-}
+});
 
-function escapeHtml(str) {
-    return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
+previousButton.addEventListener("click", () => setStep(currentStep - 1, true));
+nextButton.addEventListener("click", () => setStep(currentStep + 1, true));
+previewButton.addEventListener("click", () => setMobileView("preview"));
 
-// -------------------------------------------------------------
-// Confetti / Gold Coin Particle System
-// -------------------------------------------------------------
-class ConfettiSystem {
-    constructor(canvas) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext("2d");
-        this.particles = [];
-        this.isActive = false;
-        this.colors = [
-            "#ffd700", // Gold
-            "#d4af37", // Metallic Gold
-            "#f7931a", // Bitcoin Orange
-            "#fff275", // Pastel Gold
-            "#a88118", // Dark Gold
-            "#f8b153"  // Muted Orange
-        ];
+document.getElementById("view-plan").addEventListener("click", () => setMobileView("plan"));
+document.getElementById("view-preview").addEventListener("click", () => setMobileView("preview"));
+document.getElementById("print-plan").addEventListener("click", () => window.print());
+document.getElementById("copy-plan").addEventListener("click", copyPlan);
+document.getElementById("reset-plan").addEventListener("click", resetPlan);
 
-        window.addEventListener("resize", () => this.resizeCanvas());
-        this.resizeCanvas();
-    }
+window.addEventListener("pagehide", () => {
+    window.clearTimeout(saveTimer);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(readPlan()));
+});
 
-    resizeCanvas() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-    }
-
-    spawn() {
-        this.particles = [];
-        const prefersLighterEffects = window.matchMedia("(max-width: 640px), (pointer: coarse)").matches;
-        const count = prefersLighterEffects ? 72 : 140;
-
-        for (let i = 0; i < count; i++) {
-            this.particles.push({
-                x: Math.random() * this.canvas.width + window.scrollX,
-                y: -30 - Math.random() * 80 + window.scrollY,
-                size: 5 + Math.random() * 9,
-                color: this.colors[Math.floor(Math.random() * this.colors.length)],
-                speedX: -2.5 + Math.random() * 5,
-                speedY: 2.5 + Math.random() * 6,
-                rotation: Math.random() * 360,
-                rotationSpeed: -3 + Math.random() * 6,
-                isCoin: Math.random() < 0.28, // ~28% gold coins
-                opacity: 0.85 + Math.random() * 0.15,
-                isSparkle: false
-            });
-        }
-
-        if (!this.isActive) {
-            this.isActive = true;
-            this.animate();
-        }
-    }
-
-    animate() {
-        if (this.particles.length === 0) {
-            this.isActive = false;
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            return;
-        }
-
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        for (let i = this.particles.length - 1; i >= 0; i--) {
-            const p = this.particles[i];
-
-            p.y += p.speedY;
-            p.x += p.speedX;
-            p.rotation += p.rotationSpeed;
-
-            if (p.isSparkle) {
-                p.opacity -= 0.012;
-                if (p.opacity <= 0) {
-                    this.particles.splice(i, 1);
-                    continue;
-                }
-            }
-
-            const drawX = p.x - window.scrollX;
-            const drawY = p.y - window.scrollY;
-
-            // Remove off-screen particles relative to viewport
-            if (drawY > this.canvas.height + 20 || drawX < -20 || drawX > this.canvas.width + 20) {
-                this.particles.splice(i, 1);
-                continue;
-            }
-
-            this.ctx.save();
-            this.ctx.translate(drawX, drawY);
-            this.ctx.rotate((p.rotation * Math.PI) / 180);
-            this.ctx.globalAlpha = p.opacity;
-
-            if (p.isCoin) {
-                // Draw a gold coin with ₿
-                this.ctx.fillStyle = p.color;
-                this.ctx.beginPath();
-                this.ctx.arc(0, 0, p.size, 0, Math.PI * 2);
-                this.ctx.fill();
-
-                this.ctx.strokeStyle = "#9a7b1c";
-                this.ctx.lineWidth = 1;
-                this.ctx.stroke();
-
-                // Draw tiny ₿ in coin center
-                this.ctx.fillStyle = "#5c4608";
-                this.ctx.font = `bold ${p.size * 1.1}px sans-serif`;
-                this.ctx.textAlign = "center";
-                this.ctx.textBaseline = "middle";
-                this.ctx.fillText("₿", 0, p.size * 0.05);
-            } else if (p.isSparkle) {
-                // Draw small sparkle dot
-                this.ctx.fillStyle = p.color;
-                this.ctx.beginPath();
-                this.ctx.arc(0, 0, p.size, 0, Math.PI * 2);
-                this.ctx.fill();
-            } else {
-                // Draw normal rectangular confetti
-                this.ctx.fillStyle = p.color;
-                this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.55);
-            }
-
-            this.ctx.restore();
-        }
-
-        requestAnimationFrame(() => this.animate());
-    }
-}
-
-// -------------------------------------------------------------
-// Custom Confirm Modal Dialog Helper
-// -------------------------------------------------------------
-function showConfirmModal() {
-    return new Promise((resolve) => {
-        const modal = document.getElementById("confirm-modal");
-        const btnCancel = document.getElementById("modal-cancel");
-        const btnConfirm = document.getElementById("modal-confirm");
-
-        if (!modal || !btnCancel || !btnConfirm) {
-            resolve(false);
-            return;
-        }
-
-        const previousFocus = document.activeElement;
-        const focusable = [btnCancel, btnConfirm];
-
-        modal.classList.remove("hidden");
-        btnConfirm.focus();
-
-        function handleCancel() {
-            cleanup();
-            resolve(false);
-        }
-
-        function handleConfirm() {
-            cleanup();
-            resolve(true);
-        }
-
-        function handleKeydown(event) {
-            if (event.key === "Escape") {
-                event.preventDefault();
-                handleCancel();
-                return;
-            }
-
-            if (event.key !== "Tab") return;
-            const currentIndex = focusable.indexOf(document.activeElement);
-            const direction = event.shiftKey ? -1 : 1;
-            const nextIndex = (currentIndex + direction + focusable.length) % focusable.length;
-            event.preventDefault();
-            focusable[nextIndex].focus();
-        }
-
-        function handleOverlayClick(event) {
-            if (event.target === modal) handleCancel();
-        }
-
-        function cleanup() {
-            modal.classList.add("hidden");
-            btnCancel.removeEventListener("click", handleCancel);
-            btnConfirm.removeEventListener("click", handleConfirm);
-            modal.removeEventListener("click", handleOverlayClick);
-            document.removeEventListener("keydown", handleKeydown);
-            if (previousFocus instanceof HTMLElement) previousFocus.focus();
-        }
-
-        btnCancel.addEventListener("click", handleCancel);
-        btnConfirm.addEventListener("click", handleConfirm);
-        modal.addEventListener("click", handleOverlayClick);
-        document.addEventListener("keydown", handleKeydown);
-    });
-}
-
-// -------------------------------------------------------------
-// Scrollspy active navigation item highlighter
-// -------------------------------------------------------------
-function initScrollspy() {
-    const rulesLink = document.querySelector('a[href="#rules"]');
-    const prenupLink = document.querySelector('a[href="#prenup"]');
-    const rulesSec = document.getElementById("rules");
-    const prenupSec = document.getElementById("prenup");
-    const eduSec = document.querySelector(".education-section");
-    let updateScheduled = false;
-    let activeSection = "";
-
-    if (!rulesSec) return;
-
-    function setActiveSection(nextSection) {
-        if (nextSection === activeSection) return;
-        activeSection = nextSection;
-        rulesLink?.classList.toggle("active-nav", nextSection === "rules");
-        prenupLink?.classList.toggle("active-nav", nextSection === "prenup");
-    }
-
-    function updateScrollspy() {
-        updateScheduled = false;
-        const scrollPos = window.scrollY + 180;
-        const isDesktop = window.innerWidth > 1024;
-
-        if (isDesktop) {
-            // On desktop, columns are side-by-side. Highlight "Rules" when viewing the workspace.
-            const workspaceTop = rulesSec.offsetTop;
-            const workspaceBottom = rulesSec.offsetTop + rulesSec.offsetHeight;
-
-            if (scrollPos >= workspaceTop && scrollPos < workspaceBottom) {
-                setActiveSection("rules");
-            } else {
-                setActiveSection("");
-            }
-        } else {
-            // On mobile, modules stack vertically. Track bounds dynamically.
-            const rulesTop = rulesSec.offsetTop;
-            const prenupTop = prenupSec ? prenupSec.getBoundingClientRect().top + window.scrollY : 0;
-            const eduTop = eduSec ? eduSec.offsetTop : document.body.scrollHeight;
-
-            if (prenupTop && scrollPos >= prenupTop && scrollPos < eduTop) {
-                setActiveSection("prenup");
-            } else if (scrollPos >= rulesTop && scrollPos < prenupTop) {
-                setActiveSection("rules");
-            } else {
-                setActiveSection("");
-            }
-        }
-    }
-
-    function scheduleScrollspyUpdate() {
-        if (updateScheduled) return;
-        updateScheduled = true;
-        window.requestAnimationFrame(updateScrollspy);
-    }
-
-    window.addEventListener("scroll", scheduleScrollspyUpdate, { passive: true });
-    window.addEventListener("resize", scheduleScrollspyUpdate, { passive: true });
-    updateScrollspy();
-}
+restorePlan();
+setStep(0);

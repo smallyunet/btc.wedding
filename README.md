@@ -1,28 +1,16 @@
-# btc.wedding | Bitcoin Vow Certificate Generator
+# btc.wedding | A Bitcoin Plan for Two
 
-`btc.wedding` is a static Bitcoin vow certificate generator. It helps people create a symbolic wedding-style Bitcoin certificate with names, ceremony details, vows, signatures, and a print-ready keepsake.
+`btc.wedding` is a private, static Bitcoin household-plan builder. It helps one person or a couple agree on ownership, a buying rhythm, custody responsibilities, and emergency continuity without creating an account or connecting a wallet.
 
-The site does not require a backend, account, wallet connection, seed phrase, private key, or signature. Inputs are saved only in the browser through `localStorage`.
+## Product principles
 
-## Concept
-
-The domain is treated as a ceremonial Bitcoin commitment. The product is intentionally small:
-
-- Add one or two names for a solo keepsake or couple vow certificate.
-- Set the ceremony date and place.
-- Choose Bitcoin vows such as steady stacking, no panic selling, no leverage, and offline keys.
-- Sign, seal, copy, or print the generated certificate.
-
-## Features
-
+- Practical household decisions instead of symbolic on-chain claims.
+- A short three-step flow with a live, printable document.
+- No seed phrase, private key, wallet connection, analytics, or database.
+- Drafts stay on the current device in `localStorage`.
 - Pure HTML, CSS, and JavaScript.
-- No build step.
-- Optional public Bitcoin block-height fetch when sealing the certificate.
-- Local-only state persistence.
-- Copy, print, and reset actions.
-- Print stylesheet for a clean certificate output.
 
-## Running Locally
+## Run locally
 
 Use any static file server:
 
@@ -30,16 +18,16 @@ Use any static file server:
 python3 -m http.server 8000
 ```
 
-Then open:
+Then open `http://localhost:8000`.
 
-```text
-http://localhost:8000
+## Build
+
+```bash
+npm run build
 ```
 
-## Deployment
-
-This project is suitable for GitHub Pages, Cloudflare Pages, Netlify, or any static host. The included `CNAME` points the site at `btc.wedding`.
+The build copies the static client and Cloudflare Worker into `dist/`.
 
 ## Privacy
 
-Everything is generated in the browser. The page never asks for seed phrases, private keys, wallet signatures, or wallet connections.
+The tool does not make network requests after its own static assets load. The generated plan intentionally contains no wallet credentials or recovery material.

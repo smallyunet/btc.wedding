@@ -3,592 +3,314 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>btc.wedding | Bitcoin Vow Certificate Generator</title>
-    <meta name="description" content="Create a printable Bitcoin vow certificate locally in your browser. Add names, date, location, rules, and signatures without login or seed input.">
-    <meta name="keywords" content="bitcoin vow certificate, bitcoin wedding certificate, btc prenup, bitcoin rules, cold storage vows, local certificate generator">
+    <title>btc.wedding | A Bitcoin Plan for Two</title>
+    <meta name="description" content="Create a private, printable Bitcoin household plan for buying, custody, and emergencies. No account, wallet connection, or seed phrase.">
     <meta name="author" content="btc.wedding">
+    <meta name="theme-color" content="#080806">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://btc.wedding/">
-    <meta property="og:title" content="btc.wedding | Bitcoin Vow Certificate Generator">
-    <meta property="og:description" content="Design a symbolic Bitcoin vow certificate with names, date, rules, and signatures. Local-only, no login, no wallet connection.">
+    <meta property="og:title" content="A Bitcoin Plan for Two | btc.wedding">
+    <meta property="og:description" content="A private, practical plan for buying, custody, and emergencies—built together in your browser.">
     <meta property="og:image" content="https://btc.wedding/og.png">
     <meta property="og:image:width" content="1536">
     <meta property="og:image:height" content="1024">
-    <meta property="og:image:alt" content="Bitcoin Vow Certificate by btc.wedding">
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="btc.wedding | Bitcoin Vow Certificate Generator">
-    <meta property="twitter:description" content="Create a private, printable Bitcoin vow certificate in your browser.">
-    <meta property="twitter:image" content="https://btc.wedding/og.png">
-    <meta property="twitter:image:alt" content="Bitcoin Vow Certificate by btc.wedding">
+    <meta property="og:image:alt" content="A Bitcoin Plan for Two by btc.wedding">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="A Bitcoin Plan for Two | btc.wedding">
+    <meta name="twitter:description" content="Private. Practical. Built together.">
+    <meta name="twitter:image" content="https://btc.wedding/og.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-
-    <link rel="preload" href="fonts/cinzel-latin.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="manifest" href="manifest.json">
+    <link rel="preload" href="fonts/cormorant-garamond-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="css/style.css?v=8">
+    <link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
-    <a class="skip-link" href="#rules">Skip to certificate builder</a>
-    <!-- Faint glowing blobs in background -->
-    <div class="glow-bg">
-        <div class="blob gold"></div>
-        <div class="blob orange"></div>
-    </div>
+    <a class="skip-link" href="#planner">Skip to plan builder</a>
 
     <header class="site-header">
         <a class="brand" href="#top" aria-label="btc.wedding home">
-            <!-- Official Slanted Bitcoin Logo in Header -->
-            <svg class="brand-mark-svg" viewBox="0 0 64 64" width="36" height="36">
-                <path fill="#f7931a" d="m63.033,39.744c-4.274,17.143-21.637,27.576-38.782,23.301-17.138-4.274-27.571-21.638-23.295-38.78,4.272-17.145,21.635-27.579,38.775-23.305,17.144,4.274,27.576,21.64,23.302,38.784z"/>
-                <path fill="#FFF" d="m46.103,27.444c0.637-4.258-2.605-6.547-7.038-8.074l1.438-5.768-3.511-0.875-1.4,5.616c-0.923-0.23-1.871-0.447-2.813-0.662l1.41-5.653-3.509-0.875-1.439,5.766c-0.764-0.174-1.514-0.346-2.242-0.527l0.004-0.018-4.842-1.209-0.934,3.75s2.605,0.597,2.55,0.634c1.422,0.355,1.679,1.296,1.636,2.042l-1.638,6.571c0.098,0.025,0.225,0.061,0.365,0.117-0.117-0.029-0.242-0.061-0.371-0.092l-2.296,9.205c-0.174,0.432-0.615,1.08-1.609,0.834,0.035,0.051-2.552-0.637-2.552-0.637l-1.743,4.019,4.569,1.139c0.85,0.213,1.683,0.436,2.503,0.646l-1.453,5.834,3.507,0.875,1.439-5.772c0.958,0.26,1.888,0.5,2.798,0.726l-1.434,5.745,3.511,0.875,1.453-5.823c5.987,1.133,10.489,0.676,12.384-4.739,1.527-4.36-0.076-6.875-3.226-8.515,2.294-0.529,4.022-2.038,4.483-5.155zm-8.022,11.249c-1.085,4.36-8.426,2.003-10.806,1.412l1.928-7.729c2.38,0.594,10.012,1.77,8.878,6.317zm1.086-11.312c-0.99,3.966-7.1,1.951-9.082,1.457l1.748-7.01c1.982,0.494,8.365,1.416,7.334,5.553z"/>
-            </svg>
-            <span class="brand-text">btc.wedding</span>
+            <img src="favicon-32.png" alt="" width="32" height="32">
+            <span>btc.wedding</span>
         </a>
-        <nav aria-label="Primary navigation">
-            <a href="#rules" class="nav-link">Create</a>
-            <a href="#prenup" class="nav-link">Certificate</a>
-        </nav>
+        <span class="privacy-mark">
+            <span class="privacy-dot" aria-hidden="true"></span>
+            <span class="privacy-copy">Private by design</span>
+            <span class="privacy-short" aria-hidden="true">Private</span>
+        </span>
     </header>
 
     <main id="top">
-        <section class="hero">
-            <div class="hero-copy">
-                <div class="badge">
-                    <span class="badge-dot"></span>
-                    <span>Local-only</span>
-                </div>
-                <h1>Bitcoin Vow Certificate</h1>
-                <p class="hero-text">Turn shared Bitcoin principles into a private, printable keepsake. Choose the vows, add your ceremony details, sign together, and seal the certificate in your browser.</p>
-                <div class="promise-row" aria-label="Privacy promises">
-                    <div class="promise-item">
-                        <span>Details stay local</span>
-                    </div>
-                    <div class="promise-item">
-                        <span>No wallet connection</span>
-                    </div>
-                    <div class="promise-item">
-                        <span>Print-ready</span>
-                    </div>
-                </div>
-                <div class="hero-actions">
-                    <a class="primary-action" href="#rules">Create Certificate</a>
-                </div>
+        <section class="intro" aria-labelledby="page-title">
+            <div class="intro-label">
+                <span class="intro-rule" aria-hidden="true"></span>
+                A practical agreement, made together
+            </div>
+            <h1 id="page-title">A Bitcoin plan<br>for two.</h1>
+            <p>Create a simple household agreement for buying, custody, and emergencies. No account, wallet connection, or seed phrase.</p>
+            <div class="trust-list" aria-label="Privacy and product promises">
+                <span>Stays on this device</span>
+                <span>Works offline after loading</span>
+                <span>Print-ready</span>
+            </div>
+        </section>
+
+        <section class="planner" id="planner" aria-label="Bitcoin household plan builder">
+            <div class="mobile-view-switch" role="tablist" aria-label="Planner view">
+                <button type="button" class="view-tab active" id="view-plan" role="tab" aria-selected="true" aria-controls="plan-form">Build plan</button>
+                <button type="button" class="view-tab" id="view-preview" role="tab" aria-selected="false" aria-controls="preview-panel" tabindex="-1">Preview</button>
             </div>
 
-            <aside class="hero-document-wrapper" aria-label="Example Bitcoin vow certificate preview">
-                <div class="hero-document">
-                    <div class="gold-frame-inner">
-                        <!-- Ornate Corner Flourishes (Preview) -->
-                        <div class="cert-corner top-left"></div>
-                        <div class="cert-corner top-right"></div>
-                        <div class="cert-corner bottom-left"></div>
-                        <div class="cert-corner bottom-right"></div>
+            <form class="plan-form" id="plan-form" novalidate>
+                <div class="form-heading">
+                    <div>
+                        <span class="eyebrow">Your private workspace</span>
+                        <h2>Build your plan</h2>
+                    </div>
+                    <span class="save-state" id="save-state" role="status" aria-live="polite">Saved locally</span>
+                </div>
 
-                        <span class="paper-label">Preview</span>
+                <div class="step-navigation" role="tablist" aria-label="Plan sections">
+                    <button type="button" class="step-tab active" id="step-tab-people" role="tab" aria-selected="true" aria-controls="step-people" data-step="0">
+                        <span>01</span>
+                        People
+                    </button>
+                    <button type="button" class="step-tab" id="step-tab-rhythm" role="tab" aria-selected="false" aria-controls="step-rhythm" data-step="1" tabindex="-1">
+                        <span>02</span>
+                        Rhythm
+                    </button>
+                    <button type="button" class="step-tab" id="step-tab-safety" role="tab" aria-selected="false" aria-controls="step-safety" data-step="2" tabindex="-1">
+                        <span>03</span>
+                        Safety
+                    </button>
+                </div>
 
-                        <!-- Official Slanted B Watermark in Preview -->
-                        <div class="cert-watermark">
-                            <svg viewBox="0 0 64 64" class="cert-watermark-svg">
-                                <path d="m46.103,27.444c0.637-4.258-2.605-6.547-7.038-8.074l1.438-5.768-3.511-0.875-1.4,5.616c-0.923-0.23-1.871-0.447-2.813-0.662l1.41-5.653-3.509-0.875-1.439,5.766c-0.764-0.174-1.514-0.346-2.242-0.527l0.004-0.018-4.842-1.209-0.934,3.75s2.605,0.597,2.55,0.634c1.422,0.355,1.679,1.296,1.636,2.042l-1.638,6.571c0.098,0.025,0.225,0.061,0.365,0.117-0.117-0.029-0.242-0.061-0.371-0.092l-2.296,9.205c-0.174,0.432-0.615,1.08-1.609,0.834,0.035,0.051-2.552-0.637-2.552-0.637l-1.743,4.019,4.569,1.139c0.85,0.213,1.683,0.436,2.503,0.646l-1.453,5.834,3.507,0.875,1.439-5.772c0.958,0.26,1.888,0.5,2.798,0.726l-1.434,5.745,3.511,0.875,1.453-5.823c5.987,1.133,10.489,0.676,12.384-4.739,1.527-4.36-0.076-6.875-3.226-8.515,2.294-0.529,4.022-2.038,4.483-5.155zm-8.022,11.249c-1.085,4.36-8.426,2.003-10.806,1.412l1.928-7.729c2.38,0.594,10.012,1.77,8.878,6.317zm1.086-11.312c-0.99,3.966-7.1,1.951-9.082,1.457l1.748-7.01c1.982,0.494,8.365,1.416,7.334,5.553z"/>
-                            </svg>
+                <div class="step-panel active" id="step-people" role="tabpanel" aria-labelledby="step-tab-people" data-panel="0">
+                    <div class="section-copy">
+                        <span class="step-count">Step 1 of 3</span>
+                        <h3>Who is making this plan?</h3>
+                        <p>First names are enough. Leave the second name blank for a solo plan.</p>
+                    </div>
+
+                    <div class="field-grid">
+                        <label class="field">
+                            <span>Your name</span>
+                            <input id="person-a" name="personA" type="text" maxlength="50" autocomplete="name" placeholder="e.g. Alex">
+                        </label>
+                        <label class="field">
+                            <span>Partner’s name <small>Optional</small></span>
+                            <input id="person-b" name="personB" type="text" maxlength="50" autocomplete="name" placeholder="e.g. Sam">
+                        </label>
+                    </div>
+
+                    <fieldset class="choice-fieldset">
+                        <legend>How will you think about ownership?</legend>
+                        <div class="choice-grid three-up">
+                            <label class="choice-card">
+                                <input type="radio" name="ownership" value="separate">
+                                <span class="choice-check" aria-hidden="true"></span>
+                                <strong>Separate</strong>
+                                <small>Each person owns and manages their own bitcoin.</small>
+                            </label>
+                            <label class="choice-card">
+                                <input type="radio" name="ownership" value="shared">
+                                <span class="choice-check" aria-hidden="true"></span>
+                                <strong>Shared</strong>
+                                <small>You plan and account for it as one household reserve.</small>
+                            </label>
+                            <label class="choice-card">
+                                <input type="radio" name="ownership" value="mixed" checked>
+                                <span class="choice-check" aria-hidden="true"></span>
+                                <strong>Both</strong>
+                                <small>Personal holdings plus a shared household plan.</small>
+                            </label>
                         </div>
+                    </fieldset>
+                </div>
 
-                        <h2>Bitcoin Vows</h2>
-                        <p class="cert-date">June 8, 2026 · Cyberspace Chapel</p>
-                        <p class="cert-intro">Satoshi and Hal promise to guard their Bitcoin with patience, honesty, and cold storage.</p>
-                        <ul class="cert-list">
-                            <li>Buy on schedule.</li>
-                            <li>No panic selling.</li>
-                            <li>Keep keys offline.</li>
-                        </ul>
-                        <div class="cert-seal-mock">
-                            <!-- Slanted B inside preview seal -->
-                            <svg viewBox="0 0 64 64" width="34" height="34">
-                                <path fill="#FFF" d="m46.103,27.444c0.637-4.258-2.605-6.547-7.038-8.074l1.438-5.768-3.511-0.875-1.4,5.616c-0.923-0.23-1.871-0.447-2.813-0.662l1.41-5.653-3.509-0.875-1.439,5.766c-0.764-0.174-1.514-0.346-2.242-0.527l0.004-0.018-4.842-1.209-0.934,3.75s2.605,0.597,2.55,0.634c1.422,0.355,1.679,1.296,1.636,2.042l-1.638,6.571c0.098,0.025,0.225,0.061,0.365,0.117-0.117-0.029-0.242-0.061-0.371-0.092l-2.296,9.205c-0.174,0.432-0.615,1.08-1.609,0.834,0.035,0.051-2.552-0.637-2.552-0.637l-1.743,4.019,4.569,1.139c0.85,0.213,1.683,0.436,2.503,0.646l-1.453,5.834,3.507,0.875,1.439-5.772c0.958,0.26,1.888,0.5,2.798,0.726l-1.434,5.745,3.511,0.875,1.453-5.823c5.987,1.133,10.489,0.676,12.384-4.739,1.527-4.36-0.076-6.875-3.226-8.515,2.294-0.529,4.022-2.038,4.483-5.155zm-8.022,11.249c-1.085,4.36-8.426,2.003-10.806,1.412l1.928-7.729c2.38,0.594,10.012,1.77,8.878,6.317zm1.086-11.312c-0.99,3.966-7.1,1.951-9.082,1.457l1.748-7.01c1.982,0.494,8.365,1.416,7.334,5.553z"/>
-                            </svg>
+                <div class="step-panel" id="step-rhythm" role="tabpanel" aria-labelledby="step-tab-rhythm" data-panel="1" hidden>
+                    <div class="section-copy">
+                        <span class="step-count">Step 2 of 3</span>
+                        <h3>Set a calm buying rhythm.</h3>
+                        <p>A plan is easier to follow when the amount and timing are decided before markets get noisy.</p>
+                    </div>
+
+                    <label class="switch-row" for="recurring-enabled">
+                        <span>
+                            <strong>Include a recurring purchase</strong>
+                            <small>You can leave this off and add it later.</small>
+                        </span>
+                        <span class="switch">
+                            <input type="checkbox" id="recurring-enabled" name="recurringEnabled">
+                            <span class="switch-track" aria-hidden="true"></span>
+                        </span>
+                    </label>
+
+                    <div class="recurring-fields" id="recurring-fields" hidden>
+                        <label class="field amount-field">
+                            <span>Amount in USD</span>
+                            <span class="input-with-prefix">
+                                <span aria-hidden="true">$</span>
+                                <input id="buy-amount" name="buyAmount" type="number" min="1" max="1000000" step="1" inputmode="decimal" placeholder="100">
+                            </span>
+                            <small class="field-help">A planning target, not a transaction.</small>
+                        </label>
+                        <label class="field">
+                            <span>Frequency</span>
+                            <select id="buy-frequency" name="buyFrequency">
+                                <option value="weekly">Every week</option>
+                                <option value="biweekly">Every two weeks</option>
+                                <option value="monthly" selected>Every month</option>
+                                <option value="quarterly">Every quarter</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <label class="commitment-row" for="no-market-reactions">
+                        <input type="checkbox" id="no-market-reactions" name="noMarketReactions" checked>
+                        <span class="native-check" aria-hidden="true"></span>
+                        <span>
+                            <strong>We will not change the plan in reaction to a single market day.</strong>
+                            <small>Review decisions on a schedule, not during a spike or crash.</small>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="step-panel" id="step-safety" role="tabpanel" aria-labelledby="step-tab-safety" data-panel="2" hidden>
+                    <div class="section-copy">
+                        <span class="step-count">Step 3 of 3</span>
+                        <h3>Agree on custody and continuity.</h3>
+                        <p>This plan should describe responsibilities—not contain secrets or recovery words.</p>
+                    </div>
+
+                    <fieldset class="choice-fieldset">
+                        <legend>Primary custody approach</legend>
+                        <div class="choice-grid">
+                            <label class="choice-card">
+                                <input type="radio" name="custody" value="individual" checked>
+                                <span class="choice-check" aria-hidden="true"></span>
+                                <strong>Individual wallets</strong>
+                                <small>Each person is responsible for their own keys and backups.</small>
+                            </label>
+                            <label class="choice-card">
+                                <input type="radio" name="custody" value="multisig">
+                                <span class="choice-check" aria-hidden="true"></span>
+                                <strong>Shared multisig</strong>
+                                <small>Spending requires more than one key or participant.</small>
+                            </label>
                         </div>
+                    </fieldset>
+
+                    <fieldset class="safety-list">
+                        <legend>Household safety rules</legend>
+                        <label class="check-row">
+                            <input type="checkbox" name="separateSecrets" checked>
+                            <span class="native-check" aria-hidden="true"></span>
+                            <span>Seed phrases and private keys stay offline and separate from this plan.</span>
+                        </label>
+                        <label class="check-row">
+                            <input type="checkbox" name="emergencyGuide" checked>
+                            <span class="native-check" aria-hidden="true"></span>
+                            <span>We maintain an offline emergency guide that the right person can find.</span>
+                        </label>
+                        <label class="check-row">
+                            <input type="checkbox" name="annualReview" checked>
+                            <span class="native-check" aria-hidden="true"></span>
+                            <span>We review custody, backups, and access once a year.</span>
+                        </label>
+                    </fieldset>
+
+                    <div class="safety-note">
+                        <strong>Never enter a seed phrase here.</strong>
+                        <span>btc.wedding does not need one and cannot move funds.</span>
                     </div>
                 </div>
+
+                <div class="form-actions">
+                    <button type="button" class="button secondary" id="previous-step" hidden>Back</button>
+                    <button type="button" class="button primary" id="next-step">Continue</button>
+                    <button type="button" class="button primary show-preview-button" id="show-preview" hidden>Review plan</button>
+                </div>
+            </form>
+
+            <aside class="preview-panel" id="preview-panel" aria-label="Generated Bitcoin household plan">
+                <div class="preview-heading">
+                    <div>
+                        <span class="eyebrow">Live document</span>
+                        <h2>Your household plan</h2>
+                    </div>
+                    <span class="document-state">Ready to print</span>
+                </div>
+
+                <article class="document" id="document">
+                    <div class="document-topline">
+                        <span>BTC.WEDDING / HOUSEHOLD PLAN</span>
+                        <span id="document-date"></span>
+                    </div>
+
+                    <header class="document-header">
+                        <div class="document-mark" aria-hidden="true">₿</div>
+                        <p>Private household agreement</p>
+                        <h2>Our Bitcoin Plan</h2>
+                        <p class="document-parties" id="document-parties">A plan made with patience and clear responsibilities.</p>
+                    </header>
+
+                    <div class="document-section">
+                        <span class="document-number">01</span>
+                        <div>
+                            <h3>Ownership</h3>
+                            <p id="ownership-output"></p>
+                        </div>
+                    </div>
+
+                    <div class="document-section">
+                        <span class="document-number">02</span>
+                        <div>
+                            <h3>Buying rhythm</h3>
+                            <p id="rhythm-output"></p>
+                        </div>
+                    </div>
+
+                    <div class="document-section">
+                        <span class="document-number">03</span>
+                        <div>
+                            <h3>Custody &amp; continuity</h3>
+                            <p id="custody-output"></p>
+                            <ul id="safety-output"></ul>
+                        </div>
+                    </div>
+
+                    <footer class="document-footer">
+                        <p>This is a personal planning document, not a legal contract or financial advice. It intentionally contains no wallet credentials or recovery material.</p>
+                        <div class="signature-lines">
+                            <span><i></i><b id="signature-a">Your name</b></span>
+                            <span id="signature-b-wrap"><i></i><b id="signature-b">Partner</b></span>
+                        </div>
+                    </footer>
+                </article>
+
+                <div class="preview-actions">
+                    <button type="button" class="button primary" id="print-plan">Print plan</button>
+                    <button type="button" class="button secondary" id="copy-plan">Copy text</button>
+                    <button type="button" class="text-button" id="reset-plan">Reset plan</button>
+                </div>
+                <p class="action-status" id="action-status" role="status" aria-live="polite"></p>
             </aside>
         </section>
 
-        <section id="rules" class="workspace" aria-label="Bitcoin prenup rules">
-            <div class="workspace-mobile-tabs" role="tablist" aria-label="Certificate builder view">
-                <button type="button" class="workspace-tab active" id="tab-customize" role="tab" aria-selected="true" aria-controls="prenup-form">Customize</button>
-                <button type="button" class="workspace-tab" id="tab-preview" role="tab" aria-selected="false" aria-controls="prenup" tabindex="-1">Preview</button>
-            </div>
-            <form class="rules-panel" id="prenup-form" onsubmit="return false;">
-                <div class="panel-heading">
-                    <span class="eyebrow">Certificate details</span>
-                    <h2>Personalize The Vows</h2>
-                    <div class="form-progress" aria-live="polite">
-                        <span class="form-progress-dot" aria-hidden="true"></span>
-                        <span id="form-completion-status">Ready to personalize</span>
-                    </div>
-                </div>
-
-                <!-- Setup Type Selector -->
-                <div class="form-section">
-                    <span class="section-label">Certificate Type</span>
-                    <div class="toggle-group">
-                        <label class="toggle-btn" id="btn-solo">
-                            <input type="radio" name="setup-type" value="solo" class="sr-only">
-                            <span>Solo Keepsake</span>
-                        </label>
-                        <label class="toggle-btn active" id="btn-joint">
-                            <input type="radio" name="setup-type" value="joint" checked class="sr-only">
-                            <span>Couple Vows</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Partner Names -->
-                <div class="form-section field-grid name-inputs two-cols">
-                    <div class="field" id="partner-a-wrapper">
-                        <label for="partner-a-name" class="field-label">Name on Certificate</label>
-                        <div class="input-shell has-trailing-action">
-                            <input id="partner-a-name" type="text" placeholder="e.g. Satoshi" value="Satoshi" autocomplete="name" maxlength="60" required aria-describedby="partner-a-error">
-                            <button type="button" class="input-clear" data-clear-target="partner-a-name" aria-label="Clear first certificate name">×</button>
-                        </div>
-                        <span class="field-error" id="partner-a-error" role="alert"></span>
-                    </div>
-                    <div class="field" id="partner-b-wrapper">
-                        <label for="partner-b-name" class="field-label">Partner's Name</label>
-                        <div class="input-shell has-trailing-action">
-                            <input id="partner-b-name" type="text" placeholder="e.g. Hal Finney" value="Hal Finney" autocomplete="name" maxlength="60" aria-describedby="partner-b-error">
-                            <button type="button" class="input-clear" data-clear-target="partner-b-name" aria-label="Clear partner name">×</button>
-                        </div>
-                        <span class="field-error" id="partner-b-error" role="alert"></span>
-                    </div>
-                </div>
-
-                <div class="form-section field-grid certificate-details-grid">
-                    <div class="field">
-                        <label class="field-label" for="ceremony-date">Ceremony Date</label>
-                        <div class="date-control">
-                            <div class="input-shell date-input-shell">
-                                <span class="calendar-mark" aria-hidden="true"></span>
-                                <input id="ceremony-date" type="date" required aria-describedby="ceremony-date-error">
-                            </div>
-                            <button type="button" class="date-picker-trigger" id="open-date-picker" aria-label="Open ceremony date picker">Choose</button>
-                        </div>
-                        <div class="date-shortcuts" aria-label="Quick ceremony date choices">
-                            <button type="button" data-date-action="today">Today</button>
-                            <button type="button" data-date-action="month">+1 month</button>
-                            <button type="button" data-date-action="year">+1 year</button>
-                        </div>
-                        <span class="field-error" id="ceremony-date-error" role="alert"></span>
-                    </div>
-                    <label class="field">
-                        <span class="field-label">Ceremony Place</span>
-                        <div class="input-shell has-trailing-action">
-                            <input id="ceremony-place" type="text" placeholder="e.g. Cyberspace Chapel" value="Cyberspace Chapel" maxlength="80" required aria-describedby="ceremony-place-error">
-                            <button type="button" class="input-clear" data-clear-target="ceremony-place" aria-label="Clear ceremony place">×</button>
-                        </div>
-                        <span class="field-error" id="ceremony-place-error" role="alert"></span>
-                    </label>
-                </div>
-
-                <!-- Optional stacking plan -->
-                <fieldset class="form-fieldset">
-                    <legend>Stacking Plan</legend>
-                    <label class="witness-checkbox-label stacking-toggle" for="enable-stacking">
-                        <span class="checkbox-witness-wrapper">
-                            <input type="checkbox" id="enable-stacking" class="checkbox-witness sr-only" checked>
-                            <span class="custom-witness-checkbox"></span>
-                        </span>
-                        <span class="witness-label-text">Include a recurring Bitcoin purchase vow</span>
-                    </label>
-                    <div class="field-grid stacking-fields" id="stacking-fields">
-                        <label class="field">
-                            <span class="field-label">Amount</span>
-                            <div class="input-shell amount-input">
-                                <span class="input-prefix">$</span>
-                                <input id="buy-amount" type="number" min="1" step="1" inputmode="decimal" value="100" aria-describedby="buy-amount-error">
-                                <div class="amount-stepper" aria-label="Adjust purchase amount">
-                                    <button type="button" data-amount-step="-25" aria-label="Decrease amount by 25">−</button>
-                                    <button type="button" data-amount-step="25" aria-label="Increase amount by 25">+</button>
-                                </div>
-                            </div>
-                            <span class="field-error" id="buy-amount-error" role="alert"></span>
-                        </label>
-                        <div class="field">
-                            <span class="field-label">Frequency</span>
-                            <select id="buy-frequency" class="sr-only" tabindex="-1" aria-hidden="true">
-                                    <option value="daily">Daily</option>
-                                    <option value="weekly">Weekly</option>
-                                    <option value="bi-weekly">Bi-weekly</option>
-                                    <option value="monthly" selected>Monthly</option>
-                            </select>
-                            <div class="frequency-options" role="group" aria-label="Bitcoin purchase frequency">
-                                <button type="button" data-frequency="daily" aria-pressed="false">Daily</button>
-                                <button type="button" data-frequency="weekly" aria-pressed="false">Weekly</button>
-                                <button type="button" data-frequency="bi-weekly" aria-pressed="false">Bi-weekly</button>
-                                <button type="button" data-frequency="monthly" class="active" aria-pressed="true">Monthly</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="amount-presets" id="amount-presets" aria-label="Quick amount choices">
-                        <span>Quick select</span>
-                        <button type="button" class="amount-preset" data-amount="25">$25</button>
-                        <button type="button" class="amount-preset" data-amount="50">$50</button>
-                        <button type="button" class="amount-preset active" data-amount="100">$100</button>
-                        <button type="button" class="amount-preset" data-amount="250">$250</button>
-                    </div>
-                </fieldset>
-
-                <!-- Core Checklist (Styled as Toggle Cards) -->
-                <fieldset class="form-fieldset">
-                    <legend>Certificate Vows</legend>
-                    <div class="vows-card-grid">
-                        <!-- Card 1: No Panic Selling -->
-                        <label class="vow-card" for="no-panic">
-                            <input id="no-panic" type="checkbox" checked class="sr-only">
-                            <div class="vow-card-header">
-                                <span class="vow-icon">
-                                    <svg class="vow-svg-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 18l-9.5-9.5-5 5L1 6"></path><path d="M17 18h6v-6"></path></svg>
-                                </span>
-                                <span class="vow-checkbox-indicator"></span>
-                            </div>
-                            <span class="vow-title">Ban Panic Selling</span>
-                        </label>
-
-                        <!-- Card 2: No Leverage -->
-                        <label class="vow-card" for="no-leverage">
-                            <input id="no-leverage" type="checkbox" checked class="sr-only">
-                            <div class="vow-card-header">
-                                <span class="vow-icon">
-                                    <svg class="vow-svg-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                                </span>
-                                <span class="vow-checkbox-indicator"></span>
-                            </div>
-                            <span class="vow-title">Reject Leverage</span>
-                        </label>
-
-                        <!-- Card 3: Cold Storage -->
-                        <label class="vow-card" for="cold-storage">
-                            <input id="cold-storage" type="checkbox" checked class="sr-only">
-                            <div class="vow-card-header">
-                                <span class="vow-icon">
-                                    <svg class="vow-svg-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
-                                </span>
-                                <span class="vow-checkbox-indicator"></span>
-                            </div>
-                            <span class="vow-title">Offline Keys</span>
-                        </label>
-
-                        <!-- Card 4: Bitcoin Only -->
-                        <label class="vow-card" for="no-shitcoins">
-                            <input id="no-shitcoins" type="checkbox" checked class="sr-only">
-                            <div class="vow-card-header">
-                                <span class="vow-icon">
-                                    <svg class="vow-svg-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2h-3V8h3zm0 4a2 2 0 0 1 2 2v0a2 2 0 0 1-2 2H9v-4h3z"></path><path d="M9 6v12M11 6v2M11 16v2M13 6v2M13 16v2"></path></svg>
-                                </span>
-                                <span class="vow-checkbox-indicator"></span>
-                            </div>
-                            <span class="vow-title">Bitcoin Only</span>
-                        </label>
-                    </div>
-
-                    <!-- Custom Vow Field -->
-                    <div class="field custom-vow-container" style="margin-top: 20px;">
-                        <label for="custom-vow" class="field-label">Custom Wedding Line (Optional)</label>
-                        <div class="textarea-shell">
-                            <textarea id="custom-vow" rows="3" placeholder="e.g. We will protect our keys and our future together" maxlength="120" aria-describedby="custom-vow-count"></textarea>
-                            <button type="button" class="input-clear textarea-clear" data-clear-target="custom-vow" aria-label="Clear custom wedding line">×</button>
-                        </div>
-                        <span class="field-meta" id="custom-vow-count">0 / 120</span>
-                    </div>
-                </fieldset>
-
-                <details class="optional-details">
-                    <summary>Optional witness</summary>
-                    <div class="optional-details-body">
-                        <div class="witness-toggle-container">
-                            <label class="witness-checkbox-label" for="enable-witness">
-                                <span class="checkbox-witness-wrapper">
-                                    <input type="checkbox" id="enable-witness" class="checkbox-witness sr-only">
-                                    <span class="custom-witness-checkbox"></span>
-                                </span>
-                                <span class="witness-label-text">Add a witness signature</span>
-                            </label>
-                        </div>
-                        <div class="field hidden" id="witness-name-wrapper">
-                            <label for="witness-name" class="field-label">Witness Name</label>
-                            <div class="input-shell has-trailing-action">
-                                <input id="witness-name" type="text" placeholder="e.g. Nick Szabo" value="Nick Szabo" autocomplete="name" maxlength="60" aria-describedby="witness-name-error">
-                                <button type="button" class="input-clear" data-clear-target="witness-name" aria-label="Clear witness name">×</button>
-                            </div>
-                            <span class="field-error" id="witness-name-error" role="alert"></span>
-                        </div>
-                        <label class="witness-checkbox-label typed-signature-toggle" for="use-typed-signatures">
-                            <span class="checkbox-witness-wrapper">
-                                <input type="checkbox" id="use-typed-signatures" class="checkbox-witness sr-only" checked>
-                                <span class="custom-witness-checkbox"></span>
-                            </span>
-                            <span class="witness-label-text">
-                                Use certificate names as signatures
-                                <small>Keyboard-friendly. Turn this off to draw signatures by hand.</small>
-                            </span>
-                        </label>
-                    </div>
-                </details>
-
-                <button type="button" class="mobile-preview-cta" id="open-mobile-preview">Preview Certificate</button>
-            </form>
-
-            <div class="output-panel-wrapper">
-                <aside class="output-panel" id="prenup" aria-label="Generated Bitcoin prenup">
-                    <div class="output-header">
-                        <div>
-                            <span class="eyebrow">Live certificate</span>
-                            <h2>Your Bitcoin Vows</h2>
-                        </div>
-                        <span id="saved-status" class="saved-status" role="status" aria-live="polite">Saved locally</span>
-                    </div>
-
-                    <!-- Certificate layout -->
-                    <div class="document-sheet">
-                        <div class="stamp-ripple" id="stamp-ripple"></div>
-                        <div class="cert-frame">
-                            <div class="cert-frame-inner">
-                                <!-- Ornate Corner Flourishes -->
-                                <div class="cert-corner top-left"></div>
-                                <div class="cert-corner top-right"></div>
-                                <div class="cert-corner bottom-left"></div>
-                                <div class="cert-corner bottom-right"></div>
-
-                                <!-- Official Slanted B Watermark on Certificate -->
-                                <div class="cert-watermark">
-                                    <svg viewBox="0 0 64 64" class="cert-watermark-svg">
-                                        <path d="m46.103,27.444c0.637-4.258-2.605-6.547-7.038-8.074l1.438-5.768-3.511-0.875-1.4,5.616c-0.923-0.23-1.871-0.447-2.813-0.662l1.41-5.653-3.509-0.875-1.439,5.766c-0.764-0.174-1.514-0.346-2.242-0.527l0.004-0.018-4.842-1.209-0.934,3.75s2.605,0.597,2.55,0.634c1.422,0.355,1.679,1.296,1.636,2.042l-1.638,6.571c0.098,0.025,0.225,0.061,0.365,0.117-0.117-0.029-0.242-0.061-0.371-0.092l-2.296,9.205c-0.174,0.432-0.615,1.08-1.609,0.834,0.035,0.051-2.552-0.637-2.552-0.637l-1.743,4.019,4.569,1.139c0.85,0.213,1.683,0.436,2.503,0.646l-1.453,5.834,3.507,0.875,1.439-5.772c0.958,0.26,1.888,0.5,2.798,0.726l-1.434,5.745,3.511,0.875,1.453-5.823c5.987,1.133,10.489,0.676,12.384-4.739,1.527-4.36-0.076-6.875-3.226-8.515,2.294-0.529,4.022-2.038,4.483-5.155zm-8.022,11.249c-1.085,4.36-8.426,2.003-10.806,1.412l1.928-7.729c2.38,0.594,10.012,1.77,8.878,6.317zm1.086-11.312c-0.99,3.966-7.1,1.951-9.082,1.457l1.748-7.01c1.982,0.494,8.365,1.416,7.334,5.553z"/>
-                                    </svg>
-                                </div>
-
-                                <h2 class="cert-title">Bitcoin Vows</h2>
-
-                                <p class="cert-date-line"><span id="cert-date-display">-</span> · <span id="cert-place-display">-</span></p>
-
-                                <div class="cert-body">
-                                    <p class="cert-intro-text" id="cert-intro-text"></p>
-
-                                    <div class="cert-rules-container">
-                                        <ul id="prenup-output-list" class="cert-list">
-                                            <!-- Dynamic Rules Inserted Here -->
-                                        </ul>
-                                    </div>
-
-                                    <p class="cert-pledge">A symbolic keepsake, not a legal contract or financial advice. Never type a seed phrase into any website.</p>
-                                </div>
-
-                                <!-- Timechain Timestamp Block -->
-                                <div class="cert-block-height-wrapper">
-                                    <span class="cert-block-label">Bitcoin Block Reference</span>
-                                    <span id="cert-block-height">Unsealed</span>
-                                </div>
-
-                                <div class="cert-signatures-section two-cols typed-signatures" id="cert-signatures-section">
-                                    <!-- Signature Pad A -->
-                                    <div class="signature-box" id="sig-box-a">
-                                        <span class="sig-label">Partner A Signature</span>
-                                        <div class="canvas-wrapper">
-                                            <canvas id="sig-canvas-a" width="300" height="80" tabindex="0" role="img" aria-label="Draw Partner A signature here; the typed certificate name below is also retained"></canvas>
-                                            <button type="button" class="btn-clear-sig" id="clear-sig-a" aria-label="Clear Partner A Signature">Clear</button>
-                                        </div>
-                                        <span class="sig-name" id="sig-name-display-a">Satoshi</span>
-                                    </div>
-
-                                    <!-- Signature Pad B -->
-                                    <div class="signature-box" id="sig-box-b">
-                                        <span class="sig-label">Partner B Signature</span>
-                                        <div class="canvas-wrapper">
-                                            <canvas id="sig-canvas-b" width="300" height="80" tabindex="0" role="img" aria-label="Draw Partner B signature here; the typed certificate name below is also retained"></canvas>
-                                            <button type="button" class="btn-clear-sig" id="clear-sig-b" aria-label="Clear Partner B Signature">Clear</button>
-                                        </div>
-                                        <span class="sig-name" id="sig-name-display-b">Hal Finney</span>
-                                    </div>
-
-                                    <!-- Signature Pad Witness -->
-                                    <div class="signature-box hidden" id="sig-box-witness">
-                                        <span class="sig-label">Witness Signature</span>
-                                        <div class="canvas-wrapper">
-                                            <canvas id="sig-canvas-witness" width="300" height="80" tabindex="0" role="img" aria-label="Draw witness signature here; the typed witness name below is also retained"></canvas>
-                                            <button type="button" class="btn-clear-sig" id="clear-sig-witness" aria-label="Clear Witness Signature">Clear</button>
-                                        </div>
-                                        <span class="sig-name" id="sig-name-display-witness">Witness</span>
-                                    </div>
-                                </div>
-
-                                <!-- Wax Seal Overlay with Official Slanted B Path -->
-                                <div class="wax-seal" id="cert-wax-seal">
-                                    <svg viewBox="0 0 100 100" class="wax-seal-svg">
-                                        <defs>
-                                            <radialGradient id="sealGrad" cx="50%" cy="50%" r="50%">
-                                                <stop offset="0%" stop-color="#ffd700" />
-                                                <stop offset="70%" stop-color="#d4af37" />
-                                                <stop offset="100%" stop-color="#9a7b1c" />
-                                            </radialGradient>
-                                            <filter id="shadow">
-                                                <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.3"/>
-                                            </filter>
-                                            <filter id="wax-depth" x="-10%" y="-10%" width="120%" height="120%">
-                                                <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blur" />
-                                                <feSpecularLighting in="blur" surfaceScale="3.2" specularConstant="1.2" specularExponent="16" lighting-color="#ffffff" result="light">
-                                                    <fePointLight x="-20" y="-30" z="60" />
-                                                </feSpecularLighting>
-                                                <feComposite in="light" in2="SourceAlpha" operator="in" result="lightComposite" />
-                                                <feBlend in="SourceGraphic" in2="lightComposite" mode="multiply" />
-                                            </filter>
-                                        </defs>
-                                        <!-- Applied 3D depth and shadow filters to the circle -->
-                                        <circle cx="50" cy="50" r="46" fill="url(#sealGrad)" filter="url(#shadow) url(#wax-depth)"/>
-                                        <circle cx="50" cy="50" r="41" fill="none" stroke="#b89326" stroke-width="1.5" stroke-dasharray="3 2"/>
-                                        <circle cx="50" cy="50" r="37" fill="none" stroke="#795f12" stroke-width="1"/>
-                                        <!-- Outer text path -->
-                                        <path id="textPath" d="M 50,50 m -30,0 a 30,30 0 1,1 60,0 a 30,30 0 1,1 -60,0" fill="none" />
-                                        <text font-family="'Plus Jakarta Sans', sans-serif" font-size="5.5" font-weight="800" fill="#634d0b" letter-spacing="1">
-                                            <textPath href="#textPath" startOffset="50%" text-anchor="middle">
-                                                • HODL FOREVER • SECURE CUSTODY
-                                            </textPath>
-                                        </text>
-                                        <!-- Official Slanted B inside wax seal -->
-                                        <g transform="translate(18, 18) scale(1)">
-                                            <!-- Bitcoin Symbol in center -->
-                                            <circle cx="32" cy="32" r="28" fill="#a4821c" opacity="0.15"/>
-                                            <path fill="#584408" d="m46.103,27.444c0.637-4.258-2.605-6.547-7.038-8.074l1.438-5.768-3.511-0.875-1.4,5.616c-0.923-0.23-1.871-0.447-2.813-0.662l1.41-5.653-3.509-0.875-1.439,5.766c-0.764-0.174-1.514-0.346-2.242-0.527l0.004-0.018-4.842-1.209-0.934,3.75s2.605,0.597,2.55,0.634c1.422,0.355,1.679,1.296,1.636,2.042l-1.638,6.571c0.098,0.025,0.225,0.061,0.365,0.117-0.117-0.029-0.242-0.061-0.371-0.092l-2.296,9.205c-0.174,0.432-0.615,1.08-1.609,0.834,0.035,0.051-2.552-0.637-2.552-0.637l-1.743,4.019,4.569,1.139c0.85,0.213,1.683,0.436,2.503,0.646l-1.453,5.834,3.507,0.875,1.439-5.772c0.958,0.26,1.888,0.5,2.798,0.726l-1.434,5.745,3.511,0.875,1.453-5.823c5.987,1.133,10.489,0.676,12.384-4.739,1.527-4.36-0.076-6.875-3.226-8.515,2.294-0.529,4.022-2.038,4.483-5.155zm-8.022,11.249c-1.085,4.36-8.426,2.003-10.806,1.412l1.928-7.729c2.38,0.594,10.012,1.77,8.878,6.317zm1.086-11.312c-0.99,3.966-7.1,1.951-9.082,1.457l1.748-7.01c1.982,0.494,8.365,1.416,7.334,5.553z"/>
-                                        </g>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="actions">
-                        <button class="button primary glow-effect" type="button" id="btn-seal">
-                            <span class="btn-text">Sign & Seal Vows</span>
-                        </button>
-                        <button class="button secondary" type="button" id="copy-prenup">Copy Text</button>
-                        <button class="button secondary" type="button" id="print-prenup">Print Certificate</button>
-                        <button class="button danger" type="button" id="reset-prenup">Reset</button>
-                    </div>
-                </aside>
-            </div>
-        </section>
-
-        <!-- Compact certificate flow -->
-        <section class="education-section">
-            <div class="section-container">
-                <span class="eyebrow">Three simple steps</span>
-                <h2>Create A Keepsake Together</h2>
-
-                <div class="education-grid">
-                    <div class="education-card">
-                        <div class="edu-card-header">
-                            <span class="edu-icon">01</span>
-                            <h3>Personalize</h3>
-                        </div>
-                        <p>Add names and ceremony details.</p>
-                    </div>
-
-                    <div class="education-card">
-                        <div class="edu-card-header">
-                            <span class="edu-icon">02</span>
-                            <h3>Choose Vows</h3>
-                        </div>
-                        <p>Select the Bitcoin principles you share.</p>
-                    </div>
-
-                    <div class="education-card">
-                        <div class="edu-card-header">
-                            <span class="edu-icon">03</span>
-                            <h3>Sign &amp; Print</h3>
-                        </div>
-                        <p>Seal it with a block reference and print.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- FAQ Section: Accordion -->
-        <section class="faq-section">
-            <div class="section-container">
-                <span class="eyebrow">Questions</span>
-                <h2>Frequently Asked Questions</h2>
-
-                <div class="faq-accordion">
-                    <div class="faq-item">
-                        <button class="faq-question" type="button" aria-expanded="false" aria-controls="faq-legal">
-                            <span>Is this document legally binding?</span>
-                            <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </button>
-                        <div class="faq-answer" id="faq-legal" hidden>
-                            <p>No. This is a symbolic personal keepsake, not a registered legal contract or financial advice. It records your shared or individual intentions, but it does not create enforceable obligations.</p>
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <button class="faq-question" type="button" aria-expanded="false" aria-controls="faq-privacy">
-                            <span>Where is my data sent? Is it private?</span>
-                            <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </button>
-                        <div class="faq-answer" id="faq-privacy" hidden>
-                            <p>Your certificate details and signatures stay in your browser's <code>localStorage</code>. The site has no account, database, analytics, or tracking scripts. If you seal the certificate, it contacts mempool.space only to retrieve the latest public block height; no certificate content is included in that request.</p>
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <button class="faq-question" type="button" aria-expanded="false" aria-controls="faq-block">
-                            <span>What does "Bitcoin Block Reference" mean?</span>
-                            <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </button>
-                        <div class="faq-answer" id="faq-block" hidden>
-                            <p>When you click "Sign & Seal Vows," the page retrieves the latest public Bitcoin block height from mempool.space and prints that number on the certificate as a time reference. The certificate itself is not hashed or written to Bitcoin, so this is not an on-chain proof or cryptographic timestamp.</p>
-                        </div>
-                    </div>
-
-                    <div class="faq-item">
-                        <button class="faq-question" type="button" aria-expanded="false" aria-controls="faq-storage">
-                            <span>How should I store my generated prenup?</span>
-                            <svg class="faq-arrow" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </button>
-                        <div class="faq-answer" id="faq-storage" hidden>
-                            <p>Print the finished certificate or copy its text for your records. Treat it as a keepsake rather than recovery material, and store it separately from seed phrases and private-key backups.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <section class="privacy-summary" aria-labelledby="privacy-title">
+            <span class="eyebrow">A deliberately small tool</span>
+            <h2 id="privacy-title">Your plan belongs to you.</h2>
+            <p>The page has no account, database, analytics, or wallet integration. Your draft is stored only in this browser so it is still here when you return.</p>
         </section>
     </main>
 
-    <!-- Canvas for fullscreen gold confetti particles -->
-    <canvas id="confetti-canvas" aria-hidden="true"></canvas>
-
     <footer class="site-footer">
-        <p>Certificate content stays local. Sealing requests only the latest public block height. Never enter a seed phrase into any website.</p>
-        <p class="footer-links">
-            Read the <a href="https://bitcoin.org/bitcoin.pdf" target="_blank" rel="noopener noreferrer">Bitcoin Whitepaper</a>
-        </p>
+        <span>btc.wedding</span>
+        <p>Plan together. Keep secrets offline.</p>
     </footer>
 
-    <!-- Custom Premium Confirm Modal -->
-    <div id="confirm-modal" class="modal-overlay hidden" aria-modal="true" role="dialog" aria-labelledby="confirm-title" aria-describedby="confirm-description">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span class="modal-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 2.9 1.8 17a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
-                </span>
-                <h3 id="confirm-title">Reset Vows</h3>
-            </div>
-            <div class="modal-body">
-                <p id="confirm-description">Are you sure you want to reset all wedding vows and signatures? This action cannot be undone.</p>
-            </div>
-            <div class="modal-actions">
-                <button type="button" class="button secondary" id="modal-cancel">Cancel</button>
-                <button type="button" class="button danger" id="modal-confirm">Reset</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="js/app.js?v=8"></script>
+    <script src="js/app.js?v=9"></script>
 </body>
 </html>

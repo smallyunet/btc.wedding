@@ -1,10 +1,10 @@
 {
-  "name": "BTC.Wedding Bitcoin Vow Certificate Generator",
+  "name": "btc.wedding — A Bitcoin Plan for Two",
   "short_name": "BTC.Wedding",
-  "description": "A static Bitcoin vow certificate generator for names, ceremony details, Bitcoin vows, signatures, and print-ready keepsakes.",
+  "description": "A private, printable Bitcoin household plan for buying, custody, and emergencies.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#04060a",
+  "background_color": "#080806",
   "theme_color": "#f7931a",
   "icons": [
     {
