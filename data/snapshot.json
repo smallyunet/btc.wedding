@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "generatedAt": "2026-08-16T08:04:35.315Z",
+  "status": "partial",
+  "successfulSources": 7,
+  "totalSources": 8,
+  "metrics": {
+    "priceUsd": 62999,
+    "feeFast": 2,
+    "feeHalfHour": 1,
+    "feeHour": 1,
+    "feeEconomy": 1,
+    "mempoolVsizeMB": 43.88935,
+    "mempoolCount": 75781,
+    "blockHeight": 962695,
+    "avgBlockTimeMinutes": null,
+    "difficultyChange": -1.740625418456565,
+    "difficultyProgress": 52.72817460317461,
+    "remainingBlocks": 953,
+    "estimatedRetargetDate": "2026-08-23T01:52:20.459Z"
+  },
+  "events": [
+    {
+      "id": "fees-2026-08-16T08:04:35.315Z",
+      "category": "Fees",
+      "level": "routine",
+      "title": "Fees remain calm",
+      "summary": "High-priority estimates are 2 sat/vB and economy estimates are 1 sat/vB.",
+      "value": "2 sat/vB",
+      "publishedAt": "2026-08-16T08:04:35.315Z",
+      "source": "mempool.space",
+      "sourceUrl": "https://mempool.space/"
+    },
+    {
+      "id": "mempool-2026-08-16T08:04:35.315Z",
+      "category": "Mempool",
+      "level": "notable",
+      "title": "The queue is building",
+      "summary": "75,781 transactions occupy 43.9 virtual MB, roughly 44 blocks of space.",
+      "value": "43.9 MvB",
+      "publishedAt": "2026-08-16T08:04:35.315Z",
+      "source": "mempool.space",
+      "sourceUrl": "https://mempool.space/"
+    }
+  ],
+  "updates": [
+    {
+      "id": "optech-2026-08-14T00:00:00+00:00",
+      "category": "Protocol",
+      "level": "routine",
+      "title": "Bitcoin Optech Newsletter #418",
+      "summary": "This week’s newsletter describes a proposed contract protocol for mitigating Lightning Network channel jamming, reports on the availability of static Bitcoin Core binaries for testing, and summarizes a change replacing…",
+      "publishedAt": "2026-08-14T00:00:00+00:00",
+      "source": "Bitcoin Optech",
+      "sourceUrl": "https://bitcoinops.org/en/newsletters/2026/08/14/"
+    },
+    {
+      "id": "optech-2026-08-11T00:00:00+00:00",
+      "category": "Protocol",
+      "level": "routine",
+      "title": "Bitcoin Optech Newsletter #417 Recap Podcast",
+      "summary": "Mark “Murch” Erhardt, Gustavo Flores Echaiz, and Mike Schmidt are joined by Conduition, Ram, and Fabian Jahr to discuss Newsletter #417 . The Bitcoin Optech Podcast and transcription content is licensed Creative Commons…",
+      "publishedAt": "2026-08-11T00:00:00+00:00",
+      "source": "Bitcoin Optech",
+      "sourceUrl": "https://bitcoinops.org/en/podcast/2026/08/11/"
+    },
+    {
+      "id": "optech-2026-08-07T00:00:00+00:00",
+      "category": "Protocol",
+      "level": "routine",
+      "title": "Bitcoin Optech Newsletter #417",
+      "summary": "This week’s newsletter describes a draft BIP for relaying stale block tips between peers. Also included are our regular sections summarizing proposals and discussion about changing Bitcoin’s consensus rules, announcing…",
+      "publishedAt": "2026-08-07T00:00:00+00:00",
+      "source": "Bitcoin Optech",
+      "sourceUrl": "https://bitcoinops.org/en/newsletters/2026/08/07/"
+    },
+    {
+      "id": "core-352006528",
+      "category": "Software",
+      "level": "routine",
+      "title": "Bitcoin Core 29.4",
+      "summary": "A Bitcoin Core release is available. Review the signed release notes and upgrade guidance at the source.",
+      "publishedAt": "2026-07-10T14:25:37Z",
+      "source": "Bitcoin Core",
+      "sourceUrl": "https://github.com/bitcoin/bitcoin/releases/tag/v29.4"
+    },
+    {
+      "id": "core-350813643",
+      "category": "Software",
+      "level": "routine",
+      "title": "Bitcoin Core 31.1",
+      "summary": "A Bitcoin Core release is available. Review the signed release notes and upgrade guidance at the source.",
+      "publishedAt": "2026-07-08T09:14:15Z",
+      "source": "Bitcoin Core",
+      "sourceUrl": "https://github.com/bitcoin/bitcoin/releases/tag/v31.1"
+    }
+  ],
+  "sourceHealth": {
+    "mempool": true,
+    "optech": true,
+    "bitcoinCore": true
+  }
+}

@@ -1,8 +1,11 @@
 import { cp, mkdir, rm } from "node:fs/promises";
 
-const staticDirectories = ["css", "fonts", "js"];
+await import("./generate-data.mjs");
+
+const staticDirectories = ["css", "data", "fonts", "js"];
 const staticFiles = [
     "apple-touch-icon.png",
+    "CNAME",
     "favicon-32.png",
     "icon-192.png",
     "icon-512-maskable.png",
@@ -10,6 +13,7 @@ const staticFiles = [
     "index.html",
     "manifest.json",
     "og.png",
+    "og-changefeed.png",
     "pwa_icon.png"
 ];
 

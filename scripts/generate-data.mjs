@@ -1,0 +1,285 @@
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+
+const OUTPUT_PATH = new URL("../data/snapshot.json", import.meta.url);
+const TIMEOUT_MS = 12_000;
+
+async function readPreviousSnapshot() {
+    try {
+        return JSON.parse(await readFile(OUTPUT_PATH, "utf8"));
+    } catch {
+        return null;
+    }
+}
+
+async function fetchWithTimeout(url, options = {}) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+    try {
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                "user-agent": "btc.wedding-changefeed/1.0",
+                accept: "application/json, application/atom+xml, text/xml;q=0.9, */*;q=0.8",
+                ...options.headers
+            },
+            signal: controller.signal
+        });
+
+        if (!response.ok) {
+            throw new Error(`${response.status} ${response.statusText}`);
+        }
+
+        return response;
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
+async function getJson(url, options) {
+    return (await fetchWithTimeout(url, options)).json();
+}
+
+async function getText(url, options) {
+    return (await fetchWithTimeout(url, options)).text();
+}
+
+function settledValue(result, fallback = null) {
+    return result.status === "fulfilled" ? result.value : fallback;
+}
+
+function numberOr(value, fallback = null) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : fallback;
+}
+
+function clamp(value, minimum, maximum) {
+    return Math.min(maximum, Math.max(minimum, value));
+}
+
+function decodeXml(value = "") {
+    return value
+        .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;|&apos;/g, "'")
+        .replace(/&amp;/g, "&");
+}
+
+function stripHtml(value = "") {
+    return decodeXml(value)
+        .replace(/<style[\s\S]*?<\/style>/gi, " ")
+        .replace(/<script[\s\S]*?<\/script>/gi, " ")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function truncate(value, length = 220) {
+    if (value.length <= length) return value;
+    return `${value.slice(0, length - 1).trim()}…`;
+}
+
+function parseOptechFeed(xml) {
+    if (!xml) return [];
+
+    return Array.from(xml.matchAll(/<entry\b[\s\S]*?<\/entry>/g))
+        .slice(0, 3)
+        .map(([entry], index) => {
+            const title = stripHtml(entry.match(/<title[^>]*>([\s\S]*?)<\/title>/)?.[1] || "Bitcoin Optech update");
+            const url = entry.match(/<link[^>]+href="([^"]+)"[^>]*rel="alternate"/)?.[1]
+                || entry.match(/<link[^>]+href="([^"]+)"/)?.[1]
+                || "https://bitcoinops.org/";
+            const publishedAt = entry.match(/<published>([^<]+)<\/published>/)?.[1]
+                || entry.match(/<updated>([^<]+)<\/updated>/)?.[1]
+                || null;
+            const content = stripHtml(entry.match(/<content[^>]*>([\s\S]*?)<\/content>/)?.[1] || "");
+
+            return {
+                id: `optech-${publishedAt || index}`,
+                category: "Protocol",
+                level: "routine",
+                title,
+                summary: truncate(content || "A new source-linked Bitcoin Optech update is available."),
+                publishedAt,
+                source: "Bitcoin Optech",
+                sourceUrl: url
+            };
+        });
+}
+
+function parseCoreReleases(releases) {
+    if (!Array.isArray(releases)) return [];
+
+    return releases
+        .filter((release) => !release.draft)
+        .slice(0, 2)
+        .map((release) => ({
+            id: `core-${release.id}`,
+            category: "Software",
+            level: release.prerelease ? "notable" : "routine",
+            title: release.name || release.tag_name || "Bitcoin Core release",
+            summary: release.prerelease
+                ? "A Bitcoin Core pre-release is available for testing. Review the source release notes before installing."
+                : "A Bitcoin Core release is available. Review the signed release notes and upgrade guidance at the source.",
+            publishedAt: release.published_at,
+            source: "Bitcoin Core",
+            sourceUrl: release.html_url
+        }));
+}
+
+function calculateAverageBlockMinutes(blocks) {
+    if (!Array.isArray(blocks) || blocks.length < 2) return null;
+    const intervals = [];
+
+    for (let index = 1; index < Math.min(blocks.length, 7); index += 1) {
+        const newer = numberOr(blocks[index - 1]?.timestamp);
+        const older = numberOr(blocks[index]?.timestamp);
+        if (newer && older && newer > older) intervals.push((newer - older) / 60);
+    }
+
+    if (!intervals.length) return null;
+    return intervals.reduce((sum, value) => sum + value, 0) / intervals.length;
+}
+
+function makeNetworkEvents(metrics, generatedAt) {
+    const events = [];
+    const fee = metrics.feeFast;
+
+    if (fee !== null) {
+        const level = fee >= 25 ? "action" : fee >= 10 ? "notable" : "routine";
+        events.push({
+            id: `fees-${generatedAt}`,
+            category: "Fees",
+            level,
+            title: level === "action" ? "Blockspace is expensive" : level === "notable" ? "Fee pressure is elevated" : "Fees remain calm",
+            summary: level === "action"
+                ? `High-priority estimates are ${fee} sat/vB. Check your wallet estimate before broadcasting a non-urgent transaction.`
+                : level === "notable"
+                    ? `High-priority estimates are ${fee} sat/vB, above the quiet-network range.`
+                    : `High-priority estimates are ${fee} sat/vB and economy estimates are ${metrics.feeEconomy ?? "—"} sat/vB.`,
+            value: `${fee} sat/vB`,
+            publishedAt: generatedAt,
+            source: "mempool.space",
+            sourceUrl: "https://mempool.space/"
+        });
+    }
+
+    if (metrics.mempoolVsizeMB !== null) {
+        const level = metrics.mempoolVsizeMB >= 100 ? "action" : metrics.mempoolVsizeMB >= 20 ? "notable" : "routine";
+        events.push({
+            id: `mempool-${generatedAt}`,
+            category: "Mempool",
+            level,
+            title: level === "action" ? "The mempool is heavily backed up" : level === "notable" ? "The queue is building" : "The transaction queue is light",
+            summary: `${Math.round(metrics.mempoolCount ?? 0).toLocaleString("en-US")} transactions occupy ${metrics.mempoolVsizeMB.toFixed(1)} virtual MB, roughly ${Math.ceil(metrics.mempoolVsizeMB)} blocks of space.`,
+            value: `${metrics.mempoolVsizeMB.toFixed(1)} MvB`,
+            publishedAt: generatedAt,
+            source: "mempool.space",
+            sourceUrl: "https://mempool.space/"
+        });
+    }
+
+    if (metrics.avgBlockTimeMinutes !== null) {
+        const deviation = metrics.avgBlockTimeMinutes - 10;
+        const level = Math.abs(deviation) >= 5 ? "notable" : "routine";
+        events.push({
+            id: `pace-${generatedAt}`,
+            category: "Blocks",
+            level,
+            title: deviation >= 5 ? "Recent blocks are arriving slowly" : deviation <= -4 ? "Recent blocks are arriving quickly" : "Block production is near target",
+            summary: `The latest observed block intervals average ${metrics.avgBlockTimeMinutes.toFixed(1)} minutes. Short windows are noisy; Bitcoin targets about 10 minutes over time.`,
+            value: `${metrics.avgBlockTimeMinutes.toFixed(1)} min`,
+            publishedAt: generatedAt,
+            source: "mempool.space",
+            sourceUrl: "https://mempool.space/blocks"
+        });
+    }
+
+    return events;
+}
+
+const previous = await readPreviousSnapshot();
+const githubHeaders = process.env.GITHUB_TOKEN
+    ? { authorization: `Bearer ${process.env.GITHUB_TOKEN}`, "x-github-api-version": "2022-11-28" }
+    : {};
+
+const requests = await Promise.allSettled([
+    getJson("https://mempool.space/api/v1/fees/recommended"),
+    getJson("https://mempool.space/api/mempool"),
+    getJson("https://mempool.space/api/blocks/tip/height"),
+    getJson("https://mempool.space/api/v1/difficulty-adjustment"),
+    getJson("https://mempool.space/api/v1/prices"),
+    getJson("https://mempool.space/api/v1/blocks"),
+    getText("https://bitcoinops.org/feed.xml"),
+    getJson("https://api.github.com/repos/bitcoin/bitcoin/releases?per_page=3", { headers: githubHeaders })
+]);
+
+const [feesResult, mempoolResult, heightResult, difficultyResult, pricesResult, blocksResult, optechResult, releasesResult] = requests;
+const fees = settledValue(feesResult);
+const mempool = settledValue(mempoolResult);
+const height = settledValue(heightResult);
+const difficulty = settledValue(difficultyResult);
+const prices = settledValue(pricesResult);
+const blocks = settledValue(blocksResult);
+const optechXml = settledValue(optechResult);
+const releases = settledValue(releasesResult);
+const generatedAt = new Date().toISOString();
+const successfulRequests = requests.filter((request) => request.status === "fulfilled").length;
+
+const fallbackMetrics = previous?.metrics || {};
+const metrics = {
+    priceUsd: numberOr(prices?.USD, fallbackMetrics.priceUsd ?? null),
+    feeFast: numberOr(fees?.fastestFee, fallbackMetrics.feeFast ?? null),
+    feeHalfHour: numberOr(fees?.halfHourFee, fallbackMetrics.feeHalfHour ?? null),
+    feeHour: numberOr(fees?.hourFee, fallbackMetrics.feeHour ?? null),
+    feeEconomy: numberOr(fees?.economyFee, fallbackMetrics.feeEconomy ?? null),
+    mempoolVsizeMB: numberOr(mempool?.vsize, null) !== null
+        ? numberOr(mempool.vsize) / 1_000_000
+        : fallbackMetrics.mempoolVsizeMB ?? null,
+    mempoolCount: numberOr(mempool?.count, fallbackMetrics.mempoolCount ?? null),
+    blockHeight: numberOr(height, fallbackMetrics.blockHeight ?? null),
+    avgBlockTimeMinutes: calculateAverageBlockMinutes(blocks) ?? fallbackMetrics.avgBlockTimeMinutes ?? null,
+    difficultyChange: numberOr(difficulty?.difficultyChange, fallbackMetrics.difficultyChange ?? null),
+    difficultyProgress: clamp(numberOr(difficulty?.progressPercent, fallbackMetrics.difficultyProgress ?? 0), 0, 100),
+    remainingBlocks: numberOr(difficulty?.remainingBlocks, fallbackMetrics.remainingBlocks ?? null),
+    estimatedRetargetDate: difficulty?.estimatedRetargetDate
+        ? new Date(Number(difficulty.estimatedRetargetDate)).toISOString()
+        : fallbackMetrics.estimatedRetargetDate ?? null
+};
+
+const optechUpdates = parseOptechFeed(optechXml);
+const coreUpdates = parseCoreReleases(releases);
+const priorUpdates = Array.isArray(previous?.updates) ? previous.updates : [];
+const updates = [...optechUpdates, ...coreUpdates, ...priorUpdates]
+    .filter((item, index, items) => items.findIndex((candidate) => candidate.id === item.id) === index)
+    .sort((left, right) => new Date(right.publishedAt || 0) - new Date(left.publishedAt || 0))
+    .slice(0, 6);
+
+const snapshot = {
+    version: 1,
+    generatedAt,
+    status: successfulRequests === requests.length ? "live" : successfulRequests >= 4 ? "partial" : previous ? "fallback" : "degraded",
+    successfulSources: successfulRequests,
+    totalSources: requests.length,
+    metrics,
+    events: makeNetworkEvents(metrics, generatedAt),
+    updates,
+    sourceHealth: {
+        mempool: [feesResult, mempoolResult, heightResult, difficultyResult, pricesResult, blocksResult].some((result) => result.status === "fulfilled"),
+        optech: optechResult.status === "fulfilled",
+        bitcoinCore: releasesResult.status === "fulfilled"
+    }
+};
+
+await mkdir(new URL("../data/", import.meta.url), { recursive: true });
+await writeFile(OUTPUT_PATH, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
+
+console.log(JSON.stringify({
+    generatedAt,
+    status: snapshot.status,
+    successfulSources: snapshot.successfulSources,
+    totalSources: snapshot.totalSources,
+    output: OUTPUT_PATH.pathname
+}));

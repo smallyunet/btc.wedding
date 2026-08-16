@@ -3,314 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>btc.wedding | A Bitcoin Plan for Two</title>
-    <meta name="description" content="Create a private, printable Bitcoin household plan for buying, custody, and emergencies. No account, wallet connection, or seed phrase.">
+    <title>Bitcoin Changefeed | What changed since you last checked</title>
+    <meta name="description" content="A calm, source-linked feed of meaningful Bitcoin network, fee, block, difficulty, and software changes.">
     <meta name="author" content="btc.wedding">
-    <meta name="theme-color" content="#080806">
+    <meta name="theme-color" content="#090c10">
+    <meta name="color-scheme" content="dark">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://btc.wedding/">
-    <meta property="og:title" content="A Bitcoin Plan for Two | btc.wedding">
-    <meta property="og:description" content="A private, practical plan for buying, custody, and emergencies—built together in your browser.">
-    <meta property="og:image" content="https://btc.wedding/og.png">
+    <meta property="og:title" content="Bitcoin Changefeed">
+    <meta property="og:description" content="What changed in Bitcoin since you last checked—without the noise.">
+    <meta property="og:image" content="https://btc.wedding/og-changefeed.png">
     <meta property="og:image:width" content="1536">
     <meta property="og:image:height" content="1024">
-    <meta property="og:image:alt" content="A Bitcoin Plan for Two by btc.wedding">
+    <meta property="og:image:alt" content="Bitcoin Changefeed — what changed since you last checked">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="A Bitcoin Plan for Two | btc.wedding">
-    <meta name="twitter:description" content="Private. Practical. Built together.">
-    <meta name="twitter:image" content="https://btc.wedding/og.png">
+    <meta name="twitter:title" content="Bitcoin Changefeed">
+    <meta name="twitter:description" content="A calm, source-linked brief of meaningful Bitcoin changes.">
+    <meta name="twitter:image" content="https://btc.wedding/og-changefeed.png">
+    <link rel="canonical" href="https://btc.wedding/">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
-    <link rel="preload" href="fonts/cormorant-garamond-latin.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="css/style.css?v=9">
+    <link rel="stylesheet" href="css/style.css?v=10">
 </head>
 <body>
-    <a class="skip-link" href="#planner">Skip to plan builder</a>
+    <a class="skip-link" href="#changefeed">Skip to changefeed</a>
 
     <header class="site-header">
-        <a class="brand" href="#top" aria-label="btc.wedding home">
-            <img src="favicon-32.png" alt="" width="32" height="32">
-            <span>btc.wedding</span>
+        <a class="brand" href="#top" aria-label="Bitcoin Changefeed home">
+            <span class="brand-mark" aria-hidden="true">₿</span>
+            <span class="brand-copy">
+                <strong>Bitcoin Changefeed</strong>
+                <small>btc.wedding</small>
+            </span>
         </a>
-        <span class="privacy-mark">
-            <span class="privacy-dot" aria-hidden="true"></span>
-            <span class="privacy-copy">Private by design</span>
-            <span class="privacy-short" aria-hidden="true">Private</span>
-        </span>
+
+        <div class="header-actions">
+            <span class="data-status" id="data-status" role="status" aria-live="polite">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span id="data-status-label">Loading snapshot</span>
+            </span>
+            <button class="refresh-button" id="refresh-data" type="button">
+                <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 4v5h5"></path>
+                    <path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 20v-5h-5"></path>
+                </svg>
+                <span>Refresh</span>
+            </button>
+        </div>
     </header>
 
     <main id="top">
-        <section class="intro" aria-labelledby="page-title">
-            <div class="intro-label">
-                <span class="intro-rule" aria-hidden="true"></span>
-                A practical agreement, made together
+        <section class="hero" aria-labelledby="page-title">
+            <div class="hero-copy">
+                <p class="eyebrow"><span aria-hidden="true"></span> Signal, not spectacle</p>
+                <h1 id="page-title">What changed<br>in Bitcoin?</h1>
+                <p class="hero-lede">A calm, source-linked brief of network conditions, blockspace pressure, protocol updates, and software releases.</p>
             </div>
-            <h1 id="page-title">A Bitcoin plan<br>for two.</h1>
-            <p>Create a simple household agreement for buying, custody, and emergencies. No account, wallet connection, or seed phrase.</p>
-            <div class="trust-list" aria-label="Privacy and product promises">
-                <span>Stays on this device</span>
-                <span>Works offline after loading</span>
-                <span>Print-ready</span>
+
+            <div class="hero-aside" aria-label="Product principles">
+                <div class="aside-line">
+                    <span>01</span>
+                    <p><strong>Delta-first.</strong> We surface changes, not a wall of static metrics.</p>
+                </div>
+                <div class="aside-line">
+                    <span>02</span>
+                    <p><strong>Source-linked.</strong> Every claim points back to primary data.</p>
+                </div>
+                <div class="aside-line">
+                    <span>03</span>
+                    <p><strong>No account.</strong> Your last visit stays in this browser.</p>
+                </div>
             </div>
         </section>
 
-        <section class="planner" id="planner" aria-label="Bitcoin household plan builder">
-            <div class="mobile-view-switch" role="tablist" aria-label="Planner view">
-                <button type="button" class="view-tab active" id="view-plan" role="tab" aria-selected="true" aria-controls="plan-form">Build plan</button>
-                <button type="button" class="view-tab" id="view-preview" role="tab" aria-selected="false" aria-controls="preview-panel" tabindex="-1">Preview</button>
+        <section class="visit-summary" aria-labelledby="visit-title">
+            <div>
+                <p class="section-kicker">Since your last visit</p>
+                <h2 id="visit-title"><span id="change-count">—</span> meaningful changes</h2>
+                <p id="visit-context">Comparing the latest network snapshot with this browser’s previous visit.</p>
+            </div>
+            <div class="visit-meta">
+                <span>Last checked</span>
+                <strong id="last-visit">First visit</strong>
+            </div>
+        </section>
+
+        <section class="metrics-section" aria-labelledby="network-now-title">
+            <div class="section-heading">
+                <div>
+                    <p class="section-kicker">Network now</p>
+                    <h2 id="network-now-title">The state in four signals</h2>
+                </div>
+                <p id="snapshot-time">Snapshot time unavailable</p>
             </div>
 
-            <form class="plan-form" id="plan-form" novalidate>
-                <div class="form-heading">
-                    <div>
-                        <span class="eyebrow">Your private workspace</span>
-                        <h2>Build your plan</h2>
-                    </div>
-                    <span class="save-state" id="save-state" role="status" aria-live="polite">Saved locally</span>
-                </div>
-
-                <div class="step-navigation" role="tablist" aria-label="Plan sections">
-                    <button type="button" class="step-tab active" id="step-tab-people" role="tab" aria-selected="true" aria-controls="step-people" data-step="0">
-                        <span>01</span>
-                        People
-                    </button>
-                    <button type="button" class="step-tab" id="step-tab-rhythm" role="tab" aria-selected="false" aria-controls="step-rhythm" data-step="1" tabindex="-1">
-                        <span>02</span>
-                        Rhythm
-                    </button>
-                    <button type="button" class="step-tab" id="step-tab-safety" role="tab" aria-selected="false" aria-controls="step-safety" data-step="2" tabindex="-1">
-                        <span>03</span>
-                        Safety
-                    </button>
-                </div>
-
-                <div class="step-panel active" id="step-people" role="tabpanel" aria-labelledby="step-tab-people" data-panel="0">
-                    <div class="section-copy">
-                        <span class="step-count">Step 1 of 3</span>
-                        <h3>Who is making this plan?</h3>
-                        <p>First names are enough. Leave the second name blank for a solo plan.</p>
-                    </div>
-
-                    <div class="field-grid">
-                        <label class="field">
-                            <span>Your name</span>
-                            <input id="person-a" name="personA" type="text" maxlength="50" autocomplete="name" placeholder="e.g. Alex">
-                        </label>
-                        <label class="field">
-                            <span>Partner’s name <small>Optional</small></span>
-                            <input id="person-b" name="personB" type="text" maxlength="50" autocomplete="name" placeholder="e.g. Sam">
-                        </label>
-                    </div>
-
-                    <fieldset class="choice-fieldset">
-                        <legend>How will you think about ownership?</legend>
-                        <div class="choice-grid three-up">
-                            <label class="choice-card">
-                                <input type="radio" name="ownership" value="separate">
-                                <span class="choice-check" aria-hidden="true"></span>
-                                <strong>Separate</strong>
-                                <small>Each person owns and manages their own bitcoin.</small>
-                            </label>
-                            <label class="choice-card">
-                                <input type="radio" name="ownership" value="shared">
-                                <span class="choice-check" aria-hidden="true"></span>
-                                <strong>Shared</strong>
-                                <small>You plan and account for it as one household reserve.</small>
-                            </label>
-                            <label class="choice-card">
-                                <input type="radio" name="ownership" value="mixed" checked>
-                                <span class="choice-check" aria-hidden="true"></span>
-                                <strong>Both</strong>
-                                <small>Personal holdings plus a shared household plan.</small>
-                            </label>
-                        </div>
-                    </fieldset>
-                </div>
-
-                <div class="step-panel" id="step-rhythm" role="tabpanel" aria-labelledby="step-tab-rhythm" data-panel="1" hidden>
-                    <div class="section-copy">
-                        <span class="step-count">Step 2 of 3</span>
-                        <h3>Set a calm buying rhythm.</h3>
-                        <p>A plan is easier to follow when the amount and timing are decided before markets get noisy.</p>
-                    </div>
-
-                    <label class="switch-row" for="recurring-enabled">
-                        <span>
-                            <strong>Include a recurring purchase</strong>
-                            <small>You can leave this off and add it later.</small>
-                        </span>
-                        <span class="switch">
-                            <input type="checkbox" id="recurring-enabled" name="recurringEnabled">
-                            <span class="switch-track" aria-hidden="true"></span>
-                        </span>
-                    </label>
-
-                    <div class="recurring-fields" id="recurring-fields" hidden>
-                        <label class="field amount-field">
-                            <span>Amount in USD</span>
-                            <span class="input-with-prefix">
-                                <span aria-hidden="true">$</span>
-                                <input id="buy-amount" name="buyAmount" type="number" min="1" max="1000000" step="1" inputmode="decimal" placeholder="100">
-                            </span>
-                            <small class="field-help">A planning target, not a transaction.</small>
-                        </label>
-                        <label class="field">
-                            <span>Frequency</span>
-                            <select id="buy-frequency" name="buyFrequency">
-                                <option value="weekly">Every week</option>
-                                <option value="biweekly">Every two weeks</option>
-                                <option value="monthly" selected>Every month</option>
-                                <option value="quarterly">Every quarter</option>
-                            </select>
-                        </label>
-                    </div>
-
-                    <label class="commitment-row" for="no-market-reactions">
-                        <input type="checkbox" id="no-market-reactions" name="noMarketReactions" checked>
-                        <span class="native-check" aria-hidden="true"></span>
-                        <span>
-                            <strong>We will not change the plan in reaction to a single market day.</strong>
-                            <small>Review decisions on a schedule, not during a spike or crash.</small>
-                        </span>
-                    </label>
-                </div>
-
-                <div class="step-panel" id="step-safety" role="tabpanel" aria-labelledby="step-tab-safety" data-panel="2" hidden>
-                    <div class="section-copy">
-                        <span class="step-count">Step 3 of 3</span>
-                        <h3>Agree on custody and continuity.</h3>
-                        <p>This plan should describe responsibilities—not contain secrets or recovery words.</p>
-                    </div>
-
-                    <fieldset class="choice-fieldset">
-                        <legend>Primary custody approach</legend>
-                        <div class="choice-grid">
-                            <label class="choice-card">
-                                <input type="radio" name="custody" value="individual" checked>
-                                <span class="choice-check" aria-hidden="true"></span>
-                                <strong>Individual wallets</strong>
-                                <small>Each person is responsible for their own keys and backups.</small>
-                            </label>
-                            <label class="choice-card">
-                                <input type="radio" name="custody" value="multisig">
-                                <span class="choice-check" aria-hidden="true"></span>
-                                <strong>Shared multisig</strong>
-                                <small>Spending requires more than one key or participant.</small>
-                            </label>
-                        </div>
-                    </fieldset>
-
-                    <fieldset class="safety-list">
-                        <legend>Household safety rules</legend>
-                        <label class="check-row">
-                            <input type="checkbox" name="separateSecrets" checked>
-                            <span class="native-check" aria-hidden="true"></span>
-                            <span>Seed phrases and private keys stay offline and separate from this plan.</span>
-                        </label>
-                        <label class="check-row">
-                            <input type="checkbox" name="emergencyGuide" checked>
-                            <span class="native-check" aria-hidden="true"></span>
-                            <span>We maintain an offline emergency guide that the right person can find.</span>
-                        </label>
-                        <label class="check-row">
-                            <input type="checkbox" name="annualReview" checked>
-                            <span class="native-check" aria-hidden="true"></span>
-                            <span>We review custody, backups, and access once a year.</span>
-                        </label>
-                    </fieldset>
-
-                    <div class="safety-note">
-                        <strong>Never enter a seed phrase here.</strong>
-                        <span>btc.wedding does not need one and cannot move funds.</span>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="button secondary" id="previous-step" hidden>Back</button>
-                    <button type="button" class="button primary" id="next-step">Continue</button>
-                    <button type="button" class="button primary show-preview-button" id="show-preview" hidden>Review plan</button>
-                </div>
-            </form>
-
-            <aside class="preview-panel" id="preview-panel" aria-label="Generated Bitcoin household plan">
-                <div class="preview-heading">
-                    <div>
-                        <span class="eyebrow">Live document</span>
-                        <h2>Your household plan</h2>
-                    </div>
-                    <span class="document-state">Ready to print</span>
-                </div>
-
-                <article class="document" id="document">
-                    <div class="document-topline">
-                        <span>BTC.WEDDING / HOUSEHOLD PLAN</span>
-                        <span id="document-date"></span>
-                    </div>
-
-                    <header class="document-header">
-                        <div class="document-mark" aria-hidden="true">₿</div>
-                        <p>Private household agreement</p>
-                        <h2>Our Bitcoin Plan</h2>
-                        <p class="document-parties" id="document-parties">A plan made with patience and clear responsibilities.</p>
-                    </header>
-
-                    <div class="document-section">
-                        <span class="document-number">01</span>
-                        <div>
-                            <h3>Ownership</h3>
-                            <p id="ownership-output"></p>
-                        </div>
-                    </div>
-
-                    <div class="document-section">
-                        <span class="document-number">02</span>
-                        <div>
-                            <h3>Buying rhythm</h3>
-                            <p id="rhythm-output"></p>
-                        </div>
-                    </div>
-
-                    <div class="document-section">
-                        <span class="document-number">03</span>
-                        <div>
-                            <h3>Custody &amp; continuity</h3>
-                            <p id="custody-output"></p>
-                            <ul id="safety-output"></ul>
-                        </div>
-                    </div>
-
-                    <footer class="document-footer">
-                        <p>This is a personal planning document, not a legal contract or financial advice. It intentionally contains no wallet credentials or recovery material.</p>
-                        <div class="signature-lines">
-                            <span><i></i><b id="signature-a">Your name</b></span>
-                            <span id="signature-b-wrap"><i></i><b id="signature-b">Partner</b></span>
-                        </div>
-                    </footer>
+            <div class="metric-grid" id="metric-grid" aria-live="polite">
+                <article class="metric-card">
+                    <div class="metric-topline"><span>Price</span><span class="metric-index">01</span></div>
+                    <strong class="metric-value" id="price-value">—</strong>
+                    <p id="price-detail">USD reference rate</p>
                 </article>
-
-                <div class="preview-actions">
-                    <button type="button" class="button primary" id="print-plan">Print plan</button>
-                    <button type="button" class="button secondary" id="copy-plan">Copy text</button>
-                    <button type="button" class="text-button" id="reset-plan">Reset plan</button>
-                </div>
-                <p class="action-status" id="action-status" role="status" aria-live="polite"></p>
-            </aside>
+                <article class="metric-card">
+                    <div class="metric-topline"><span>Priority fee</span><span class="metric-index">02</span></div>
+                    <strong class="metric-value" id="fee-value">—</strong>
+                    <p id="fee-detail">sat/vB</p>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-topline"><span>Mempool</span><span class="metric-index">03</span></div>
+                    <strong class="metric-value" id="mempool-value">—</strong>
+                    <p id="mempool-detail">Virtual megabytes waiting</p>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-topline"><span>Recent block pace</span><span class="metric-index">04</span></div>
+                    <strong class="metric-value" id="pace-value">—</strong>
+                    <p id="pace-detail">Target is about 10 minutes</p>
+                </article>
+            </div>
         </section>
 
-        <section class="privacy-summary" aria-labelledby="privacy-title">
-            <span class="eyebrow">A deliberately small tool</span>
-            <h2 id="privacy-title">Your plan belongs to you.</h2>
-            <p>The page has no account, database, analytics, or wallet integration. Your draft is stored only in this browser so it is still here when you return.</p>
+        <section class="pulse-grid" aria-label="Bitcoin network pulse">
+            <article class="pulse-card fee-card">
+                <div class="pulse-heading">
+                    <div>
+                        <p class="section-kicker">Blockspace</p>
+                        <h2 id="fee-state-title">Reading fee pressure</h2>
+                    </div>
+                    <span class="state-pill" id="fee-state-pill">Loading</span>
+                </div>
+                <p class="pulse-copy" id="fee-state-copy">Waiting for the latest source-linked fee estimates.</p>
+                <div class="fee-scale" aria-label="Fee estimates by urgency">
+                    <div><span>Fast</span><strong id="fee-fast">—</strong></div>
+                    <div><span>1 hour</span><strong id="fee-hour">—</strong></div>
+                    <div><span>Economy</span><strong id="fee-economy">—</strong></div>
+                </div>
+            </article>
+
+            <article class="pulse-card difficulty-card">
+                <div class="pulse-heading">
+                    <div>
+                        <p class="section-kicker">Difficulty epoch</p>
+                        <h2>Next retarget</h2>
+                    </div>
+                    <strong class="difficulty-change" id="difficulty-change">—</strong>
+                </div>
+                <div class="progress-track" aria-hidden="true"><span id="difficulty-progress"></span></div>
+                <div class="progress-meta">
+                    <span id="difficulty-progress-label">Progress unavailable</span>
+                    <span id="difficulty-remaining">— blocks remaining</span>
+                </div>
+                <p class="pulse-copy" id="difficulty-copy">Bitcoin adjusts mining difficulty every 2,016 blocks to keep long-run block production near target.</p>
+            </article>
+        </section>
+
+        <section class="feed-section" id="changefeed" aria-labelledby="feed-title">
+            <div class="feed-header">
+                <div>
+                    <p class="section-kicker">Changefeed</p>
+                    <h2 id="feed-title">Only what moved</h2>
+                </div>
+                <div class="feed-filters" role="group" aria-label="Filter changefeed">
+                    <button type="button" class="filter-button active" data-filter="all" aria-pressed="true">All</button>
+                    <button type="button" class="filter-button" data-filter="action" aria-pressed="false">Action</button>
+                    <button type="button" class="filter-button" data-filter="notable" aria-pressed="false">Notable</button>
+                    <button type="button" class="filter-button" data-filter="routine" aria-pressed="false">Routine</button>
+                </div>
+            </div>
+
+            <div class="feed-list" id="feed-list" aria-live="polite" aria-busy="true">
+                <div class="feed-skeleton" aria-hidden="true"></div>
+                <div class="feed-skeleton" aria-hidden="true"></div>
+                <div class="feed-skeleton" aria-hidden="true"></div>
+            </div>
+            <p class="feed-empty" id="feed-empty" hidden>No changes match this filter.</p>
+        </section>
+
+        <section class="method-section" aria-labelledby="method-title">
+            <div>
+                <p class="section-kicker">How to read this</p>
+                <h2 id="method-title">Facts first. Interpretation kept narrow.</h2>
+            </div>
+            <div class="method-grid">
+                <p><strong>Action</strong><span>Conditions that may affect a transaction, upgrade, or security decision.</span></p>
+                <p><strong>Notable</strong><span>A measurable shift worth understanding, but not necessarily acting on.</span></p>
+                <p><strong>Routine</strong><span>Normal network movement and trusted ecosystem updates.</span></p>
+            </div>
+        </section>
+
+        <section class="source-section" aria-labelledby="sources-title">
+            <div>
+                <p class="section-kicker">Primary inputs</p>
+                <h2 id="sources-title">Follow the source, not us.</h2>
+            </div>
+            <div class="source-links">
+                <a href="https://mempool.space/" target="_blank" rel="noopener noreferrer">
+                    <span>Network, blocks & fees</span><strong>mempool.space</strong>
+                </a>
+                <a href="https://bitcoinops.org/" target="_blank" rel="noopener noreferrer">
+                    <span>Protocol developments</span><strong>Bitcoin Optech</strong>
+                </a>
+                <a href="https://github.com/bitcoin/bitcoin/releases" target="_blank" rel="noopener noreferrer">
+                    <span>Reference implementation</span><strong>Bitcoin Core</strong>
+                </a>
+            </div>
         </section>
     </main>
 
     <footer class="site-footer">
-        <span>btc.wedding</span>
-        <p>Plan together. Keep secrets offline.</p>
+        <div>
+            <strong>Bitcoin Changefeed</strong>
+            <span>Built at btc.wedding</span>
+        </div>
+        <p>No wallet connection. No investment advice. No copied headlines without a source.</p>
     </footer>
 
-    <script src="js/app.js?v=9"></script>
+    <template id="feed-item-template">
+        <article class="feed-item">
+            <div class="feed-rail" aria-hidden="true"><span></span></div>
+            <div class="feed-content">
+                <div class="feed-meta">
+                    <span class="feed-level"></span>
+                    <span class="feed-category"></span>
+                    <time></time>
+                </div>
+                <div class="feed-title-row">
+                    <h3></h3>
+                    <strong class="feed-value"></strong>
+                </div>
+                <p class="feed-summary"></p>
+                <a class="source-link" target="_blank" rel="noopener noreferrer">
+                    <span>Open source</span>
+                    <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M7 17 17 7M8 7h9v9"></path>
+                    </svg>
+                </a>
+            </div>
+        </article>
+    </template>
+
+    <script src="js/app.js?v=10" defer></script>
 </body>
 </html>

@@ -1,10 +1,10 @@
 {
-  "name": "btc.wedding — A Bitcoin Plan for Two",
-  "short_name": "BTC.Wedding",
-  "description": "A private, printable Bitcoin household plan for buying, custody, and emergencies.",
-  "start_url": "./index.html",
+  "name": "Bitcoin Changefeed",
+  "short_name": "Changefeed",
+  "description": "A calm, source-linked feed of meaningful Bitcoin network and protocol changes.",
+  "start_url": "./",
   "display": "standalone",
-  "background_color": "#080806",
+  "background_color": "#090c10",
   "theme_color": "#f7931a",
   "icons": [
     {
