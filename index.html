@@ -3,49 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bitcoin Changefeed | What changed since you last checked</title>
-    <meta name="description" content="A calm, source-linked feed of meaningful Bitcoin network, fee, block, difficulty, and software changes.">
+    <title>Bitcoin Changefeed | Bitcoin at a glance</title>
+    <meta name="description" content="A simple, source-linked view of Bitcoin price, blocks, fees, mempool pressure, difficulty, and important updates.">
     <meta name="author" content="btc.wedding">
-    <meta name="theme-color" content="#090c10">
-    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#f7f7f5">
+    <meta name="color-scheme" content="light">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://btc.wedding/">
     <meta property="og:title" content="Bitcoin Changefeed">
-    <meta property="og:description" content="What changed in Bitcoin since you last checked—without the noise.">
+    <meta property="og:description" content="Bitcoin at a glance. See what changed without the noise.">
     <meta property="og:image" content="https://btc.wedding/og-changefeed.png">
     <meta property="og:image:width" content="1536">
     <meta property="og:image:height" content="1024">
-    <meta property="og:image:alt" content="Bitcoin Changefeed — what changed since you last checked">
+    <meta property="og:image:alt" content="Bitcoin Changefeed">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Bitcoin Changefeed">
-    <meta name="twitter:description" content="A calm, source-linked brief of meaningful Bitcoin changes.">
+    <meta name="twitter:description" content="Bitcoin at a glance. See what changed without the noise.">
     <meta name="twitter:image" content="https://btc.wedding/og-changefeed.png">
     <link rel="canonical" href="https://btc.wedding/">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
-    <link rel="preload" href="fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="css/style.css?v=10">
+    <link rel="stylesheet" href="css/style.css?v=11">
 </head>
 <body>
-    <a class="skip-link" href="#changefeed">Skip to changefeed</a>
+    <a class="skip-link" href="#changefeed">Skip to updates</a>
 
-    <header class="site-header">
+    <header class="site-header" id="top">
         <a class="brand" href="#top" aria-label="Bitcoin Changefeed home">
             <span class="brand-mark" aria-hidden="true">₿</span>
-            <span class="brand-copy">
-                <strong>Bitcoin Changefeed</strong>
-                <small>btc.wedding</small>
-            </span>
+            <span>Bitcoin Changefeed</span>
         </a>
 
         <div class="header-actions">
             <span class="data-status" id="data-status" role="status" aria-live="polite">
                 <span class="status-dot" aria-hidden="true"></span>
-                <span id="data-status-label">Loading snapshot</span>
+                <span id="data-status-label">Loading</span>
             </span>
             <button class="refresh-button" id="refresh-data" type="button">
-                <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 4v5h5"></path>
                     <path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 20v-5h-5"></path>
                 </svg>
@@ -54,123 +50,88 @@
         </div>
     </header>
 
-    <main id="top">
-        <section class="hero" aria-labelledby="page-title">
-            <div class="hero-copy">
-                <p class="eyebrow"><span aria-hidden="true"></span> Signal, not spectacle</p>
-                <h1 id="page-title">What changed<br>in Bitcoin?</h1>
-                <p class="hero-lede">A calm, source-linked brief of network conditions, blockspace pressure, protocol updates, and software releases.</p>
+    <main>
+        <section class="intro" aria-labelledby="page-title">
+            <div>
+                <h1 id="page-title">Bitcoin, at a glance.</h1>
+                <p>Live network conditions and meaningful updates, linked to their sources.</p>
             </div>
-
-            <div class="hero-aside" aria-label="Product principles">
-                <div class="aside-line">
-                    <span>01</span>
-                    <p><strong>Delta-first.</strong> We surface changes, not a wall of static metrics.</p>
-                </div>
-                <div class="aside-line">
-                    <span>02</span>
-                    <p><strong>Source-linked.</strong> Every claim points back to primary data.</p>
-                </div>
-                <div class="aside-line">
-                    <span>03</span>
-                    <p><strong>No account.</strong> Your last visit stays in this browser.</p>
-                </div>
-            </div>
+            <p class="snapshot-time" id="snapshot-time">Snapshot time unavailable</p>
         </section>
 
         <section class="visit-summary" aria-labelledby="visit-title">
-            <div>
-                <p class="section-kicker">Since your last visit</p>
-                <h2 id="visit-title"><span id="change-count">—</span> meaningful changes</h2>
-                <p id="visit-context">Comparing the latest network snapshot with this browser’s previous visit.</p>
+            <div class="visit-count">
+                <strong id="change-count">—</strong>
+                <div>
+                    <h2 id="visit-title">notable changes</h2>
+                    <p id="visit-context">Comparing this snapshot with your previous visit.</p>
+                </div>
             </div>
-            <div class="visit-meta">
-                <span>Last checked</span>
-                <strong id="last-visit">First visit</strong>
-            </div>
+            <p class="last-visit"><span>Last checked</span><strong id="last-visit">First visit</strong></p>
         </section>
 
-        <section class="metrics-section" aria-labelledby="network-now-title">
-            <div class="section-heading">
-                <div>
-                    <p class="section-kicker">Network now</p>
-                    <h2 id="network-now-title">The state in four signals</h2>
-                </div>
-                <p id="snapshot-time">Snapshot time unavailable</p>
-            </div>
-
+        <section class="metrics-section" aria-labelledby="network-title">
+            <div class="section-header"><h2 id="network-title">Network now</h2></div>
             <div class="metric-grid" id="metric-grid" aria-live="polite">
                 <article class="metric-card">
-                    <div class="metric-topline"><span>Price</span><span class="metric-index">01</span></div>
-                    <strong class="metric-value" id="price-value">—</strong>
-                    <p id="price-detail">USD reference rate</p>
+                    <span>Price</span>
+                    <strong id="price-value">—</strong>
+                    <p id="price-detail">USD reference</p>
                 </article>
                 <article class="metric-card">
-                    <div class="metric-topline"><span>Priority fee</span><span class="metric-index">02</span></div>
-                    <strong class="metric-value" id="fee-value">—</strong>
-                    <p id="fee-detail">sat/vB</p>
+                    <span>Block height</span>
+                    <strong id="pace-value">—</strong>
+                    <p id="pace-detail">Latest confirmed block</p>
                 </article>
                 <article class="metric-card">
-                    <div class="metric-topline"><span>Mempool</span><span class="metric-index">03</span></div>
-                    <strong class="metric-value" id="mempool-value">—</strong>
-                    <p id="mempool-detail">Virtual megabytes waiting</p>
+                    <span>Priority fee</span>
+                    <strong><span id="fee-value">—</span><small> sat/vB</small></strong>
+                    <p id="fee-detail">High-priority estimate</p>
                 </article>
                 <article class="metric-card">
-                    <div class="metric-topline"><span>Recent block pace</span><span class="metric-index">04</span></div>
-                    <strong class="metric-value" id="pace-value">—</strong>
-                    <p id="pace-detail">Target is about 10 minutes</p>
+                    <span>Mempool</span>
+                    <strong><span id="mempool-value">—</span><small> MvB</small></strong>
+                    <p id="mempool-detail">Transactions waiting</p>
                 </article>
             </div>
         </section>
 
-        <section class="pulse-grid" aria-label="Bitcoin network pulse">
-            <article class="pulse-card fee-card">
-                <div class="pulse-heading">
-                    <div>
-                        <p class="section-kicker">Blockspace</p>
-                        <h2 id="fee-state-title">Reading fee pressure</h2>
-                    </div>
-                    <span class="state-pill" id="fee-state-pill">Loading</span>
-                </div>
-                <p class="pulse-copy" id="fee-state-copy">Waiting for the latest source-linked fee estimates.</p>
-                <div class="fee-scale" aria-label="Fee estimates by urgency">
-                    <div><span>Fast</span><strong id="fee-fast">—</strong></div>
-                    <div><span>1 hour</span><strong id="fee-hour">—</strong></div>
-                    <div><span>Economy</span><strong id="fee-economy">—</strong></div>
-                </div>
+        <section class="network-details" aria-labelledby="details-title">
+            <div class="section-header"><h2 id="details-title">Network details</h2></div>
+            <article class="detail-row">
+                <div class="detail-title"><span>Blockspace</span><h3 id="fee-state-title">Reading fee pressure</h3></div>
+                <span class="state-pill" id="fee-state-pill">Loading</span>
+                <p class="detail-copy" id="fee-state-copy">Waiting for current fee estimates.</p>
+                <dl class="fee-list" aria-label="Fee estimates by urgency">
+                    <div><dt>Fast</dt><dd><strong id="fee-fast">—</strong> sat/vB</dd></div>
+                    <div><dt>1 hour</dt><dd><strong id="fee-hour">—</strong> sat/vB</dd></div>
+                    <div><dt>Economy</dt><dd><strong id="fee-economy">—</strong> sat/vB</dd></div>
+                </dl>
             </article>
-
-            <article class="pulse-card difficulty-card">
-                <div class="pulse-heading">
-                    <div>
-                        <p class="section-kicker">Difficulty epoch</p>
-                        <h2>Next retarget</h2>
+            <article class="detail-row difficulty-row">
+                <div class="detail-title"><span>Difficulty</span><h3>Next retarget</h3></div>
+                <strong class="difficulty-change" id="difficulty-change">—</strong>
+                <div class="difficulty-data">
+                    <div class="progress-track" aria-hidden="true"><span id="difficulty-progress"></span></div>
+                    <div class="progress-meta">
+                        <span id="difficulty-progress-label">Progress unavailable</span>
+                        <span id="difficulty-remaining">— blocks remaining</span>
                     </div>
-                    <strong class="difficulty-change" id="difficulty-change">—</strong>
+                    <p class="detail-copy" id="difficulty-copy">Difficulty adjusts every 2,016 blocks.</p>
                 </div>
-                <div class="progress-track" aria-hidden="true"><span id="difficulty-progress"></span></div>
-                <div class="progress-meta">
-                    <span id="difficulty-progress-label">Progress unavailable</span>
-                    <span id="difficulty-remaining">— blocks remaining</span>
-                </div>
-                <p class="pulse-copy" id="difficulty-copy">Bitcoin adjusts mining difficulty every 2,016 blocks to keep long-run block production near target.</p>
             </article>
         </section>
 
         <section class="feed-section" id="changefeed" aria-labelledby="feed-title">
             <div class="feed-header">
-                <div>
-                    <p class="section-kicker">Changefeed</p>
-                    <h2 id="feed-title">Only what moved</h2>
-                </div>
-                <div class="feed-filters" role="group" aria-label="Filter changefeed">
+                <div><h2 id="feed-title">Changes</h2><p>Current conditions and recent ecosystem updates.</p></div>
+                <div class="feed-filters" role="group" aria-label="Filter changes">
                     <button type="button" class="filter-button active" data-filter="all" aria-pressed="true">All</button>
                     <button type="button" class="filter-button" data-filter="action" aria-pressed="false">Action</button>
                     <button type="button" class="filter-button" data-filter="notable" aria-pressed="false">Notable</button>
                     <button type="button" class="filter-button" data-filter="routine" aria-pressed="false">Routine</button>
                 </div>
             </div>
-
             <div class="feed-list" id="feed-list" aria-live="polite" aria-busy="true">
                 <div class="feed-skeleton" aria-hidden="true"></div>
                 <div class="feed-skeleton" aria-hidden="true"></div>
@@ -179,69 +140,39 @@
             <p class="feed-empty" id="feed-empty" hidden>No changes match this filter.</p>
         </section>
 
-        <section class="method-section" aria-labelledby="method-title">
-            <div>
-                <p class="section-kicker">How to read this</p>
-                <h2 id="method-title">Facts first. Interpretation kept narrow.</h2>
+        <details class="about-details">
+            <summary>Sources and methodology</summary>
+            <div class="about-content">
+                <p>Action means conditions may affect a transaction or upgrade decision. Notable means a measurable shift worth seeing. Routine means normal network movement.</p>
+                <nav aria-label="Data sources">
+                    <a href="https://mempool.space/" target="_blank" rel="noopener noreferrer">mempool.space</a>
+                    <a href="https://bitcoinops.org/" target="_blank" rel="noopener noreferrer">Bitcoin Optech</a>
+                    <a href="https://github.com/bitcoin/bitcoin/releases" target="_blank" rel="noopener noreferrer">Bitcoin Core</a>
+                </nav>
             </div>
-            <div class="method-grid">
-                <p><strong>Action</strong><span>Conditions that may affect a transaction, upgrade, or security decision.</span></p>
-                <p><strong>Notable</strong><span>A measurable shift worth understanding, but not necessarily acting on.</span></p>
-                <p><strong>Routine</strong><span>Normal network movement and trusted ecosystem updates.</span></p>
-            </div>
-        </section>
-
-        <section class="source-section" aria-labelledby="sources-title">
-            <div>
-                <p class="section-kicker">Primary inputs</p>
-                <h2 id="sources-title">Follow the source, not us.</h2>
-            </div>
-            <div class="source-links">
-                <a href="https://mempool.space/" target="_blank" rel="noopener noreferrer">
-                    <span>Network, blocks & fees</span><strong>mempool.space</strong>
-                </a>
-                <a href="https://bitcoinops.org/" target="_blank" rel="noopener noreferrer">
-                    <span>Protocol developments</span><strong>Bitcoin Optech</strong>
-                </a>
-                <a href="https://github.com/bitcoin/bitcoin/releases" target="_blank" rel="noopener noreferrer">
-                    <span>Reference implementation</span><strong>Bitcoin Core</strong>
-                </a>
-            </div>
-        </section>
+        </details>
     </main>
 
     <footer class="site-footer">
-        <div>
-            <strong>Bitcoin Changefeed</strong>
-            <span>Built at btc.wedding</span>
-        </div>
-        <p>No wallet connection. No investment advice. No copied headlines without a source.</p>
+        <span>Bitcoin Changefeed · btc.wedding</span>
+        <span>No wallet connection. No investment advice.</span>
     </footer>
 
     <template id="feed-item-template">
         <article class="feed-item">
-            <div class="feed-rail" aria-hidden="true"><span></span></div>
-            <div class="feed-content">
-                <div class="feed-meta">
-                    <span class="feed-level"></span>
-                    <span class="feed-category"></span>
-                    <time></time>
-                </div>
-                <div class="feed-title-row">
-                    <h3></h3>
-                    <strong class="feed-value"></strong>
-                </div>
-                <p class="feed-summary"></p>
-                <a class="source-link" target="_blank" rel="noopener noreferrer">
-                    <span>Open source</span>
-                    <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M7 17 17 7M8 7h9v9"></path>
-                    </svg>
-                </a>
+            <div class="feed-meta">
+                <span class="feed-level"></span><span class="feed-category"></span><time></time>
             </div>
+            <div class="feed-main">
+                <div class="feed-title-row"><h3></h3><strong class="feed-value"></strong></div>
+                <p class="feed-summary"></p>
+            </div>
+            <a class="source-link" target="_blank" rel="noopener noreferrer">
+                <span>Source</span>
+                <svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"></path></svg>
+            </a>
         </article>
     </template>
-
-    <script src="js/app.js?v=10" defer></script>
+    <script src="js/app.js?v=11" defer></script>
 </body>
 </html>

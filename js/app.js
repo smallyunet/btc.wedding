@@ -352,10 +352,10 @@ function deduplicateFeed(items) {
 function setStatus(status, successfulSources, totalSources) {
     const normalized = ["live", "partial", "fallback", "degraded"].includes(status) ? status : "partial";
     const labels = {
-        live: "Live sources",
-        partial: "Partial live data",
-        fallback: "Cached snapshot",
-        degraded: "Sources unavailable"
+        live: "Live",
+        partial: "Partial data",
+        fallback: "Cached data",
+        degraded: "Unavailable"
     };
 
     elements.dataStatus.className = `data-status ${normalized}`;
@@ -371,26 +371,24 @@ function setText(element, value) {
 
 function renderMetrics(metrics) {
     setText(elements.priceValue, formatCurrency(metrics.priceUsd));
-    setText(elements.priceDetail, isFiniteNumber(metrics.blockHeight)
-        ? `Block ${formatNumber(metrics.blockHeight)}`
-        : "USD reference rate");
+    setText(elements.priceDetail, "USD reference");
+
+    setText(elements.paceValue, isFiniteNumber(metrics.blockHeight)
+        ? formatNumber(metrics.blockHeight)
+        : "—");
+    setText(elements.paceDetail, isFiniteNumber(metrics.avgBlockTimeMinutes)
+        ? `${Number(metrics.avgBlockTimeMinutes).toFixed(1)} min recent pace`
+        : "Latest confirmed block");
 
     setText(elements.feeValue, isFiniteNumber(metrics.feeFast) ? String(metrics.feeFast) : "—");
-    setText(elements.feeDetail, isFiniteNumber(metrics.feeFast) ? "sat/vB · high priority" : "Fee estimate unavailable");
+    setText(elements.feeDetail, isFiniteNumber(metrics.feeFast) ? "High-priority estimate" : "Estimate unavailable");
 
     setText(elements.mempoolValue, isFiniteNumber(metrics.mempoolVsizeMB)
         ? `${Number(metrics.mempoolVsizeMB).toFixed(1)}`
         : "—");
     setText(elements.mempoolDetail, isFiniteNumber(metrics.mempoolVsizeMB)
-        ? `MvB · ~${Math.ceil(metrics.mempoolVsizeMB)} blocks queued`
-        : "Mempool data unavailable");
-
-    setText(elements.paceValue, isFiniteNumber(metrics.avgBlockTimeMinutes)
-        ? `${Number(metrics.avgBlockTimeMinutes).toFixed(1)}`
-        : "—");
-    setText(elements.paceDetail, isFiniteNumber(metrics.avgBlockTimeMinutes)
-        ? "minutes · recent observed average"
-        : "Recent block pace unavailable");
+        ? `About ${Math.ceil(metrics.mempoolVsizeMB)} blocks queued`
+        : "Data unavailable");
 }
 
 function renderFeePulse(metrics) {
@@ -399,12 +397,12 @@ function renderFeePulse(metrics) {
     const title = fee === null ? "Fee data unavailable" : level === "action" ? "Blockspace is expensive" : level === "notable" ? "Fee pressure is elevated" : "Blockspace is calm";
     const label = fee === null ? "Unknown" : level === "action" ? "Action" : level === "notable" ? "Watch" : "Calm";
     const copy = fee === null
-        ? "The latest fee source could not be reached. The rest of the page may still contain a cached snapshot."
+        ? "The latest fee source could not be reached."
         : level === "action"
-            ? "Non-urgent transactions may benefit from waiting. Always use your wallet’s estimate and verify replace-by-fee support."
+            ? "Fees are high. Check your wallet estimate before sending."
             : level === "notable"
-                ? "Demand for blockspace is above the quiet-network range. Check the live mempool before broadcasting."
-                : "Current estimates are in the quiet-network range. Conditions can still change between blocks.";
+                ? "Demand is above the quiet-network range."
+                : "Current estimates are in the quiet-network range.";
 
     setText(elements.feeStateTitle, title);
     setText(elements.feeStatePill, label);
@@ -427,8 +425,8 @@ function renderDifficulty(metrics) {
         ? "—"
         : `${change >= 0 ? "+" : ""}${change.toFixed(2)}%`);
     setText(elements.difficultyCopy, metrics.estimatedRetargetDate
-        ? `The next retarget is estimated ${formatRelativeTime(metrics.estimatedRetargetDate)}. Estimates move as block pace changes.`
-        : "Bitcoin adjusts mining difficulty every 2,016 blocks to keep long-run block production near target.");
+        ? `Estimated retarget ${formatRelativeTime(metrics.estimatedRetargetDate)}.`
+        : "Difficulty adjusts every 2,016 blocks.");
 }
 
 function renderVisitSummary(comparisonEvents) {
@@ -438,11 +436,11 @@ function renderVisitSummary(comparisonEvents) {
     if (state.previous?.seenAt) {
         setText(elements.lastVisit, formatRelativeTime(state.previous.seenAt));
         setText(elements.visitContext, meaningful
-            ? "These changes crossed a material threshold relative to the snapshot saved in this browser."
-            : "No action or notable threshold was crossed since this browser last checked.");
+            ? "Compared with the snapshot saved in this browser."
+            : "Nothing crossed a notable threshold since your last check.");
     } else {
         setText(elements.lastVisit, "First visit");
-        setText(elements.visitContext, "This browser will keep today’s public metrics locally so the next visit can show only what moved.");
+        setText(elements.visitContext, "Your next visit will show what changed.");
     }
 }
 

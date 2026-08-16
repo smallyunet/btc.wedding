@@ -1,11 +1,11 @@
 {
   "name": "Bitcoin Changefeed",
   "short_name": "Changefeed",
-  "description": "A calm, source-linked feed of meaningful Bitcoin network and protocol changes.",
+  "description": "A simple, source-linked view of Bitcoin network conditions and meaningful updates.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#090c10",
-  "theme_color": "#f7931a",
+  "background_color": "#f7f7f5",
+  "theme_color": "#f7f7f5",
   "icons": [
     {
       "src": "./icon-192.png",

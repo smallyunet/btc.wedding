@@ -1,0 +1,194 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "btc.wedding 重新定位评估",
+    "description": "低维护 Bitcoin 产品方向与两周验证方案",
+    "generatedAt": "2026-08-16T12:00:00+08:00",
+    "charts": [
+      {
+        "id": "direction_ranking",
+        "title": "候选方向加权总分",
+        "subtitle": "六个方向，1–5 分；结构化策略判断，不代表已测量的市场需求",
+        "type": "bar",
+        "dataset": "direction_scores",
+        "sourceId": "strategy_notes",
+        "valueFormat": "number",
+        "maxRows": 6,
+        "layout": "full",
+        "encodings": {
+          "x": { "field": "direction", "type": "nominal", "label": "方向" },
+          "y": { "field": "weighted_score", "type": "quantitative", "label": "加权总分" },
+          "tooltip": [
+            { "field": "verdict", "type": "text", "label": "判断" }
+          ]
+        }
+      }
+    ],
+    "tables": [
+      {
+        "id": "direction_scorecard",
+        "title": "候选方向评分",
+        "subtitle": "1–5 分；总分按复用价值 25%、低运维 25%、差异化 20%、数据韧性 15%、现有栈适配 15% 加权",
+        "dataset": "direction_scores",
+        "sourceId": "strategy_notes",
+        "defaultSort": { "field": "weighted_score", "direction": "desc" },
+        "density": "spacious",
+        "layout": "full",
+        "columns": [
+          { "field": "direction", "label": "方向", "type": "text" },
+          { "field": "recurring_utility", "label": "复用价值", "format": "number" },
+          { "field": "low_operations", "label": "低运维", "format": "number" },
+          { "field": "differentiation", "label": "差异化", "format": "number" },
+          { "field": "resilience", "label": "数据韧性", "format": "number" },
+          { "field": "stack_fit", "label": "现有栈适配", "format": "number" },
+          { "field": "weighted_score", "label": "加权总分", "format": "number" },
+          { "field": "verdict", "label": "判断", "type": "text" }
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "strategy_notes",
+        "label": "方向评分方法、证据清单与验证说明",
+        "path": "source-notes.md",
+        "query": {
+          "engine": "sqlite",
+          "sql": "WITH directions(direction, recurring_utility, low_operations, differentiation, resilience, stack_fit, verdict) AS (VALUES ('Bitcoin Changefeed',4,4,5,4,5,'首选；先做 delta-first MVP'),('Bitcoin Time Machine',3,5,4,4,5,'备选；适合作为历史层'),('现有 household planner',2,5,3,5,5,'可归档，不再作为主产品'),('普通 BTC dashboard',3,4,1,4,5,'不做；同质化严重'),('BTC 新闻/话题聚合',4,2,2,2,4,'不做泛聚合；只纳入可信更新源'),('重型 on-chain analytics',4,1,2,2,2,'不做；成本与定义负担过高')) SELECT direction, recurring_utility, low_operations, differentiation, resilience, stack_fit, ROUND(recurring_utility*0.25 + low_operations*0.25 + differentiation*0.20 + resilience*0.15 + stack_fit*0.15, 2) AS weighted_score, verdict FROM directions ORDER BY weighted_score DESC",
+          "description": "Recomputes the six-direction ordinal strategy scorecard from the reviewed inputs and stated weights.",
+          "executed_at": "2026-08-16T12:00:00+08:00",
+          "metric_definitions": [
+            "Each criterion is an ordinal judgment from 1 (weak) to 5 (strong).",
+            "Weighted score = recurring utility 25% + low operations 25% + differentiation 20% + data resilience 15% + current stack fit 15%."
+          ]
+        }
+      },
+      { "id": "live_site", "label": "btc.wedding 线上站点", "href": "https://btc.wedding/" },
+      { "id": "mempool_docs", "label": "mempool.space REST API", "href": "https://mempool.space/docs/api/rest" },
+      { "id": "clark_moody", "label": "Clark Moody Bitcoin Dashboard", "href": "https://dashboard.clarkmoody.com/" },
+      { "id": "bitbo_dashboards", "label": "Bitbo Bitcoin dashboard directory", "href": "https://bitbo.io/tools/dashboards/" },
+      { "id": "btc_network", "label": "BTC.network recurring network reports", "href": "https://btc.network/blog" },
+      { "id": "optech", "label": "Bitcoin Optech", "href": "https://bitcoinops.org/" },
+      { "id": "cloudflare_cron", "label": "Cloudflare Cron Triggers", "href": "https://developers.cloudflare.com/workers/configuration/cron-triggers/" },
+      { "id": "cloudflare_kv", "label": "Cloudflare Workers KV limits", "href": "https://developers.cloudflare.com/kv/platform/limits/" }
+    ],
+    "blocks": [
+      {
+        "id": "title",
+        "type": "markdown",
+        "body": "# btc.wedding 重新定位评估"
+      },
+      {
+        "id": "executive_summary",
+        "type": "markdown",
+        "body": "## Executive Summary\n\n- **建议彻底停止以 wedding 为产品约束，但暂时不要急着换域名。** 先把现有域名当验证入口；产品名与域名解耦，验证成功后再决定是否迁移。\n- **首选方向是 Bitcoin Changefeed：只展示自上次访问以来真正发生的变化。** 它不是另一个全量仪表盘，也不是自动洗稿站，而是一条由客观链上数据、费用/难度异常、重要软件发布与 Optech 更新组成的低噪音变化流。\n- **第二选择是 Bitcoin Time Machine。** 它更容易做到极低维护和可分享，但复用频率弱于 Changefeed；最适合作为后续历史归档能力，而不是第一主产品。\n- **普通新闻聚合、普通链上仪表盘和重型 on-chain analytics 都不建议做。** 前两者已经拥挤，后者会把项目拖入昂贵数据、指标定义和持续内容解释。"
+      },
+      {
+        "id": "current_state",
+        "type": "markdown",
+        "body": "## 现有产品的问题不是设计，而是使用频率\n\n本地 `main` 已经是一个完成度不错的静态家庭 Bitcoin 计划工具：无账户、无数据库、无钱包连接、数据留在浏览器。它的架构很轻，但核心任务通常只发生一次，最多按年复查，因此很难形成自然回访。\n\n同时，线上站点仍是更早的 **Bitcoin Vow Certificate**，与本地 `main` 的 household-plan 版本不一致。这意味着重新定位前应先把“线上到底是什么版本”理清；否则新方向会叠在两套旧叙事上。"
+      },
+      {
+        "id": "crowded_market",
+        "type": "markdown",
+        "body": "## “再做一个 dashboard”不会形成产品理由\n\n[Clark Moody](https://dashboard.clarkmoody.com/) 已覆盖价格、网络、挖矿、费用、Lightning、供应等大量指标，[Bitbo](https://bitbo.io/tools/dashboards/) 也同时经营仪表盘目录与图表产品；[BTC.network](https://btc.network/blog) 甚至已经发布费用、区块空间、挖矿和周度网络报告。\n\n所以机会不在于增加更多卡片，而在于改变信息模型：**从 state-first（现在是多少）变成 delta-first（什么刚刚变了，以及是否值得关注）。**"
+      },
+      {
+        "id": "score_intro",
+        "type": "markdown",
+        "body": "## Changefeed 与 Time Machine 明显领先\n\n下面的分数是结构化判断，不是市场规模数据。它强迫每个方向同时接受“是否会回访”和“是否真能低运维”的约束；精确分值可审计，未知需求仍需上线验证。"
+      },
+      {
+        "id": "score_chart",
+        "type": "chart",
+        "chartId": "direction_ranking"
+      },
+      {
+        "id": "score_detail_intro",
+        "type": "markdown",
+        "body": "### 分项明细\n\nChangefeed 只领先 Time Machine 0.20 分，说明备选并不弱；差别主要来自前者更清晰的重复访问理由。这个优势仍属于假设，必须用真实回访验证。"
+      },
+      {
+        "id": "score_table",
+        "type": "table",
+        "tableId": "direction_scorecard"
+      },
+      {
+        "id": "product_definition",
+        "type": "markdown",
+        "body": "## 首选产品：Bitcoin Changefeed\n\n**一句话定位：** 打开后只看见“从你上次来之后，Bitcoin 有哪些值得知道的客观变化”。\n\n首页不是新闻瀑布，而是三层变化：\n\n1. **需要行动：** 费用突然升高、已知安全公告、关键软件新版本。\n2. **值得注意：** 难度调整、区块速度显著偏离、mempool 压力跃迁、算力趋势变化。\n3. **例行更新：** 新一期 Optech、正常网络快照、已恢复的异常。\n\n浏览器用 `localStorage` 记住上次访问时间，页面显示 `Since your last visit`。同一批每日快照自然形成历史页，后续即可演化为 Time Machine，而不需要另做一套产品。"
+      },
+      {
+        "id": "mvp_scope",
+        "type": "markdown",
+        "body": "## MVP 应刻意少做\n\n**第一版只接四类来源：** [mempool.space](https://mempool.space/docs/api/rest) 的费用、mempool、区块与难度数据；[Bitcoin Optech](https://bitcoinops.org/) RSS；Bitcoin Core GitHub releases；项目自己保存的前一份快照。\n\n**第一版只做五类规则：** 费用状态切换、mempool 体积跃迁、难度调整完成/预测显著变化、近期区块明显变慢或变快、重要发布/安全条目出现。每条事件必须带原始来源和时间。\n\n**第一版明确不做：** 泛 crypto 新闻、价格预测、AI 投资结论、钱包连接、个性化资产、邮件推送、复杂 on-chain 指标、抓取全文。这样才能把维护面控制在 API 变化和少量阈值校准，而不是每天编辑内容。"
+      },
+      {
+        "id": "architecture",
+        "type": "markdown",
+        "body": "## 当前技术栈可以直接承接\n\n现有 Cloudflare Worker 增加 `scheduled()` 即可定时抓取；每次运行把标准化快照和生成的 change events 写入 KV，前端只读取缓存结果，避免每个访客直接冲击公共 API。Cloudflare 的 Cron Triggers 原生支持定时任务，KV 当前免费额度对按小时、集中写入的小型产品足够。\n\n摘要应先使用确定性模板，例如“经济费率从 2 升至 18 sat/vB”，而不是让 LLM 自由解释。这样成本、幻觉和内容审校都接近零。Coin Metrics 社区数据明确带有非商业使用边界，不应在商业方向未定时成为核心依赖。"
+      },
+      {
+        "id": "validation_plan",
+        "type": "markdown",
+        "body": "## 两周验证，不先做完整产品\n\n1. **第 1 周：** 在 `/radar` 做一个真实数据原型，只含 changefeed、来源链接、`since last visit` 和 7 天历史。显示品牌名 `Bitcoin Changefeed`，先不改主站。\n2. **第 2 周：** 找 10–20 个目标用户试用，并启用隐私优先的聚合访问统计。访谈只问三件事：哪条变化有用、哪条是噪音、他们是否愿意每周打开。\n3. **继续门槛：** 至少 5 位目标用户在一周内主动回访两次；至少 3 位明确表示会替代自己现有的某个查看习惯；连续 7 天无需人工修正文案或数据。\n4. **停止门槛：** 用户只把它当一次性漂亮页面，或必须持续人工挑新闻才能让页面有价值。此时转向更低频但更稳的 Time Machine。"
+      },
+      {
+        "id": "next_steps",
+        "type": "markdown",
+        "body": "## Recommended Next Steps\n\n1. 冻结当前 household/wedding 功能，不继续做增量优化。\n2. 先保留线上旧版，不覆盖根路径；在 `/radar` 做可丢弃的 Changefeed 原型。\n3. MVP 不使用 AI，不抓文章全文，不做账户，不接付费数据源。\n4. 验证通过后再把根路径切到新产品，并把旧功能归档到 `/vows` 或独立静态页。\n5. 域名决策延后：有回访证据后再判断 `btc.wedding` 是保留为古怪但可记忆的入口，还是迁到更可信的产品域名。"
+      },
+      {
+        "id": "open_questions",
+        "type": "markdown",
+        "body": "## Further Questions\n\n- 第一目标用户是普通持币者、技术用户，还是 Bitcoin 业务运营者？这会改变事件阈值和语言深度。\n- 产品默认英文还是中文？英文市场更大但竞品更多；中文可能更有信息整理价值，但消息源处理更复杂。\n- 目标是纯公共工具、SEO 资产，还是未来可订阅产品？这会影响数据许可与是否加入推送。"
+      },
+      {
+        "id": "caveats",
+        "type": "markdown",
+        "body": "## Caveats and Assumptions\n\n- 本结论基于截至 2026 年 8 月 16 日的仓库、线上页面、竞品与官方接口文档；它证明技术和定位可行，不证明存在足够需求。\n- 评分中的复用价值与差异化是判断值，必须由真实回访行为验证。\n- 公共 API 会限流或变更；MVP 必须缓存、超时、保留 last-known-good 数据，并清楚显示数据时间。\n- 当前分析没有决定是否商业化。任何商业化前都应重新审查数据源许可。"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-08-16T12:00:00+08:00",
+    "status": "ready",
+    "datasets": {
+      "direction_scores": [
+        { "direction": "Bitcoin Changefeed", "recurring_utility": 4, "low_operations": 4, "differentiation": 5, "resilience": 4, "stack_fit": 5, "weighted_score": 4.35, "verdict": "首选；先做 delta-first MVP" },
+        { "direction": "Bitcoin Time Machine", "recurring_utility": 3, "low_operations": 5, "differentiation": 4, "resilience": 4, "stack_fit": 5, "weighted_score": 4.15, "verdict": "备选；适合作为历史层" },
+        { "direction": "现有 household planner", "recurring_utility": 2, "low_operations": 5, "differentiation": 3, "resilience": 5, "stack_fit": 5, "weighted_score": 3.85, "verdict": "可归档，不再作为主产品" },
+        { "direction": "普通 BTC dashboard", "recurring_utility": 3, "low_operations": 4, "differentiation": 1, "resilience": 4, "stack_fit": 5, "weighted_score": 3.3, "verdict": "不做；同质化严重" },
+        { "direction": "BTC 新闻/话题聚合", "recurring_utility": 4, "low_operations": 2, "differentiation": 2, "resilience": 2, "stack_fit": 4, "weighted_score": 2.8, "verdict": "不做泛聚合；只纳入可信更新源" },
+        { "direction": "重型 on-chain analytics", "recurring_utility": 4, "low_operations": 1, "differentiation": 2, "resilience": 2, "stack_fit": 2, "weighted_score": 2.25, "verdict": "不做；成本与定义负担过高" }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "strategy_notes",
+      "label": "方向评分方法、证据清单与验证说明",
+      "path": "source-notes.md",
+      "query": {
+        "engine": "sqlite",
+        "sql": "WITH directions(direction, recurring_utility, low_operations, differentiation, resilience, stack_fit, verdict) AS (VALUES ('Bitcoin Changefeed',4,4,5,4,5,'首选；先做 delta-first MVP'),('Bitcoin Time Machine',3,5,4,4,5,'备选；适合作为历史层'),('现有 household planner',2,5,3,5,5,'可归档，不再作为主产品'),('普通 BTC dashboard',3,4,1,4,5,'不做；同质化严重'),('BTC 新闻/话题聚合',4,2,2,2,4,'不做泛聚合；只纳入可信更新源'),('重型 on-chain analytics',4,1,2,2,2,'不做；成本与定义负担过高')) SELECT direction, recurring_utility, low_operations, differentiation, resilience, stack_fit, ROUND(recurring_utility*0.25 + low_operations*0.25 + differentiation*0.20 + resilience*0.15 + stack_fit*0.15, 2) AS weighted_score, verdict FROM directions ORDER BY weighted_score DESC",
+        "description": "Recomputes the six-direction ordinal strategy scorecard from the reviewed inputs and stated weights.",
+        "executed_at": "2026-08-16T12:00:00+08:00",
+        "metric_definitions": [
+          "Each criterion is an ordinal judgment from 1 (weak) to 5 (strong).",
+          "Weighted score = recurring utility 25% + low operations 25% + differentiation 20% + data resilience 15% + current stack fit 15%."
+        ]
+      }
+    },
+    { "id": "live_site", "label": "btc.wedding 线上站点", "href": "https://btc.wedding/" },
+    { "id": "mempool_docs", "label": "mempool.space REST API", "href": "https://mempool.space/docs/api/rest" },
+    { "id": "clark_moody", "label": "Clark Moody Bitcoin Dashboard", "href": "https://dashboard.clarkmoody.com/" },
+    { "id": "bitbo_dashboards", "label": "Bitbo Bitcoin dashboard directory", "href": "https://bitbo.io/tools/dashboards/" },
+    { "id": "btc_network", "label": "BTC.network recurring network reports", "href": "https://btc.network/blog" },
+    { "id": "optech", "label": "Bitcoin Optech", "href": "https://bitcoinops.org/" },
+    { "id": "cloudflare_cron", "label": "Cloudflare Cron Triggers", "href": "https://developers.cloudflare.com/workers/configuration/cron-triggers/" },
+    { "id": "cloudflare_kv", "label": "Cloudflare Workers KV limits", "href": "https://developers.cloudflare.com/kv/platform/limits/" }
+  ]
+}
