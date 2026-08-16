@@ -204,7 +204,7 @@ main { padding: 48px 0 24px; }
 .last-visit span, .last-visit strong { display: block; }
 .last-visit strong { margin-top: 2px; color: var(--text); font-weight: 600; }
 
-.metrics-section, .network-details, .feed-section { margin-top: 40px; }
+.metrics-section, .network-details, .supply-section, .feed-section { margin-top: 40px; }
 
 .section-header {
     min-height: 32px;
@@ -304,7 +304,21 @@ main { padding: 48px 0 24px; }
 .fee-list dd { margin: 1px 0 0; font-size: 12px; white-space: nowrap; }
 .fee-list strong { color: var(--text); font-size: 17px; font-variant-numeric: tabular-nums; }
 .difficulty-change { font-size: 15px; font-variant-numeric: tabular-nums; }
-.difficulty-data { grid-column: 3 / -1; }
+.difficulty-data, .halving-data { grid-column: 3 / -1; }
+
+.compact-value span {
+    display: block;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.compact-value strong {
+    display: block;
+    margin-top: 1px;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
 
 .progress-track {
     height: 6px;
@@ -331,7 +345,172 @@ main { padding: 48px 0 24px; }
     font-size: 12px;
 }
 
-.difficulty-data .detail-copy { margin-top: 7px; }
+.difficulty-data .detail-copy, .halving-data .detail-copy { margin-top: 7px; }
+
+.supply-section {
+    border-top: 1px solid var(--border);
+}
+
+.supply-section .section-header {
+    margin: 0;
+    padding: 18px 0 12px;
+}
+
+.supply-section .section-header p {
+    margin: 3px 0 0;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.supply-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+.supply-stat {
+    min-width: 0;
+    padding: 16px;
+}
+
+.supply-stat + .supply-stat {
+    border-left: 1px solid var(--border);
+}
+
+.supply-stat > span {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.supply-stat > strong {
+    display: block;
+    margin-top: 5px;
+    font-size: 22px;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.supply-stat p {
+    margin: 4px 0 0;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.research-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.research-panel {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+.research-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.research-heading span,
+.research-heading time {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.research-heading time {
+    flex: none;
+    padding-top: 2px;
+}
+
+.research-heading h3 {
+    margin: 2px 0 0;
+    font-size: 15px;
+}
+
+.distribution-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.distribution-list p {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 0 5px;
+    font-size: 13px;
+}
+
+.distribution-list strong {
+    font-variant-numeric: tabular-nums;
+}
+
+.distribution-track {
+    height: 6px;
+    display: block;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #e8e8e3;
+}
+
+.distribution-track > span {
+    height: 100%;
+    display: block;
+    min-width: 3px;
+    border-radius: inherit;
+    background: var(--accent);
+}
+
+.research-note {
+    margin: 18px 0 0;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.research-source {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 650;
+    text-underline-offset: 3px;
+}
+
+.lost-range {
+    display: block;
+    margin-top: 18px;
+    font-size: 28px;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+}
+
+.lost-share {
+    margin: 4px 0 0;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.research-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
 .feed-section { border-top: 1px solid var(--border); }
 
 .feed-header {
@@ -504,8 +683,12 @@ main { padding: 48px 0 24px; }
     .metric-card:nth-child(3) { border-left: 0; }
     .metric-card:nth-child(n + 3) { border-top: 1px solid var(--border); }
 
+    .supply-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .supply-stat:nth-child(3) { border-left: 0; }
+    .supply-stat:nth-child(n + 3) { border-top: 1px solid var(--border); }
+
     .detail-row { grid-template-columns: 150px 88px minmax(0, 1fr); }
-    .fee-list, .difficulty-data { grid-column: 3; }
+    .fee-list, .difficulty-data, .halving-data { grid-column: 3; }
 
     .detail-row > .detail-copy {
         grid-column: 3;
@@ -544,14 +727,14 @@ main { padding: 48px 0 24px; }
     .visit-count > strong { min-width: 34px; font-size: 26px; }
     .visit-summary p { max-width: 34ch; }
     .last-visit { display: none; }
-    .metrics-section, .network-details, .feed-section { margin-top: 32px; }
+    .metrics-section, .network-details, .supply-section, .feed-section { margin-top: 32px; }
     .metric-card { padding: 15px; }
     .metric-card > strong { min-height: 34px; font-size: clamp(20px, 6.2vw, 26px); }
     .metric-card p { white-space: normal; }
 
     .detail-row { grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 18px 0; }
     .detail-title { grid-column: 1; }
-    .detail-row > .state-pill, .detail-row > .difficulty-change { grid-column: 2; grid-row: 1; }
+    .detail-row > .state-pill, .detail-row > .difficulty-change, .detail-row > .compact-value { grid-column: 2; grid-row: 1; }
 
     .detail-row > .detail-copy {
         grid-column: 1 / -1;
@@ -560,7 +743,9 @@ main { padding: 48px 0 24px; }
         padding: 0;
     }
 
-    .fee-list, .difficulty-data { grid-column: 1 / -1; grid-row: auto; }
+    .fee-list, .difficulty-data, .halving-data { grid-column: 1 / -1; grid-row: auto; }
+
+    .research-grid { grid-template-columns: 1fr; gap: 14px; }
     .feed-header { min-height: 0; display: block; padding: 18px 0 12px; }
     .feed-filters { justify-content: flex-start; margin-top: 14px; }
     .filter-button { min-height: 44px; }

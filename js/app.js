@@ -34,9 +34,18 @@ const elements = {
     feeStatePill: document.getElementById("fee-state-pill"),
     feeStateTitle: document.getElementById("fee-state-title"),
     feeValue: document.getElementById("fee-value"),
+    halvingCopy: document.getElementById("halving-copy"),
+    halvingProgress: document.getElementById("halving-progress"),
+    halvingProgressLabel: document.getElementById("halving-progress-label"),
+    halvingRemaining: document.getElementById("halving-remaining"),
+    halvingReward: document.getElementById("halving-reward"),
     feedEmpty: document.getElementById("feed-empty"),
     feedList: document.getElementById("feed-list"),
     lastVisit: document.getElementById("last-visit"),
+    dailyIssuance: document.getElementById("daily-issuance"),
+    issuedSupply: document.getElementById("issued-supply"),
+    issuedSupplyDetail: document.getElementById("issued-supply-detail"),
+    lostShare: document.getElementById("lost-share"),
     mempoolDetail: document.getElementById("mempool-detail"),
     mempoolValue: document.getElementById("mempool-value"),
     paceDetail: document.getElementById("pace-detail"),
@@ -45,6 +54,7 @@ const elements = {
     priceValue: document.getElementById("price-value"),
     refreshButton: document.getElementById("refresh-data"),
     snapshotTime: document.getElementById("snapshot-time"),
+    unminedSupply: document.getElementById("unmined-supply"),
     visitContext: document.getElementById("visit-context")
 };
 
@@ -129,6 +139,26 @@ function formatExactTime(value) {
         hour: "2-digit",
         minute: "2-digit"
     }).format(date);
+}
+
+function formatDate(value) {
+    const date = new Date(value || 0);
+    if (Number.isNaN(date.getTime())) return "date unavailable";
+    return new Intl.DateTimeFormat("en", {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+    }).format(date);
+}
+
+function formatBitcoinAmount(value) {
+    if (!isFiniteNumber(value)) return "—";
+    return Number(value).toFixed(8).replace(/\.?0+$/, "");
+}
+
+function formatMillions(value, maximumFractionDigits = 3) {
+    if (!isFiniteNumber(value)) return "—";
+    return `${new Intl.NumberFormat("en-US", { maximumFractionDigits }).format(Number(value) / 1_000_000)}M BTC`;
 }
 
 async function fetchJson(url, timeout = 9_000) {
@@ -429,6 +459,85 @@ function renderDifficulty(metrics) {
         : "Difficulty adjusts every 2,016 blocks.");
 }
 
+function calculateIssuanceState(blockHeight) {
+    const height = numberOrNull(blockHeight);
+    if (height === null) return null;
+
+    const interval = 210_000;
+    const era = Math.floor(height / interval);
+    const nextHeight = (era + 1) * interval;
+    const blocksRemaining = nextHeight - height;
+    const progress = ((height % interval) / interval) * 100;
+    const divisor = 2n ** BigInt(era);
+    const currentSubsidySats = era >= 33 ? 0n : 5_000_000_000n / divisor;
+    const nextSubsidySats = era >= 32 ? 0n : currentSubsidySats / 2n;
+
+    let blocksToCount = BigInt(Math.floor(height) + 1);
+    let rewardSats = 5_000_000_000n;
+    let issuedSats = 0n;
+    while (blocksToCount > 0n && rewardSats > 0n) {
+        const eraBlocks = blocksToCount > 210_000n ? 210_000n : blocksToCount;
+        issuedSats += eraBlocks * rewardSats;
+        blocksToCount -= eraBlocks;
+        rewardSats /= 2n;
+    }
+
+    return {
+        blocksRemaining,
+        currentSubsidy: Number(currentSubsidySats) / 100_000_000,
+        issuedSupply: Number(issuedSats) / 100_000_000,
+        nextHeight,
+        nextSubsidy: Number(nextSubsidySats) / 100_000_000,
+        progress
+    };
+}
+
+function renderHalving(metrics, generatedAt) {
+    const height = numberOrNull(metrics.blockHeight);
+    const issuance = calculateIssuanceState(height);
+    if (!issuance) {
+        elements.halvingProgress.style.width = "0%";
+        setText(elements.halvingProgressLabel, "Cycle progress unavailable");
+        setText(elements.halvingRemaining, "Remaining blocks unavailable");
+        setText(elements.halvingReward, "—");
+        setText(elements.halvingCopy, "Bitcoin halves its block subsidy every 210,000 blocks.");
+        return;
+    }
+
+    const estimateBase = new Date(generatedAt || Date.now());
+    const estimateDate = new Date(estimateBase.getTime() + issuance.blocksRemaining * 10 * 60 * 1_000);
+
+    elements.halvingProgress.style.width = `${issuance.progress}%`;
+    setText(elements.halvingProgressLabel, `${issuance.progress.toFixed(1)}% of cycle complete`);
+    setText(elements.halvingRemaining, `${formatNumber(issuance.blocksRemaining)} blocks remaining`);
+    setText(elements.halvingReward, `${formatBitcoinAmount(issuance.currentSubsidy)} BTC`);
+    setText(elements.halvingCopy, `Next subsidy: ${formatBitcoinAmount(issuance.nextSubsidy)} BTC at block ${formatNumber(issuance.nextHeight)} · around ${formatDate(estimateDate)} at the 10-minute target.`);
+}
+
+function renderSupply(metrics) {
+    const issuance = calculateIssuanceState(metrics.blockHeight);
+    if (!issuance) {
+        setText(elements.issuedSupply, "—");
+        setText(elements.issuedSupplyDetail, "Calculated from block height");
+        setText(elements.unminedSupply, "—");
+        setText(elements.dailyIssuance, "—");
+        setText(elements.lostShare, "Share unavailable without current issuance");
+        return;
+    }
+
+    const supplyCap = 21_000_000;
+    const unmined = Math.max(0, supplyCap - issuance.issuedSupply);
+    const issuedPercent = (issuance.issuedSupply / supplyCap) * 100;
+    const lostLowPercent = (3_000_000 / issuance.issuedSupply) * 100;
+    const lostHighPercent = (3_750_000 / issuance.issuedSupply) * 100;
+
+    setText(elements.issuedSupply, formatMillions(issuance.issuedSupply));
+    setText(elements.issuedSupplyDetail, `${issuedPercent.toFixed(2)}% of the 21M cap`);
+    setText(elements.unminedSupply, formatMillions(unmined));
+    setText(elements.dailyIssuance, `${formatNumber(issuance.currentSubsidy * 144)} BTC`);
+    setText(elements.lostShare, `About ${lostLowPercent.toFixed(1)}–${lostHighPercent.toFixed(1)}% of current scheduled issuance`);
+}
+
 function renderVisitSummary(comparisonEvents) {
     const meaningful = comparisonEvents.filter((item) => item.level === "action" || item.level === "notable").length;
     setText(elements.changeCount, String(meaningful));
@@ -497,6 +606,8 @@ function render(current) {
     renderMetrics(current.metrics);
     renderFeePulse(current.metrics);
     renderDifficulty(current.metrics);
+    renderHalving(current.metrics, current.generatedAt);
+    renderSupply(current.metrics);
     renderVisitSummary(comparisonEvents);
     renderFeed();
     scheduleSave();

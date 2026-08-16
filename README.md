@@ -21,6 +21,13 @@ It combines public network conditions with trusted protocol and software updates
 
 If an upstream source fails, the generator preserves the last known values and marks the snapshot as partial or fallback instead of inventing data.
 
+## Supply methodology
+
+- Scheduled issuance, unissued supply, daily target issuance, block subsidy, and halving progress are calculated locally from the current block height and Bitcoin's 210,000-block subsidy eras.
+- The 21 million cap is shown as the familiar rounded protocol limit. Scheduled issuance can differ slightly from spendable supply because miners may claim less than the allowed subsidy and some outputs are provably unspendable.
+- Ownership cohorts are a dated March 2023 Glassnode entity-adjusted research snapshot, not live wallet balances and not a complete partition of supply. Addresses do not map one-to-one to people.
+- The 3.0–3.75 million BTC lost range combines historical 2020 Glassnode and Chainalysis estimates. It is labeled as an estimate because inactivity cannot prove loss of private keys.
+
 ## Run locally
 
 ```bash

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bitcoin Changefeed | Bitcoin at a glance</title>
-    <meta name="description" content="A simple, source-linked view of Bitcoin price, blocks, fees, mempool pressure, difficulty, and important updates.">
+    <meta name="description" content="A simple, source-linked view of Bitcoin price, blocks, fees, supply, ownership estimates, halving progress, and important updates.">
     <meta name="author" content="btc.wedding">
     <meta name="theme-color" content="#f7f7f5">
     <meta name="color-scheme" content="light">
@@ -120,6 +120,98 @@
                     <p class="detail-copy" id="difficulty-copy">Difficulty adjusts every 2,016 blocks.</p>
                 </div>
             </article>
+            <article class="detail-row halving-row">
+                <div class="detail-title"><span>Issuance</span><h3>Next halving</h3></div>
+                <div class="compact-value">
+                    <span>Subsidy</span>
+                    <strong id="halving-reward">—</strong>
+                </div>
+                <div class="halving-data">
+                    <div class="progress-track" aria-hidden="true"><span id="halving-progress"></span></div>
+                    <div class="progress-meta">
+                        <span id="halving-progress-label">Cycle progress unavailable</span>
+                        <span id="halving-remaining">— blocks remaining</span>
+                    </div>
+                    <p class="detail-copy" id="halving-copy">Bitcoin halves its block subsidy every 210,000 blocks.</p>
+                </div>
+            </article>
+        </section>
+
+        <section class="supply-section" aria-labelledby="supply-title">
+            <div class="section-header">
+                <div>
+                    <h2 id="supply-title">Supply</h2>
+                    <p>Protocol facts first, research estimates clearly labeled.</p>
+                </div>
+            </div>
+
+            <div class="supply-grid" aria-live="polite">
+                <article class="supply-stat">
+                    <span>Scheduled issuance</span>
+                    <strong id="issued-supply">—</strong>
+                    <p id="issued-supply-detail">Calculated from block height</p>
+                </article>
+                <article class="supply-stat">
+                    <span>Supply cap</span>
+                    <strong>21M BTC</strong>
+                    <p>Protocol limit, reached asymptotically</p>
+                </article>
+                <article class="supply-stat">
+                    <span>Not yet issued</span>
+                    <strong id="unmined-supply">—</strong>
+                    <p>Released over future halving eras</p>
+                </article>
+                <article class="supply-stat">
+                    <span>New supply / day</span>
+                    <strong id="daily-issuance">—</strong>
+                    <p>At the 144-block daily target</p>
+                </article>
+            </div>
+
+            <div class="research-grid">
+                <article class="research-panel" aria-labelledby="distribution-title">
+                    <div class="research-heading">
+                        <div>
+                            <span>Entity-adjusted research</span>
+                            <h3 id="distribution-title">Selected ownership cohorts</h3>
+                        </div>
+                        <time datetime="2023-03-15">Mar 2023</time>
+                    </div>
+                    <div class="distribution-list" aria-label="Selected shares of circulating supply from Glassnode's March 2023 entity-adjusted research">
+                        <div>
+                            <p><span>Under 1 BTC</span><strong>6.6%</strong></p>
+                            <span class="distribution-track" aria-hidden="true"><span style="width: 6.6%"></span></span>
+                        </div>
+                        <div>
+                            <p><span>1–10 BTC</span><strong>10.5%</strong></p>
+                            <span class="distribution-track" aria-hidden="true"><span style="width: 10.5%"></span></span>
+                        </div>
+                        <div>
+                            <p><span>Over 1,000 BTC</span><strong>34.4%</strong></p>
+                            <span class="distribution-track" aria-hidden="true"><span style="width: 34.4%"></span></span>
+                        </div>
+                    </div>
+                    <p class="research-note">Selected cohorts, not a complete partition. The 1,000+ BTC cohort excludes exchanges. Entity clustering is an estimate; one custodian can represent many people.</p>
+                    <a class="research-source" href="https://research.glassnode.com/bitcoin-supply-distribution-revisited/" target="_blank" rel="noopener noreferrer">Glassnode methodology and snapshot <span aria-hidden="true">↗</span></a>
+                </article>
+
+                <article class="research-panel lost-panel" aria-labelledby="lost-title">
+                    <div class="research-heading">
+                        <div>
+                            <span>Research range</span>
+                            <h3 id="lost-title">Estimated permanently lost</h3>
+                        </div>
+                        <time datetime="2020">2020 estimates</time>
+                    </div>
+                    <strong class="lost-range">3.0–3.75M BTC</strong>
+                    <p class="lost-share" id="lost-share">— of scheduled issuance</p>
+                    <p class="research-note">Lost keys cannot usually be proven on-chain. This range combines historical entity and activity heuristics; dormant coins may still move. Provably unspendable outputs are a narrower category.</p>
+                    <div class="research-links">
+                        <a class="research-source" href="https://research.glassnode.com/bitcoin-liquid-supply/" target="_blank" rel="noopener noreferrer">Glassnode estimate <span aria-hidden="true">↗</span></a>
+                        <a class="research-source" href="https://www.chainalysis.com/blog/bitcoin-market-march-2020/" target="_blank" rel="noopener noreferrer">Chainalysis estimate <span aria-hidden="true">↗</span></a>
+                    </div>
+                </article>
+            </div>
         </section>
 
         <section class="feed-section" id="changefeed" aria-labelledby="feed-title">
