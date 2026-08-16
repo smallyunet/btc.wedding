@@ -53,6 +53,7 @@ const elements = {
     priceDetail: document.getElementById("price-detail"),
     priceValue: document.getElementById("price-value"),
     refreshButton: document.getElementById("refresh-data"),
+    signalSummary: document.getElementById("signal-summary"),
     snapshotTime: document.getElementById("snapshot-time"),
     unminedSupply: document.getElementById("unmined-supply"),
     visitContext: document.getElementById("visit-context")
@@ -81,6 +82,7 @@ function scheduleSave() {
 }
 
 function isFiniteNumber(value) {
+    if (value === null || value === undefined || value === "") return false;
     return Number.isFinite(Number(value));
 }
 
@@ -539,7 +541,9 @@ function renderSupply(metrics) {
 }
 
 function renderVisitSummary(comparisonEvents) {
-    const meaningful = comparisonEvents.filter((item) => item.level === "action" || item.level === "notable").length;
+    const meaningful = state.previous?.seenAt
+        ? comparisonEvents.filter((item) => item.level === "action" || item.level === "notable").length
+        : state.feed.filter((item) => item.level === "action" || item.level === "notable").length;
     setText(elements.changeCount, String(meaningful));
 
     if (state.previous?.seenAt) {
@@ -549,8 +553,24 @@ function renderVisitSummary(comparisonEvents) {
             : "Nothing crossed a notable threshold since your last check.");
     } else {
         setText(elements.lastVisit, "First visit");
-        setText(elements.visitContext, "Your next visit will show what changed.");
+        setText(elements.visitContext, meaningful
+            ? "Current signals above the quiet-network range."
+            : "Your next visit will show what changed.");
     }
+}
+
+function renderSignalSummary() {
+    if (!elements.signalSummary) return;
+    const leading = state.feed.slice(0, 3);
+    const fragment = document.createDocumentFragment();
+
+    (leading.length ? leading : [{ title: "No material movement detected" }]).forEach((item) => {
+        const entry = document.createElement("li");
+        entry.textContent = item.title;
+        fragment.append(entry);
+    });
+
+    elements.signalSummary.replaceChildren(fragment);
 }
 
 function renderFeed() {
@@ -609,6 +629,7 @@ function render(current) {
     renderHalving(current.metrics, current.generatedAt);
     renderSupply(current.metrics);
     renderVisitSummary(comparisonEvents);
+    renderSignalSummary();
     renderFeed();
     scheduleSave();
 }
