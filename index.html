@@ -24,7 +24,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="css/style.css?v=11">
+    <link rel="stylesheet" href="css/style.css?v=12">
 </head>
 <body>
     <a class="skip-link" href="#changefeed">Skip to updates</a>
@@ -51,24 +51,27 @@
     </header>
 
     <main>
-        <section class="intro" aria-labelledby="page-title">
-            <div>
-                <h1 id="page-title">Bitcoin, at a glance.</h1>
-                <p>Live network conditions and meaningful updates, linked to their sources.</p>
-            </div>
-            <p class="snapshot-time" id="snapshot-time">Snapshot time unavailable</p>
-        </section>
-
-        <section class="visit-summary" aria-labelledby="visit-title">
-            <div class="visit-count">
-                <strong id="change-count">—</strong>
+        <div class="hero-panel">
+            <section class="intro" aria-labelledby="page-title">
                 <div>
-                    <h2 id="visit-title">notable changes</h2>
-                    <p id="visit-context">Comparing this snapshot with your previous visit.</p>
+                    <span class="eyebrow">Signal, not noise</span>
+                    <h1 id="page-title">Bitcoin, at a glance.</h1>
+                    <p>Live network conditions and meaningful updates, linked to their sources.</p>
                 </div>
-            </div>
-            <p class="last-visit"><span>Last checked</span><strong id="last-visit">First visit</strong></p>
-        </section>
+                <p class="snapshot-time" id="snapshot-time">Snapshot time unavailable</p>
+            </section>
+
+            <section class="visit-summary" aria-labelledby="visit-title">
+                <div class="visit-count">
+                    <strong id="change-count">—</strong>
+                    <div>
+                        <h2 id="visit-title">notable changes</h2>
+                        <p id="visit-context">Comparing this snapshot with your previous visit.</p>
+                    </div>
+                </div>
+                <p class="last-visit"><span>Last checked</span><strong id="last-visit">First visit</strong></p>
+            </section>
+        </div>
 
         <section class="metrics-section" aria-labelledby="network-title">
             <div class="section-header"><h2 id="network-title">Network now</h2></div>
@@ -265,6 +268,6 @@
             </a>
         </article>
     </template>
-    <script src="js/app.js?v=11" defer></script>
+    <script src="js/app.js?v=12" defer></script>
 </body>
 </html>
