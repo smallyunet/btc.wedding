@@ -1,8 +1,8 @@
 # Bitcoin Changefeed
 
-Bitcoin Changefeed answers one question: **what changed in Bitcoin since you last checked?**
+Bitcoin Changefeed gives you a ten-second answer to one question: **does Bitcoin need my attention right now?**
 
-It combines public network conditions with trusted protocol and software updates, while keeping the product account-free and low-maintenance.
+It turns public network conditions and trusted protocol or software updates into a plain-language brief, while keeping the product account-free and low-maintenance.
 
 ## Product principles
 

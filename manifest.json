@@ -1,11 +1,11 @@
 {
   "name": "Bitcoin Changefeed",
   "short_name": "Changefeed",
-  "description": "A simple, source-linked view of Bitcoin network conditions and meaningful updates.",
+  "description": "Know in 10 seconds whether Bitcoin needs your attention.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f7f7f5",
-  "theme_color": "#f7f7f5",
+  "background_color": "#090908",
+  "theme_color": "#090908",
   "icons": [
     {
       "src": "./icon-192.png",

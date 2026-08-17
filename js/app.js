@@ -18,6 +18,8 @@ const state = {
 };
 
 const elements = {
+    briefingCopy: document.getElementById("briefing-copy"),
+    briefingEyebrow: document.getElementById("briefing-eyebrow"),
     changeCount: document.getElementById("change-count"),
     dataStatus: document.getElementById("data-status"),
     dataStatusLabel: document.getElementById("data-status-label"),
@@ -52,9 +54,11 @@ const elements = {
     paceValue: document.getElementById("pace-value"),
     priceDetail: document.getElementById("price-detail"),
     priceValue: document.getElementById("price-value"),
+    pageTitle: document.getElementById("page-title"),
     refreshButton: document.getElementById("refresh-data"),
     signalSummary: document.getElementById("signal-summary"),
     snapshotTime: document.getElementById("snapshot-time"),
+    summaryWindow: document.getElementById("summary-window"),
     unminedSupply: document.getElementById("unmined-supply"),
     visitContext: document.getElementById("visit-context")
 };
@@ -277,13 +281,28 @@ function buildCurrentEvents(metrics, publishedAt) {
 
     if (isFiniteNumber(metrics.mempoolVsizeMB)) {
         const size = Number(metrics.mempoolVsizeMB);
-        const level = size >= 100 ? "action" : size >= 20 ? "notable" : "routine";
+        const fee = numberOrNull(metrics.feeFast);
+        const feePressure = fee ?? 0;
+        const level = size >= 100 && feePressure >= 10
+            ? "action"
+            : size >= 50 || (size >= 20 && feePressure >= 5)
+                ? "notable"
+                : "routine";
+        const calmQueue = level === "routine" && size >= 20 && fee !== null && fee < 5;
         events.push({
             id: `mempool-current-${size.toFixed(1)}`,
             category: "Mempool",
             level,
-            title: level === "action" ? "The mempool is heavily backed up" : level === "notable" ? "The queue is building" : "The transaction queue is light",
-            summary: `${formatNumber(metrics.mempoolCount)} transactions occupy ${size.toFixed(1)} virtual MB, roughly ${Math.ceil(size)} blocks of space.`,
+            title: level === "action"
+                ? "The mempool is heavily backed up"
+                : level === "notable"
+                    ? "Many transactions are waiting"
+                    : calmQueue
+                        ? "The queue is large, but fees are calm"
+                        : "The transaction queue is light",
+            summary: calmQueue
+                ? `${formatNumber(metrics.mempoolCount)} transactions are waiting, but priority fees remain ${fee} sat/vB. Queue size alone does not make a transaction urgent.`
+                : `${formatNumber(metrics.mempoolCount)} transactions occupy ${size.toFixed(1)} virtual MB, roughly ${Math.ceil(size)} blocks of space.`,
             value: `${size.toFixed(1)} MvB`,
             publishedAt,
             source: "mempool.space",
@@ -343,7 +362,10 @@ function buildComparisonEvents(current, previousVisit) {
         events.push({
             id: `visit-mempool-${current.metrics.mempoolVsizeMB}`,
             category: "Since last visit",
-            level: rising && current.metrics.mempoolVsizeMB >= 20 ? "notable" : "routine",
+            level: rising && (
+                current.metrics.mempoolVsizeMB >= 50
+                || (current.metrics.mempoolVsizeMB >= 20 && Number(current.metrics.feeFast) >= 5)
+            ) ? "notable" : "routine",
             title: `Mempool pressure ${rising ? "increased" : "cleared"}`,
             summary: `Queued virtual size moved from ${Number(previous.mempoolVsizeMB).toFixed(1)} to ${Number(current.metrics.mempoolVsizeMB).toFixed(1)} MvB.`,
             value: `${mempoolDelta > 0 ? "+" : ""}${mempoolDelta.toFixed(0)}%`,
@@ -540,28 +562,62 @@ function renderSupply(metrics) {
     setText(elements.lostShare, `About ${lostLowPercent.toFixed(1)}–${lostHighPercent.toFixed(1)}% of current scheduled issuance`);
 }
 
-function renderVisitSummary(comparisonEvents) {
-    const meaningful = state.previous?.seenAt
-        ? comparisonEvents.filter((item) => item.level === "action" || item.level === "notable").length
-        : state.feed.filter((item) => item.level === "action" || item.level === "notable").length;
+function renderBriefing(current) {
+    const panel = document.getElementById("briefing");
+    const actionItems = state.feed.filter((item) => item.level === "action");
+    const notableItems = state.feed.filter((item) => item.level === "notable");
+    const lead = actionItems[0] || notableItems[0];
+    let stateName = "calm";
+    let title = "Bitcoin looks calm.";
+    let copy = "Nothing needs your attention right now. Fees and recent block production are within their normal ranges.";
+
+    if (current.status === "degraded") {
+        stateName = "unknown";
+        title = "Some data is unavailable.";
+        copy = "The latest network check could not complete. Cached information remains below, clearly timestamped.";
+    } else if (actionItems.length) {
+        stateName = "action";
+        title = "Bitcoin needs attention.";
+        copy = `${lead.title}. ${lead.summary}`;
+    } else if (notableItems.length) {
+        stateName = "notable";
+        title = "Worth a quick look.";
+        copy = `${notableItems.length} ${notableItems.length === 1 ? "signal is" : "signals are"} outside the quiet range. ${lead.title}.`;
+    }
+
+    panel.classList.remove("hero-calm", "hero-notable", "hero-action", "hero-unknown");
+    panel.classList.add(`hero-${stateName}`);
+    setText(elements.briefingEyebrow, state.previous?.seenAt
+        ? "Your 10-second check · since last visit"
+        : "Your 10-second Bitcoin check");
+    setText(elements.pageTitle, title);
+    setText(elements.briefingCopy, copy);
+}
+
+function renderVisitSummary() {
+    const attentionItems = state.feed.filter((item) => item.level === "action" || item.level === "notable");
+    const actionCount = attentionItems.filter((item) => item.level === "action").length;
+    const meaningful = attentionItems.length;
     setText(elements.changeCount, String(meaningful));
+    setText(elements.summaryWindow, "Right now");
 
     if (state.previous?.seenAt) {
         setText(elements.lastVisit, formatRelativeTime(state.previous.seenAt));
-        setText(elements.visitContext, meaningful
-            ? "Compared with the snapshot saved in this browser."
-            : "Nothing crossed a notable threshold since your last check.");
     } else {
         setText(elements.lastVisit, "First visit");
-        setText(elements.visitContext, meaningful
-            ? "Current signals above the quiet-network range."
-            : "Your next visit will show what changed.");
     }
+
+    setText(elements.visitContext, actionCount
+        ? "At least one signal may affect a transaction or upgrade decision."
+        : meaningful
+            ? "A small number of signals deserve a closer look."
+            : "Nothing needs your attention right now.");
 }
 
 function renderSignalSummary() {
     if (!elements.signalSummary) return;
-    const leading = state.feed.slice(0, 3);
+    const attentionItems = state.feed.filter((item) => item.level === "action" || item.level === "notable");
+    const leading = (attentionItems.length ? attentionItems : state.feed).slice(0, 3);
     const fragment = document.createDocumentFragment();
 
     (leading.length ? leading : [{ title: "No material movement detected" }]).forEach((item) => {
@@ -583,7 +639,7 @@ function renderFeed() {
     visibleItems.forEach((item) => {
         const node = template.content.firstElementChild.cloneNode(true);
         node.classList.add(item.level || "routine");
-        node.querySelector(".feed-level").textContent = item.level === "action" ? "Action" : item.level === "notable" ? "Notable" : "Routine";
+        node.querySelector(".feed-level").textContent = item.level === "action" ? "Need action" : item.level === "notable" ? "Worth knowing" : "Normal";
         node.querySelector(".feed-category").textContent = item.category || "Update";
         const time = node.querySelector("time");
         time.dateTime = item.publishedAt || "";
@@ -628,7 +684,8 @@ function render(current) {
     renderDifficulty(current.metrics);
     renderHalving(current.metrics, current.generatedAt);
     renderSupply(current.metrics);
-    renderVisitSummary(comparisonEvents);
+    renderBriefing(current);
+    renderVisitSummary();
     renderSignalSummary();
     renderFeed();
     scheduleSave();
