@@ -24,7 +24,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="css/style.css?v=19">
+    <link rel="stylesheet" href="css/style.css?v=20">
 </head>
 <body>
     <a class="skip-link" href="#changefeed">Skip to changes</a>
@@ -32,7 +32,7 @@
     <header class="site-header" id="top">
         <a class="brand" href="#top" aria-label="Bitcoin Changefeed home">
             <span class="brand-mark" aria-hidden="true">₿</span>
-            <span class="brand-name">Bitcoin<br>Changefeed</span>
+            <span class="brand-copy"><span class="brand-name">Bitcoin<br>Changefeed</span><span class="brand-domain">by btc.wedding</span></span>
         </a>
         <div class="header-actions">
             <span class="data-status" id="data-status" role="status" aria-live="polite">
@@ -53,17 +53,17 @@
         <section class="hero-panel" id="briefing" aria-labelledby="page-title">
             <div class="hero-grid" aria-hidden="true"></div>
             <div class="hero-copy">
-                <span class="eyebrow" id="briefing-eyebrow">Your 10-second Bitcoin check</span>
+                <span class="eyebrow" id="briefing-eyebrow">Current network brief</span>
                 <h1 id="page-title">Reading Bitcoin.</h1>
                 <p id="briefing-copy">Checking whether current network conditions need your attention.</p>
-                <a class="briefing-link" href="#changefeed">See what changed <span aria-hidden="true">↓</span></a>
+                <a class="briefing-link" href="#changefeed"><span id="briefing-link-label">View current brief</span><span aria-hidden="true">↓</span></a>
             </div>
             <div class="visit-summary" aria-labelledby="visit-title">
                 <span class="visit-index" id="summary-window">Right now</span>
                 <div class="visit-count">
                     <strong id="change-count">—</strong>
                     <div>
-                        <h2 id="visit-title">signals needing attention</h2>
+                        <h2 id="visit-title">Current conditions</h2>
                         <p id="visit-context">Reading current conditions and trusted updates.</p>
                     </div>
                 </div>
@@ -89,34 +89,6 @@
             </div>
         </section>
 
-        <section class="satoshi-today" id="satoshi-today" aria-labelledby="satoshi-today-title">
-            <div class="satoshi-date-panel">
-                <h2 class="section-number" id="satoshi-today-title">Archive / On this day</h2>
-                <time class="satoshi-calendar" id="satoshi-calendar" datetime="">
-                    <span id="satoshi-month">Today</span>
-                    <strong id="satoshi-day">—</strong>
-                </time>
-                <p id="satoshi-date-status">Looking through Satoshi’s archived words.</p>
-            </div>
-            <div class="satoshi-quote-panel" aria-live="polite">
-                <div class="satoshi-quote-meta">
-                    <span id="satoshi-quote-label">From the archive</span>
-                    <span id="satoshi-quote-count" hidden></span>
-                </div>
-                <p class="satoshi-provenance"><span id="satoshi-source-type">Verified archive record</span><span id="satoshi-disputed" hidden>Disputed attribution</span></p>
-                <blockquote id="satoshi-quote">Loading today’s archive entry…</blockquote>
-                <div class="satoshi-quote-footer">
-                    <p><strong>Satoshi Nakamoto</strong><time id="satoshi-quote-date" datetime=""></time><span id="satoshi-subject"></span></p>
-                    <div class="satoshi-actions">
-                        <button id="satoshi-next" type="button" hidden>Another message</button>
-                        <a id="satoshi-original" href="https://satoshi.nakamotoinstitute.org/" target="_blank" rel="noopener noreferrer" hidden>Original <span aria-hidden="true">↗</span></a>
-                        <a id="satoshi-source" href="https://satoshi.nakamotoinstitute.org/" target="_blank" rel="noopener noreferrer">Archive record <span aria-hidden="true">↗</span></a>
-                    </div>
-                </div>
-                <p class="satoshi-disclaimer" id="satoshi-disclaimer" hidden></p>
-            </div>
-        </section>
-
         <div class="content-layout">
             <section class="feed-section" id="changefeed" aria-labelledby="feed-title">
                 <div class="feed-header">
@@ -131,6 +103,7 @@
                 <div class="feed-list" id="feed-list" aria-live="polite" aria-busy="true">
                     <div class="feed-skeleton" aria-hidden="true"></div><div class="feed-skeleton" aria-hidden="true"></div><div class="feed-skeleton" aria-hidden="true"></div>
                 </div>
+                <button class="feed-more" id="feed-more" type="button" aria-controls="feed-list" aria-expanded="false" hidden></button>
                 <p class="feed-empty" id="feed-empty" hidden>No changes match this filter.</p>
             </section>
 
@@ -154,6 +127,35 @@
                 </article>
             </aside>
         </div>
+
+        <section class="satoshi-today" id="satoshi-today" aria-labelledby="satoshi-today-title">
+            <div class="satoshi-date-panel">
+                <h2 class="section-number" id="satoshi-today-title">Archive / On this day</h2>
+                <time class="satoshi-calendar" id="satoshi-calendar" datetime="">
+                    <span id="satoshi-month">Today</span>
+                    <strong id="satoshi-day">—</strong>
+                </time>
+                <p id="satoshi-date-status">Looking through Satoshi’s archived words.</p>
+                <button class="archive-toggle" id="archive-toggle" type="button" aria-controls="satoshi-quote-panel" aria-expanded="false">Read today’s message <span aria-hidden="true">↓</span></button>
+            </div>
+            <div class="satoshi-quote-panel" id="satoshi-quote-panel" aria-live="polite">
+                <div class="satoshi-quote-meta">
+                    <span id="satoshi-quote-label">From the archive</span>
+                    <span id="satoshi-quote-count" hidden></span>
+                </div>
+                <p class="satoshi-provenance"><span id="satoshi-source-type">Verified archive record</span><span id="satoshi-disputed" hidden>Disputed attribution</span></p>
+                <blockquote id="satoshi-quote">Loading today’s archive entry…</blockquote>
+                <div class="satoshi-quote-footer">
+                    <p><strong>Satoshi Nakamoto</strong><time id="satoshi-quote-date" datetime=""></time><span id="satoshi-subject"></span></p>
+                    <div class="satoshi-actions">
+                        <button id="satoshi-next" type="button" hidden>Another message</button>
+                        <a id="satoshi-original" href="https://satoshi.nakamotoinstitute.org/" target="_blank" rel="noopener noreferrer" hidden>Original <span aria-hidden="true">↗</span></a>
+                        <a id="satoshi-source" href="https://satoshi.nakamotoinstitute.org/" target="_blank" rel="noopener noreferrer">Archive record <span aria-hidden="true">↗</span></a>
+                    </div>
+                </div>
+                <p class="satoshi-disclaimer" id="satoshi-disclaimer" hidden></p>
+            </div>
+        </section>
 
         <details class="reference-details">
             <summary><span><span class="section-number">03 / Reference</span><strong>Supply and research context</strong></span><span class="summary-action">Open</span></summary>
@@ -188,11 +190,11 @@
 
         <details class="about-details">
             <summary>Sources and methodology</summary>
-            <div class="about-content"><p>Need action means conditions may affect a transaction or upgrade decision. Worth knowing means a measurable shift deserves a closer look. Normal means no response is expected. The daily archive uses the visitor’s local calendar date and clearly labels the nearest entry when no quote is indexed for that day.</p><nav aria-label="Data sources"><a href="https://mempool.space/" target="_blank" rel="noopener noreferrer">mempool.space</a><a href="https://docs.coinmetrics.io/asset-metrics/supply/ser" target="_blank" rel="noopener noreferrer">Coin Metrics</a><a href="https://bitcoinops.org/" target="_blank" rel="noopener noreferrer">Bitcoin Optech</a><a href="https://github.com/bitcoin/bitcoin/releases" target="_blank" rel="noopener noreferrer">Bitcoin Core</a><a href="https://satoshi.nakamotoinstitute.org/quotes/" target="_blank" rel="noopener noreferrer">Satoshi Nakamoto Institute</a></nav></div>
+            <div class="about-content"><p>Bitcoin Changefeed by btc.wedding is a low-noise network brief. Need action means conditions may affect a transaction or upgrade decision. Worth knowing means a measurable shift deserves a closer look. Normal means no response is expected. The daily archive uses the visitor’s local calendar date and clearly labels the nearest entry when no quote is indexed for that day.</p><nav aria-label="Data sources"><a href="https://mempool.space/" target="_blank" rel="noopener noreferrer">mempool.space</a><a href="https://docs.coinmetrics.io/asset-metrics/supply/ser" target="_blank" rel="noopener noreferrer">Coin Metrics</a><a href="https://bitcoinops.org/" target="_blank" rel="noopener noreferrer">Bitcoin Optech</a><a href="https://github.com/bitcoin/bitcoin/releases" target="_blank" rel="noopener noreferrer">Bitcoin Core</a><a href="https://satoshi.nakamotoinstitute.org/quotes/" target="_blank" rel="noopener noreferrer">Satoshi Nakamoto Institute</a></nav></div>
         </details>
     </main>
 
-    <footer class="site-footer"><span>Bitcoin Changefeed · btc.wedding</span><span>No account. No wallet connection. No investment advice.</span></footer>
+    <footer class="site-footer"><span>Bitcoin Changefeed by btc.wedding</span><span>No account. No wallet connection. No investment advice.</span></footer>
 
     <template id="feed-item-template">
         <article class="feed-item">
@@ -202,6 +204,6 @@
             <a class="source-link" target="_blank" rel="noopener noreferrer"><span>Source</span><svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"></path></svg></a>
         </article>
     </template>
-    <script src="js/app.js?v=18" defer></script>
+    <script src="js/app.js?v=19" defer></script>
 </body>
 </html>

@@ -97,7 +97,9 @@ a { color: inherit; }
     font-size: 21px;
     font-weight: 700;
 }
+.brand-copy { display: flex; flex-direction: column; gap: 3px; }
 .brand-name { font-size: var(--text-label); font-weight: 750; line-height: 1.1; letter-spacing: 0.07em; text-transform: uppercase; }
+.brand-domain { color: var(--muted); font-family: var(--mono); font-size: 10px; line-height: 1; letter-spacing: .04em; }
 .header-actions { display: flex; align-items: center; gap: 16px; }
 .data-status { min-height: 44px; display: inline-flex; align-items: center; gap: 8px; color: var(--muted-dark); font-family: var(--mono); font-size: var(--text-label); text-transform: uppercase; white-space: nowrap; }
 .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); box-shadow: 0 0 0 4px rgba(0,0,0,.045); }
@@ -197,7 +199,7 @@ main { padding: 28px 0 48px; }
 .tape-item p { margin: 3px 0 0; color: var(--muted); font-size: var(--text-label); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .satoshi-today {
-    margin-top: 24px;
+    margin-top: 48px;
     display: grid;
     grid-template-columns: minmax(230px,.42fr) minmax(0,1.58fr);
     border: 1px solid var(--line-dark);
@@ -210,6 +212,7 @@ main { padding: 28px 0 48px; }
 .satoshi-calendar span { color: var(--bitcoin); font-size: var(--text-body); font-weight: 700; letter-spacing: .12em; }
 .satoshi-calendar strong { font-size: clamp(54px,7vw,88px); font-weight: 500; line-height: .8; letter-spacing: -.09em; font-variant-numeric: tabular-nums; }
 .satoshi-date-panel > p { max-width: 260px; margin: 26px 0 0; color: #b9b2a6; font-size: var(--text-supporting); line-height: 1.6; }
+.archive-toggle { display: none; }
 .satoshi-quote-panel { min-width: 0; padding: 28px 34px 30px; display: flex; flex-direction: column; justify-content: space-between; }
 .satoshi-quote-meta { display: flex; justify-content: space-between; gap: 16px; color: #b9b2a6; font-family: var(--mono); font-size: var(--text-label); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .satoshi-provenance { display: flex; flex-wrap: wrap; gap: 7px; margin: 13px 0 0; color: #b9b2a6; font-family: var(--mono); font-size: var(--text-meta); }
@@ -233,7 +236,7 @@ main { padding: 28px 0 48px; }
 .satoshi-actions button:hover, .satoshi-actions a:hover { border-color: var(--bitcoin); color: #ffc476; }
 .satoshi-actions button:active, .satoshi-actions a:active { background: #28251f; }
 
-.content-layout { margin-top: 72px; display: grid; grid-template-columns: minmax(0,1.6fr) minmax(360px,.62fr); align-items: start; gap: 24px; }
+.content-layout { margin-top: 48px; display: grid; grid-template-columns: minmax(0,1.6fr) minmax(360px,.62fr); align-items: start; gap: 24px; }
 .feed-section { min-width: 0; scroll-margin-top: 24px; border: 1px solid var(--line); background: var(--paper-bright); color: var(--ink); }
 .feed-header { min-height: 150px; padding: 28px 30px; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--line); }
 .section-number { display: block; margin-bottom: 11px; color: var(--muted); font-family: var(--mono); font-size: var(--text-label); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
@@ -243,7 +246,7 @@ main { padding: 28px 0 48px; }
 .filter-button { min-width: 44px; min-height: 44px; padding: 0 12px; border: 1px solid transparent; border-radius: 0; background: transparent; color: var(--muted); font-family: var(--mono); font-size: var(--text-label); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; cursor: pointer; transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease; }
 .filter-button:hover { border-color: var(--line); color: var(--ink); }
 .filter-button.active { border-color: var(--ink); background: var(--ink); color: var(--paper-bright); }
-.feed-item { position: relative; min-height: 172px; display: grid; grid-template-columns: 18px 132px minmax(0,1fr) 120px; gap: 20px; padding: 28px; border-bottom: 1px solid var(--line); transition: background-color 160ms ease; }
+.feed-item { position: relative; min-height: 156px; display: grid; grid-template-columns: 18px 132px minmax(0,1fr) 120px; gap: 20px; padding: 24px 28px; border-bottom: 1px solid var(--line); transition: background-color 160ms ease; }
 .feed-item:last-child { border-bottom: 0; }
 .feed-item:hover { background: #f3f0e7; }
 .feed-marker { position: relative; display: flex; justify-content: center; }
@@ -262,10 +265,13 @@ main { padding: 28px 0 48px; }
 .feed-title-row h3 { margin: 0; font-size: clamp(20px,1.7vw,24px); line-height: 1.2; letter-spacing: -.03em; }
 .feed-value { flex: none; color: var(--ink); font-family: var(--mono); font-size: var(--text-supporting); font-weight: 500; white-space: nowrap; }
 .feed-summary { max-width: 680px; margin: 12px 0 0; color: #4f4d46; font-size: var(--text-body); line-height: 1.6; overflow-wrap: anywhere; }
-.source-link { min-height: 44px; display: inline-flex; align-items: center; justify-content: flex-end; align-self: center; gap: 5px; color: var(--muted); font-family: var(--mono); font-size: var(--text-label); font-weight: 700; text-decoration: none; }
-.source-link:hover { color: #9d5905; }
+.source-link { min-height: 44px; display: inline-flex; align-items: center; justify-content: flex-end; align-self: center; gap: 5px; color: var(--muted-dark); font-family: var(--mono); font-size: var(--text-label); font-weight: 700; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 4px; transition: color 150ms ease, text-decoration-color 150ms ease; }
+.source-link:hover { color: #9d5905; text-decoration-color: currentColor; }
 .feed-skeleton { height: 172px; border-bottom: 1px solid var(--line); background: linear-gradient(90deg,transparent,rgba(0,0,0,.035),transparent); background-size: 200% 100%; animation: shimmer 1.5s linear infinite; }
 .feed-empty { margin: 0; padding: 44px 28px; color: var(--muted); font-size: var(--text-body); text-align: center; }
+.feed-more { width: 100%; min-height: 56px; padding: 0 24px; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: #f3f0e7; color: var(--ink); font-family: var(--mono); font-size: var(--text-label); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; transition: background-color 150ms ease, color 150ms ease; }
+.feed-more:hover { background: #ebe5d9; color: var(--bitcoin-pale); }
+.feed-more[hidden] { display: none; }
 
 .network-details { position: sticky; top: 20px; border: 1px solid var(--line-dark); background: var(--paper-bright); }
 .details-header { min-height: 150px; padding: 28px; display: flex; flex-direction: column; justify-content: flex-end; border-bottom: 1px solid var(--line-dark); }
@@ -370,7 +376,7 @@ main { padding: 28px 0 48px; }
     .satoshi-calendar span, .satoshi-calendar strong { display: block; }
     .satoshi-calendar strong { margin-top: 10px; }
     .satoshi-quote-panel { padding-inline: 26px; }
-    .content-layout { margin-top: 48px; grid-template-columns: 1fr; }
+    .content-layout { margin-top: 36px; grid-template-columns: 1fr; }
     .network-details { position: static; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
     .details-header { grid-column: 1 / -1; min-height: 120px; }
     .detail-row { min-width: 0; border-right: 1px solid var(--line-dark); border-bottom: 0; }
@@ -396,10 +402,11 @@ main { padding: 28px 0 48px; }
     .briefing-link { margin-top: 22px; }
     .hero-grid { background-size: 54px 54px; }
     .visit-index { padding: 22px; }
-    .visit-count { padding: 28px 22px; }
+    .visit-count { padding: 24px 22px; }
     .visit-count > strong { font-size: 62px; }
-    .signal-summary { padding-inline: 22px; }
-    .visit-meta { padding: 22px; }
+    .signal-summary { min-height: 0; padding: 6px 22px; }
+    .signal-summary li { min-height: 58px; padding-block: 10px; }
+    .visit-meta { padding: 18px 22px; }
     .network-tape { overflow: hidden; }
     .tape-heading { padding-inline: 18px; }
     .tape-item { padding: 15px 13px; }
@@ -410,14 +417,16 @@ main { padding: 28px 0 48px; }
     .satoshi-calendar span, .satoshi-calendar strong { display: inline; }
     .satoshi-calendar strong { margin-top: 0; font-size: 56px; }
     .satoshi-date-panel > p { max-width: none; margin-top: 18px; }
-    .satoshi-quote-panel { padding: 24px 22px; }
+    .archive-toggle { min-height: 44px; width: fit-content; margin-top: 18px; padding: 0; display: inline-flex; align-items: center; gap: 9px; border: 0; border-bottom: 1px solid #5a554b; border-radius: 0; background: transparent; color: var(--paper-bright); font-family: var(--mono); font-size: var(--text-label); font-weight: 700; text-transform: uppercase; cursor: pointer; }
+    .satoshi-quote-panel { display: none; padding: 24px 22px; }
+    .satoshi-today.expanded .satoshi-quote-panel { display: flex; }
     .satoshi-quote-panel blockquote { margin-block: 24px; font-size: clamp(18px,5vw,23px); }
     .satoshi-quote-footer { display: block; }
     .satoshi-actions { justify-content: flex-start; margin-top: 18px; }
     .feed-header { min-height: 0; display: block; padding: 26px 20px 18px; }
-    .feed-filters { justify-content: flex-start; margin-top: 18px; }
-    .filter-button { padding-inline: 9px; }
-    .feed-item { grid-template-columns: 14px minmax(0,1fr) auto; gap: 10px 13px; padding: 22px 18px; }
+    .feed-filters { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px; margin-top: 18px; }
+    .filter-button { width: 100%; padding-inline: 8px; }
+    .feed-item { min-height: 0; grid-template-columns: 14px minmax(0,1fr) auto; gap: 9px 13px; padding: 18px; }
     .feed-marker { grid-row: 1 / 4; }
     .feed-meta { grid-column: 2; flex-direction: row; align-items: center; flex-wrap: wrap; }
     .feed-category { margin: 0; }
@@ -444,10 +453,9 @@ main { padding: 28px 0 48px; }
     .hero-copy h1 { font-size: 47px; }
     .visit-meta { display: block; }
     .snapshot-time { margin-top: 12px !important; text-align: left; }
-    .tape-grid, .supply-grid { grid-template-columns: 1fr; }
-    .tape-item, .supply-stat { border-right: 0; border-bottom: 1px solid var(--line-dark); }
-    .supply-stat { border-bottom-color: var(--line); }
-    .tape-item:last-child, .supply-stat:last-child { border-bottom: 0; }
+    .supply-grid { grid-template-columns: 1fr; }
+    .supply-stat { border-right: 0; border-bottom: 1px solid var(--line); }
+    .supply-stat:last-child { border-bottom: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

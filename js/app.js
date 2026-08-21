@@ -13,6 +13,7 @@ const state = {
     activeFilter: "all",
     current: null,
     feed: [],
+    feedExpanded: false,
     satoshiQuoteIndex: 0,
     satoshiQuotes: [],
     previous: readPreviousVisit(),
@@ -20,8 +21,10 @@ const state = {
 };
 
 const elements = {
+    archiveToggle: document.getElementById("archive-toggle"),
     briefingCopy: document.getElementById("briefing-copy"),
     briefingEyebrow: document.getElementById("briefing-eyebrow"),
+    briefingLinkLabel: document.getElementById("briefing-link-label"),
     changeCount: document.getElementById("change-count"),
     dataStatus: document.getElementById("data-status"),
     dataStatusLabel: document.getElementById("data-status-label"),
@@ -45,6 +48,7 @@ const elements = {
     halvingReward: document.getElementById("halving-reward"),
     feedEmpty: document.getElementById("feed-empty"),
     feedList: document.getElementById("feed-list"),
+    feedMore: document.getElementById("feed-more"),
     lastVisit: document.getElementById("last-visit"),
     ledgerSupply: document.getElementById("ledger-supply"),
     ledgerSupplyDetail: document.getElementById("ledger-supply-detail"),
@@ -77,7 +81,8 @@ const elements = {
     satoshiSource: document.getElementById("satoshi-source"),
     snapshotTime: document.getElementById("snapshot-time"),
     summaryWindow: document.getElementById("summary-window"),
-    visitContext: document.getElementById("visit-context")
+    visitContext: document.getElementById("visit-context"),
+    visitTitle: document.getElementById("visit-title")
 };
 
 function readPreviousVisit() {
@@ -606,7 +611,7 @@ function renderBriefing(current) {
     const lead = actionItems[0] || notableItems[0];
     let stateName = "calm";
     let title = "Bitcoin looks calm.";
-    let copy = "Nothing needs your attention right now. Fees and recent block production are within their normal ranges.";
+    let copy = "No fee, mempool, or block-production changes need action.";
 
     if (current.status === "degraded") {
         stateName = "unknown";
@@ -624,9 +629,9 @@ function renderBriefing(current) {
 
     panel.classList.remove("hero-calm", "hero-notable", "hero-action", "hero-unknown");
     panel.classList.add(`hero-${stateName}`);
-    setText(elements.briefingEyebrow, state.previous?.seenAt
-        ? "Your 10-second check · since last visit"
-        : "Your 10-second Bitcoin check");
+    const returningVisitor = Boolean(state.previous?.seenAt);
+    setText(elements.briefingEyebrow, returningVisitor ? "Since your last visit" : "Current network brief");
+    setText(elements.briefingLinkLabel, returningVisitor ? "View changes since last visit" : "View current brief");
     setText(elements.pageTitle, title);
     setText(elements.briefingCopy, copy);
 }
@@ -636,7 +641,7 @@ function renderVisitSummary() {
     const actionCount = attentionItems.filter((item) => item.level === "action").length;
     const meaningful = attentionItems.length;
     setText(elements.changeCount, String(meaningful));
-    setText(elements.summaryWindow, "Right now");
+    setText(elements.summaryWindow, state.previous?.seenAt ? "Since last visit" : "Right now");
 
     if (state.previous?.seenAt) {
         setText(elements.lastVisit, formatRelativeTime(state.previous.seenAt));
@@ -644,22 +649,31 @@ function renderVisitSummary() {
         setText(elements.lastVisit, "First visit");
     }
 
+    setText(elements.visitTitle, actionCount ? "Need attention" : meaningful ? "Worth knowing" : "All clear");
     setText(elements.visitContext, actionCount
         ? "At least one signal may affect a transaction or upgrade decision."
         : meaningful
             ? "A small number of signals deserve a closer look."
-            : "Nothing needs your attention right now.");
+            : "No fee, mempool, or block-production changes need action.");
 }
 
 function renderSignalSummary() {
     if (!elements.signalSummary) return;
     const attentionItems = state.feed.filter((item) => item.level === "action" || item.level === "notable");
-    const leading = (attentionItems.length ? attentionItems : state.feed).slice(0, 3);
+    const metrics = state.current?.metrics || {};
+    const calmConditions = [
+        isFiniteNumber(metrics.feeFast) ? `Priority fee · ${formatNumber(metrics.feeFast)} sat/vB` : null,
+        isFiniteNumber(metrics.mempoolVsizeMB) ? `Mempool · ${Number(metrics.mempoolVsizeMB).toFixed(1)} MvB` : null,
+        isFiniteNumber(metrics.avgBlockTimeMinutes) ? `Recent block pace · ${Number(metrics.avgBlockTimeMinutes).toFixed(1)} min` : null
+    ].filter(Boolean);
+    const leading = attentionItems.length
+        ? attentionItems.slice(0, 3).map((item) => item.title)
+        : calmConditions;
     const fragment = document.createDocumentFragment();
 
-    (leading.length ? leading : [{ title: "No material movement detected" }]).forEach((item) => {
+    (leading.length ? leading : ["No material movement detected"]).forEach((label) => {
         const entry = document.createElement("li");
-        entry.textContent = item.title;
+        entry.textContent = label;
         fragment.append(entry);
     });
 
@@ -668,9 +682,17 @@ function renderSignalSummary() {
 
 function renderFeed() {
     const template = document.getElementById("feed-item-template");
-    const visibleItems = state.activeFilter === "all"
+    const filteredItems = state.activeFilter === "all"
         ? state.feed
         : state.feed.filter((item) => item.level === state.activeFilter);
+    const routineItems = filteredItems.filter((item) => item.level === "routine");
+    const routineLimit = 3;
+    const hiddenRoutineCount = state.activeFilter === "all"
+        ? Math.max(0, routineItems.length - routineLimit)
+        : 0;
+    const visibleItems = state.activeFilter === "all" && !state.feedExpanded
+        ? filteredItems.filter((item) => item.level !== "routine").concat(routineItems.slice(0, routineLimit))
+        : filteredItems;
     const fragment = document.createDocumentFragment();
 
     visibleItems.forEach((item) => {
@@ -697,6 +719,11 @@ function renderFeed() {
     elements.feedList.replaceChildren(fragment);
     elements.feedList.setAttribute("aria-busy", "false");
     elements.feedEmpty.hidden = visibleItems.length > 0;
+    elements.feedMore.hidden = hiddenRoutineCount === 0;
+    elements.feedMore.setAttribute("aria-expanded", String(state.feedExpanded));
+    setText(elements.feedMore, state.feedExpanded
+        ? "Show fewer normal updates"
+        : `Show ${hiddenRoutineCount} more normal ${hiddenRoutineCount === 1 ? "update" : "updates"}`);
 }
 
 function renderSatoshiQuote() {
@@ -827,6 +854,7 @@ async function refresh({ initial = false } = {}) {
 document.querySelectorAll(".filter-button").forEach((button) => {
     button.addEventListener("click", () => {
         state.activeFilter = button.dataset.filter;
+        state.feedExpanded = false;
         document.querySelectorAll(".filter-button").forEach((candidate) => {
             const active = candidate === button;
             candidate.classList.toggle("active", active);
@@ -834,6 +862,18 @@ document.querySelectorAll(".filter-button").forEach((button) => {
         });
         renderFeed();
     });
+});
+
+elements.feedMore.addEventListener("click", () => {
+    state.feedExpanded = !state.feedExpanded;
+    renderFeed();
+});
+
+elements.archiveToggle.addEventListener("click", () => {
+    const archive = document.getElementById("satoshi-today");
+    const expanded = archive.classList.toggle("expanded");
+    elements.archiveToggle.setAttribute("aria-expanded", String(expanded));
+    elements.archiveToggle.firstChild.textContent = expanded ? "Hide today’s message " : "Read today’s message ";
 });
 
 elements.refreshButton.addEventListener("click", () => refresh());
