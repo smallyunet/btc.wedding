@@ -24,7 +24,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="css/style.css?v=17">
+    <link rel="stylesheet" href="css/style.css?v=18">
 </head>
 <body>
     <a class="skip-link" href="#changefeed">Skip to changes</a>
@@ -103,14 +103,17 @@
                     <span id="satoshi-quote-label">From the archive</span>
                     <span id="satoshi-quote-count" hidden></span>
                 </div>
+                <p class="satoshi-provenance"><span id="satoshi-source-type">Verified archive record</span><span id="satoshi-disputed" hidden>Disputed attribution</span></p>
                 <blockquote id="satoshi-quote">Loading today’s archive entry…</blockquote>
                 <div class="satoshi-quote-footer">
-                    <p><strong>Satoshi Nakamoto</strong><time id="satoshi-quote-date" datetime=""></time></p>
+                    <p><strong>Satoshi Nakamoto</strong><time id="satoshi-quote-date" datetime=""></time><span id="satoshi-subject"></span></p>
                     <div class="satoshi-actions">
-                        <button id="satoshi-next" type="button" hidden>Another quote</button>
-                        <a id="satoshi-source" href="https://satoshi.nakamotoinstitute.org/quotes/" target="_blank" rel="noopener noreferrer">Open source <span aria-hidden="true">↗</span></a>
+                        <button id="satoshi-next" type="button" hidden>Another message</button>
+                        <a id="satoshi-original" href="https://satoshi.nakamotoinstitute.org/" target="_blank" rel="noopener noreferrer" hidden>Original <span aria-hidden="true">↗</span></a>
+                        <a id="satoshi-source" href="https://satoshi.nakamotoinstitute.org/" target="_blank" rel="noopener noreferrer">Archive record <span aria-hidden="true">↗</span></a>
                     </div>
                 </div>
+                <p class="satoshi-disclaimer" id="satoshi-disclaimer" hidden></p>
             </div>
         </section>
 
@@ -155,28 +158,28 @@
         <details class="reference-details">
             <summary><span><span class="section-number">03 / Reference</span><strong>Supply and research context</strong></span><span class="summary-action">Open</span></summary>
             <div class="supply-section" aria-labelledby="supply-title">
-                <div class="section-header"><div><h2 id="supply-title">Supply reference</h2><p>Protocol facts first. Dated research is clearly labeled.</p></div></div>
+                <div class="section-header"><div><h2 id="supply-title">Supply reference</h2><p>Live protocol calculations and observed ledger supply first. Historical research is clearly separated below.</p></div></div>
                 <div class="supply-grid" aria-live="polite">
                     <article class="supply-stat"><span>Scheduled issuance</span><strong id="issued-supply">—</strong><p id="issued-supply-detail">Calculated from block height</p></article>
+                    <article class="supply-stat"><span>Ledger-visible supply</span><strong id="ledger-supply">—</strong><p id="ledger-supply-detail">Loading Coin Metrics daily data</p><a class="supply-source" href="https://docs.coinmetrics.io/asset-metrics/supply/ser" target="_blank" rel="noopener noreferrer">Coin Metrics <span aria-hidden="true">↗</span></a></article>
                     <article class="supply-stat"><span>Supply cap</span><strong>21M BTC</strong><p>Protocol limit, reached asymptotically</p></article>
-                    <article class="supply-stat"><span>Not yet issued</span><strong id="unmined-supply">—</strong><p>Released over future halving eras</p></article>
                     <article class="supply-stat"><span>New supply / day</span><strong id="daily-issuance">—</strong><p>At the 144-block daily target</p></article>
                 </div>
                 <div class="research-grid">
                     <article class="research-panel" aria-labelledby="distribution-title">
-                        <div class="research-heading"><div><span>Entity-adjusted research</span><h3 id="distribution-title">Selected ownership cohorts</h3></div><time datetime="2023-03-15">Mar 2023</time></div>
+                        <div class="research-heading"><div><span>Historical entity study</span><h3 id="distribution-title">Selected ownership cohorts</h3></div><time datetime="2023-03-15">Mar 2023 snapshot</time></div>
                         <div class="distribution-list" aria-label="Selected shares of circulating supply from Glassnode's March 2023 entity-adjusted research">
                             <div><p><span>Under 1 BTC</span><strong>6.6%</strong></p><span class="distribution-track" aria-hidden="true"><span style="width: 6.6%"></span></span></div>
                             <div><p><span>1–10 BTC</span><strong>10.5%</strong></p><span class="distribution-track" aria-hidden="true"><span style="width: 10.5%"></span></span></div>
                             <div><p><span>Over 1,000 BTC</span><strong>34.4%</strong></p><span class="distribution-track" aria-hidden="true"><span style="width: 34.4%"></span></span></div>
                         </div>
-                        <p class="research-note">Selected cohorts, not a complete partition. The 1,000+ BTC cohort excludes exchanges. Entity clustering is an estimate; one custodian can represent many people.</p>
+                        <p class="research-note">Historical snapshot, not live balances. Selected cohorts are not a complete partition. The 1,000+ BTC cohort excludes exchanges; entity clustering is an estimate and one custodian can represent many people.</p>
                         <a class="research-source" href="https://research.glassnode.com/bitcoin-supply-distribution-revisited/" target="_blank" rel="noopener noreferrer">Glassnode methodology <span aria-hidden="true">↗</span></a>
                     </article>
                     <article class="research-panel lost-panel" aria-labelledby="lost-title">
-                        <div class="research-heading"><div><span>Research range</span><h3 id="lost-title">Estimated permanently lost</h3></div><time datetime="2020">2020 estimates</time></div>
-                        <strong class="lost-range">3.0–3.75M BTC</strong><p class="lost-share" id="lost-share">— of scheduled issuance</p>
-                        <p class="research-note">Lost keys cannot usually be proven on-chain. Dormant coins may still move; provably unspendable outputs are a narrower category.</p>
+                        <div class="research-heading"><div><span>Historical research range</span><h3 id="lost-title">Estimated lost coins</h3></div><time datetime="2020">2020 studies</time></div>
+                        <strong class="lost-range">3.0–3.75M BTC</strong><p class="lost-share">Historical range · not a live total</p>
+                        <p class="research-note">Private-key loss cannot usually be proven on-chain, so no API can report a definitive permanently lost total. Dormant coins may still move; provably unspendable outputs are a narrower category.</p>
                         <div class="research-links"><a class="research-source" href="https://research.glassnode.com/bitcoin-liquid-supply/" target="_blank" rel="noopener noreferrer">Glassnode <span aria-hidden="true">↗</span></a><a class="research-source" href="https://www.chainalysis.com/blog/bitcoin-market-march-2020/" target="_blank" rel="noopener noreferrer">Chainalysis <span aria-hidden="true">↗</span></a></div>
                     </article>
                 </div>
@@ -185,7 +188,7 @@
 
         <details class="about-details">
             <summary>Sources and methodology</summary>
-            <div class="about-content"><p>Need action means conditions may affect a transaction or upgrade decision. Worth knowing means a measurable shift deserves a closer look. Normal means no response is expected. The daily archive uses the visitor’s local calendar date and clearly labels the nearest entry when no quote is indexed for that day.</p><nav aria-label="Data sources"><a href="https://mempool.space/" target="_blank" rel="noopener noreferrer">mempool.space</a><a href="https://bitcoinops.org/" target="_blank" rel="noopener noreferrer">Bitcoin Optech</a><a href="https://github.com/bitcoin/bitcoin/releases" target="_blank" rel="noopener noreferrer">Bitcoin Core</a><a href="https://satoshi.nakamotoinstitute.org/quotes/" target="_blank" rel="noopener noreferrer">Satoshi Nakamoto Institute</a></nav></div>
+            <div class="about-content"><p>Need action means conditions may affect a transaction or upgrade decision. Worth knowing means a measurable shift deserves a closer look. Normal means no response is expected. The daily archive uses the visitor’s local calendar date and clearly labels the nearest entry when no quote is indexed for that day.</p><nav aria-label="Data sources"><a href="https://mempool.space/" target="_blank" rel="noopener noreferrer">mempool.space</a><a href="https://docs.coinmetrics.io/asset-metrics/supply/ser" target="_blank" rel="noopener noreferrer">Coin Metrics</a><a href="https://bitcoinops.org/" target="_blank" rel="noopener noreferrer">Bitcoin Optech</a><a href="https://github.com/bitcoin/bitcoin/releases" target="_blank" rel="noopener noreferrer">Bitcoin Core</a><a href="https://satoshi.nakamotoinstitute.org/quotes/" target="_blank" rel="noopener noreferrer">Satoshi Nakamoto Institute</a></nav></div>
         </details>
     </main>
 
@@ -199,6 +202,6 @@
             <a class="source-link" target="_blank" rel="noopener noreferrer"><span>Source</span><svg aria-hidden="true" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8 7h9v9"></path></svg></a>
         </article>
     </template>
-    <script src="js/app.js?v=17" defer></script>
+    <script src="js/app.js?v=18" defer></script>
 </body>
 </html>

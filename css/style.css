@@ -212,7 +212,11 @@ main { padding: 28px 0 48px; }
 .satoshi-date-panel > p { max-width: 260px; margin: 26px 0 0; color: #b9b2a6; font-size: var(--text-supporting); line-height: 1.6; }
 .satoshi-quote-panel { min-width: 0; padding: 28px 34px 30px; display: flex; flex-direction: column; justify-content: space-between; }
 .satoshi-quote-meta { display: flex; justify-content: space-between; gap: 16px; color: #b9b2a6; font-family: var(--mono); font-size: var(--text-label); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-.satoshi-quote-panel blockquote { max-width: 920px; margin: 28px 0 30px; color: var(--paper-bright); font-size: clamp(22px,2.4vw,34px); font-weight: 600; line-height: 1.35; letter-spacing: -.035em; text-wrap: balance; overflow-wrap: anywhere; }
+.satoshi-provenance { display: flex; flex-wrap: wrap; gap: 7px; margin: 13px 0 0; color: #b9b2a6; font-family: var(--mono); font-size: var(--text-meta); }
+.satoshi-provenance span { padding: 4px 7px; border: 1px solid #4a463e; }
+.satoshi-provenance #satoshi-disputed { border-color: #9b6a29; color: #ffc476; }
+.satoshi-provenance [hidden] { display: none; }
+.satoshi-quote-panel blockquote { max-width: 920px; margin: 22px 0 30px; color: var(--paper-bright); font-size: clamp(22px,2.4vw,34px); font-weight: 600; line-height: 1.35; letter-spacing: -.035em; text-wrap: balance; overflow-wrap: anywhere; }
 .satoshi-quote-panel blockquote::before { color: var(--bitcoin); content: "“"; }
 .satoshi-quote-panel blockquote::after { color: var(--bitcoin); content: "”"; }
 .satoshi-quote-footer { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding-top: 20px; border-top: 1px solid #3d3932; }
@@ -220,6 +224,9 @@ main { padding: 28px 0 48px; }
 .satoshi-quote-footer strong, .satoshi-quote-footer time { display: block; }
 .satoshi-quote-footer strong { color: var(--paper-bright); }
 .satoshi-quote-footer time { margin-top: 3px; font-family: var(--mono); font-size: var(--text-meta); }
+.satoshi-quote-footer p > span { display: block; max-width: 420px; margin-top: 5px; color: #918b80; font-size: var(--text-meta); line-height: 1.4; }
+.satoshi-disclaimer { margin: 16px 0 0; padding: 12px 14px; border-left: 2px solid var(--bitcoin); background: #28251f; color: #c9c2b7; font-size: var(--text-meta); line-height: 1.55; }
+.satoshi-disclaimer[hidden] { display: none; }
 .satoshi-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .satoshi-actions [hidden] { display: none; }
 .satoshi-actions button, .satoshi-actions a { min-height: 44px; padding: 0 14px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #5a554b; border-radius: 0; background: transparent; color: var(--paper-bright); font-family: var(--mono); font-size: var(--text-label); font-weight: 700; text-decoration: none; text-transform: uppercase; cursor: pointer; transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease; }
@@ -304,6 +311,8 @@ main { padding: 28px 0 48px; }
 .supply-stat > span { color: var(--muted); font-family: var(--mono); font-size: var(--text-label); text-transform: uppercase; }
 .supply-stat > strong { display: block; margin-top: 8px; font-family: var(--mono); font-size: 22px; font-weight: 500; letter-spacing: -.04em; white-space: nowrap; }
 .supply-stat p { margin: 5px 0 0; color: var(--muted); font-size: var(--text-meta); }
+.supply-source { min-height: 44px; display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; color: var(--muted-dark); font-family: var(--mono); font-size: var(--text-label); font-weight: 700; text-underline-offset: 3px; }
+.supply-source:hover { color: #9d5905; }
 .research-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; margin-top: 14px; }
 .research-panel { min-width: 0; padding: 24px; border: 1px solid var(--line); background: var(--paper-bright); }
 .lost-panel { background: #ebe7dc; }

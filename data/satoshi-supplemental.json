@@ -1,0 +1,13 @@
+[
+  {
+    "id": "adam-back-2008-08-21-1859",
+    "date": "2008-08-21T18:59:00Z",
+    "subject": "Re: Hashcash and b-money",
+    "text": "Thanks, I wasn't aware of the b-money page, but my ideas start from exactly that point. I'll e-mail him to confirm the year of publication so I can credit him. The main thing my system adds is to also use proof-of-work to support a distributed timestamp server. While users are generating proof-of-work to make new coins for themselves, the same proof-of-work is also supporting the network timestamping. This is instead of Usenet.",
+    "sourceType": "private-email",
+    "source": "Adam Back correspondence",
+    "archiveUrl": "https://github.com/lugaxker/nakamoto-archive/blob/master/src/adam-back-exhibit-ab1.pdf",
+    "originalUrl": "https://s3.documentcloud.org/documents/24439625/adam-back-exhibit-ab1-1.pdf",
+    "provenance": "Court exhibit compiled in the Nakamoto Archive"
+  }
+]

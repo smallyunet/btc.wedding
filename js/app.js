@@ -46,10 +46,11 @@ const elements = {
     feedEmpty: document.getElementById("feed-empty"),
     feedList: document.getElementById("feed-list"),
     lastVisit: document.getElementById("last-visit"),
+    ledgerSupply: document.getElementById("ledger-supply"),
+    ledgerSupplyDetail: document.getElementById("ledger-supply-detail"),
     dailyIssuance: document.getElementById("daily-issuance"),
     issuedSupply: document.getElementById("issued-supply"),
     issuedSupplyDetail: document.getElementById("issued-supply-detail"),
-    lostShare: document.getElementById("lost-share"),
     mempoolDetail: document.getElementById("mempool-detail"),
     mempoolValue: document.getElementById("mempool-value"),
     paceDetail: document.getElementById("pace-detail"),
@@ -64,14 +65,18 @@ const elements = {
     satoshiDay: document.getElementById("satoshi-day"),
     satoshiMonth: document.getElementById("satoshi-month"),
     satoshiNext: document.getElementById("satoshi-next"),
+    satoshiOriginal: document.getElementById("satoshi-original"),
     satoshiQuote: document.getElementById("satoshi-quote"),
     satoshiQuoteCount: document.getElementById("satoshi-quote-count"),
     satoshiQuoteDate: document.getElementById("satoshi-quote-date"),
     satoshiQuoteLabel: document.getElementById("satoshi-quote-label"),
+    satoshiSourceType: document.getElementById("satoshi-source-type"),
+    satoshiSubject: document.getElementById("satoshi-subject"),
+    satoshiDisputed: document.getElementById("satoshi-disputed"),
+    satoshiDisclaimer: document.getElementById("satoshi-disclaimer"),
     satoshiSource: document.getElementById("satoshi-source"),
     snapshotTime: document.getElementById("snapshot-time"),
     summaryWindow: document.getElementById("summary-window"),
-    unminedSupply: document.getElementById("unmined-supply"),
     visitContext: document.getElementById("visit-context")
 };
 
@@ -170,7 +175,7 @@ function formatDate(value) {
 }
 
 function formatArchiveDate(value) {
-    const [year, month, day] = String(value || "").split("-").map(Number);
+    const [year, month, day] = String(value || "").slice(0, 10).split("-").map(Number);
     if (!year || !month || !day) return "Date unavailable";
     return new Intl.DateTimeFormat("en", {
         year: "numeric",
@@ -576,23 +581,22 @@ function renderSupply(metrics) {
     if (!issuance) {
         setText(elements.issuedSupply, "—");
         setText(elements.issuedSupplyDetail, "Calculated from block height");
-        setText(elements.unminedSupply, "—");
         setText(elements.dailyIssuance, "—");
-        setText(elements.lostShare, "Share unavailable without current issuance");
-        return;
+    } else {
+        const supplyCap = 21_000_000;
+        const unmined = Math.max(0, supplyCap - issuance.issuedSupply);
+        const issuedPercent = (issuance.issuedSupply / supplyCap) * 100;
+
+        setText(elements.issuedSupply, formatMillions(issuance.issuedSupply));
+        setText(elements.issuedSupplyDetail, `${issuedPercent.toFixed(2)}% of cap · ${formatMillions(unmined)} not yet issued`);
+        setText(elements.dailyIssuance, `${formatNumber(issuance.currentSubsidy * 144)} BTC`);
     }
 
-    const supplyCap = 21_000_000;
-    const unmined = Math.max(0, supplyCap - issuance.issuedSupply);
-    const issuedPercent = (issuance.issuedSupply / supplyCap) * 100;
-    const lostLowPercent = (3_000_000 / issuance.issuedSupply) * 100;
-    const lostHighPercent = (3_750_000 / issuance.issuedSupply) * 100;
-
-    setText(elements.issuedSupply, formatMillions(issuance.issuedSupply));
-    setText(elements.issuedSupplyDetail, `${issuedPercent.toFixed(2)}% of the 21M cap`);
-    setText(elements.unminedSupply, formatMillions(unmined));
-    setText(elements.dailyIssuance, `${formatNumber(issuance.currentSubsidy * 144)} BTC`);
-    setText(elements.lostShare, `About ${lostLowPercent.toFixed(1)}–${lostHighPercent.toFixed(1)}% of current scheduled issuance`);
+    const ledgerSupply = numberOrNull(metrics.ledgerVisibleSupply);
+    setText(elements.ledgerSupply, ledgerSupply === null ? "—" : formatMillions(ledgerSupply));
+    setText(elements.ledgerSupplyDetail, ledgerSupply === null
+        ? "Coin Metrics daily data unavailable"
+        : `Observed UTXO supply · ${metrics.ledgerVisibleSupplyAsOf ? formatDate(metrics.ledgerVisibleSupplyAsOf) : "date unavailable"}`);
 }
 
 function renderBriefing(current) {
@@ -702,8 +706,20 @@ function renderSatoshiQuote() {
     setText(elements.satoshiQuote, quote.text);
     setText(elements.satoshiQuoteDate, formatArchiveDate(quote.date));
     elements.satoshiQuoteDate.dateTime = quote.date;
-    elements.satoshiSource.href = quote.sourceUrl || "https://satoshi.nakamotoinstitute.org/quotes/";
-    elements.satoshiSource.setAttribute("aria-label", `Open the archived source for Satoshi Nakamoto on ${formatArchiveDate(quote.date)}`);
+    setText(elements.satoshiSourceType, `${quote.source || "Archived record"} · ${quote.provenance || "Source preserved"}`);
+    setText(elements.satoshiSubject, quote.subject || "");
+    elements.satoshiSubject.hidden = !quote.subject;
+    elements.satoshiDisputed.hidden = !quote.disputed;
+    setText(elements.satoshiDisclaimer, quote.disclaimer || "This attribution is disputed; review the archive note before treating it as authentic.");
+    elements.satoshiDisclaimer.hidden = !quote.disputed;
+    elements.satoshiSource.href = quote.archiveUrl || quote.sourceUrl || "https://satoshi.nakamotoinstitute.org/";
+    elements.satoshiSource.setAttribute("aria-label", `Open the exact archive record for Satoshi Nakamoto on ${formatArchiveDate(quote.date)}`);
+    const hasSeparateOriginal = Boolean(quote.originalUrl && quote.originalUrl !== quote.archiveUrl);
+    elements.satoshiOriginal.hidden = !hasSeparateOriginal;
+    if (hasSeparateOriginal) {
+        elements.satoshiOriginal.href = quote.originalUrl;
+        elements.satoshiOriginal.setAttribute("aria-label", `Open the original source for Satoshi Nakamoto on ${formatArchiveDate(quote.date)}`);
+    }
     elements.satoshiNext.hidden = state.satoshiQuotes.length < 2;
     elements.satoshiQuoteCount.hidden = state.satoshiQuotes.length < 2;
     setText(elements.satoshiQuoteCount, `${state.satoshiQuoteIndex + 1} / ${state.satoshiQuotes.length}`);
@@ -713,16 +729,16 @@ function renderSatoshiToday(history) {
     const today = new Date();
     const monthDay = `${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
     const monthLabel = new Intl.DateTimeFormat("en", { month: "short" }).format(today);
-    const quotes = Array.isArray(history?.quotes) ? history.quotes : [];
-    const exact = quotes.filter((quote) => String(quote.date).slice(5) === monthDay);
+    const quotes = Array.isArray(history?.entries) ? history.entries : Array.isArray(history?.quotes) ? history.quotes : [];
+    const exact = quotes.filter((quote) => String(quote.date).slice(5, 10) === monthDay);
     const nearestMonthDay = exact.length || !quotes.length
         ? monthDay
-        : [...new Set(quotes.map((quote) => String(quote.date).slice(5)))]
+        : [...new Set(quotes.map((quote) => String(quote.date).slice(5, 10)))]
             .sort((left, right) => calendarDistance(left, monthDay) - calendarDistance(right, monthDay))[0];
 
     state.satoshiQuotes = exact.length
         ? exact
-        : quotes.filter((quote) => String(quote.date).slice(5) === nearestMonthDay);
+        : quotes.filter((quote) => String(quote.date).slice(5, 10) === nearestMonthDay);
     state.satoshiQuoteIndex = 0;
 
     elements.satoshiCalendar.dateTime = `${today.getFullYear()}-${monthDay}`;
@@ -740,11 +756,11 @@ function renderSatoshiToday(history) {
     }
 
     if (exact.length) {
-        setText(elements.satoshiDateStatus, `${exact.length} indexed ${exact.length === 1 ? "quote" : "quotes"} on this calendar date.`);
+        setText(elements.satoshiDateStatus, `${exact.length} archived ${exact.length === 1 ? "message" : "messages"} on this calendar date.`);
         setText(elements.satoshiQuoteLabel, "Satoshi, on this day");
     } else {
         const nearestDate = formatArchiveDate(state.satoshiQuotes[0].date);
-        setText(elements.satoshiDateStatus, "No indexed quote is preserved for this calendar date.");
+        setText(elements.satoshiDateStatus, "No indexed message is preserved for this calendar date.");
         setText(elements.satoshiQuoteLabel, `Nearest archive entry · ${nearestDate}`);
     }
 

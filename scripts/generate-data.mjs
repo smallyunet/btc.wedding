@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 
 const OUTPUT_PATH = new URL("../data/snapshot.json", import.meta.url);
+const SATOSHI_SUPPLEMENTAL_PATH = new URL("../data/satoshi-supplemental.json", import.meta.url);
 const TIMEOUT_MS = 12_000;
 
 async function readPreviousSnapshot() {
@@ -131,40 +132,117 @@ function parseCoreReleases(releases) {
 }
 
 function normalizeQuoteText(value = "") {
-    const normalized = String(value).replace(/\s+/g, " ").trim();
+    const normalized = stripHtml(String(value))
+        .replace(/&nbsp;|&#160;/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim();
     if (normalized.length <= 560) return normalized;
     const shortened = normalized.slice(0, 560);
     const sentenceEnd = Math.max(shortened.lastIndexOf(". "), shortened.lastIndexOf("? "), shortened.lastIndexOf("! "));
     return `${shortened.slice(0, sentenceEnd >= 180 ? sentenceEnd + 1 : 557).trim()}…`;
 }
 
-function makeSatoshiHistory(quotes, fallback) {
-    if (!Array.isArray(quotes) || !quotes.length) return fallback || { quotes: [] };
-    const grouped = new Map();
+function normalizeMessageText(value = "") {
+    const withoutQuotedContext = String(value)
+        .replace(/<div class="quoteheader"[^>]*>[\s\S]*?<\/div>/gi, " ")
+        .replace(/<div class="quote"[^>]*>[\s\S]*?<\/div>/gi, " ")
+        .replace(/(?:^|\n)\s*(?:&gt;|>)[^\n]*/g, " ");
+    return normalizeQuoteText(withoutQuotedContext);
+}
 
-    quotes.forEach((quote, sourceIndex) => {
-        if (!quote?.date || !quote?.text) return;
-        const monthDay = String(quote.date).slice(5);
-        const entry = {
-            id: `satoshi-${quote.date}-${sourceIndex}`,
-            date: quote.date,
-            text: normalizeQuoteText(quote.text),
-            category: quote.categories?.[0] || "general",
-            sourceUrl: `https://satoshi.nakamotoinstitute.org/quotes/${quote.categories?.[0] || "general"}/`
-        };
+function sourceLabel(source, kind) {
+    const labels = {
+        bitcointalk: "BitcoinTalk",
+        p2pfoundation: "P2P Foundation",
+        cryptography: "Cryptography mailing list",
+        "bitcoin-list": "Bitcoin mailing list",
+        "p2p-research": "P2P Research mailing list"
+    };
+    return labels[source] || (kind === "email" ? "Archived email" : "Archived forum post");
+}
+
+function makeSatoshiHistory({ quotes, posts, postThreads, emails, emailThreads, supplemental }, fallback) {
+    const hasOfficialArchive = Array.isArray(posts) && Array.isArray(postThreads)
+        && Array.isArray(emails) && Array.isArray(emailThreads);
+    if (!hasOfficialArchive) return fallback || { entries: [], quotes: [] };
+
+    const postSources = new Map(postThreads.map((thread) => [thread.id, thread.source]));
+    const emailSources = new Map(emailThreads.map((thread) => [thread.id, thread.source]));
+    const featuredPosts = new Map();
+    const featuredEmails = new Map();
+
+    (Array.isArray(quotes) ? quotes : []).forEach((quote) => {
+        const target = quote.post_id ? featuredPosts : quote.email_id ? featuredEmails : null;
+        const id = Number(quote.post_id || quote.email_id);
+        if (!target || !id || target.has(id)) return;
+        target.set(id, normalizeQuoteText(quote.text));
+    });
+
+    const records = [];
+    posts.filter((post) => post?.satoshi_id).forEach((post) => {
+        const source = postSources.get(post.thread_id);
+        records.push({
+            id: `sni-post-${post.satoshi_id}`,
+            date: post.date,
+            subject: post.subject,
+            text: featuredPosts.get(post.satoshi_id) || normalizeMessageText(post.text),
+            sourceType: "forum-post",
+            source: sourceLabel(source, "post"),
+            archiveUrl: `https://satoshi.nakamotoinstitute.org/posts/${source}/${post.satoshi_id}/`,
+            originalUrl: post.url,
+            provenance: "Satoshi Nakamoto Institute archive",
+            featured: featuredPosts.has(post.satoshi_id),
+            disputed: Boolean(post.disclaimer),
+            disclaimer: post.disclaimer ? normalizeQuoteText(post.disclaimer) : null
+        });
+    });
+
+    emails.filter((email) => email?.satoshi_id).forEach((email) => {
+        const source = emailSources.get(email.thread_id);
+        records.push({
+            id: `sni-email-${email.satoshi_id}`,
+            date: email.date,
+            subject: email.subject,
+            text: featuredEmails.get(email.satoshi_id) || normalizeMessageText(email.text),
+            sourceType: "email",
+            source: sourceLabel(source, "email"),
+            archiveUrl: `https://satoshi.nakamotoinstitute.org/emails/${source}/${email.satoshi_id}/`,
+            originalUrl: email.url,
+            provenance: "Satoshi Nakamoto Institute archive",
+            featured: featuredEmails.has(email.satoshi_id),
+            disputed: Boolean(email.disclaimer),
+            disclaimer: email.disclaimer ? normalizeQuoteText(email.disclaimer) : null
+        });
+    });
+
+    (Array.isArray(supplemental) ? supplemental : []).forEach((entry) => {
+        if (!entry?.date || !entry?.text || !entry?.archiveUrl) return;
+        records.push({ ...entry, text: normalizeQuoteText(entry.text), featured: true, disputed: Boolean(entry.disputed) });
+    });
+
+    const grouped = new Map();
+    records.forEach((entry) => {
+        const monthDay = String(entry.date).slice(5, 10);
         const current = grouped.get(monthDay) || [];
         current.push(entry);
         grouped.set(monthDay, current);
     });
 
     return {
-        source: "Satoshi Nakamoto Institute",
-        sourceUrl: "https://satoshi.nakamotoinstitute.org/quotes/",
-        quotes: [...grouped.values()].flatMap((entries) => entries
+        source: "Satoshi Nakamoto Institute + verified supplements",
+        sourceUrl: "https://satoshi.nakamotoinstitute.org/",
+        coverage: {
+            records: records.length,
+            calendarDays: grouped.size,
+            officialPosts: posts.filter((post) => post?.satoshi_id).length,
+            officialEmails: emails.filter((email) => email?.satoshi_id).length,
+            supplements: Array.isArray(supplemental) ? supplemental.length : 0
+        },
+        entries: [...grouped.values()].flatMap((entries) => entries
             .sort((left, right) => {
-                const leftFit = left.text.length >= 70 && left.text.length <= 420 ? 0 : 1;
-                const rightFit = right.text.length >= 70 && right.text.length <= 420 ? 0 : 1;
-                return leftFit - rightFit || left.text.length - right.text.length;
+                const leftRank = left.featured ? 0 : left.text.length >= 70 && left.text.length <= 420 ? 1 : 2;
+                const rightRank = right.featured ? 0 : right.text.length >= 70 && right.text.length <= 420 ? 1 : 2;
+                return leftRank - rightRank || left.text.length - right.text.length;
             })
             .slice(0, 3))
     };
@@ -182,6 +260,15 @@ function calculateAverageBlockMinutes(blocks) {
 
     if (!intervals.length) return null;
     return intervals.reduce((sum, value) => sum + value, 0) / intervals.length;
+}
+
+function latestCoinMetricsSupply(response) {
+    if (!Array.isArray(response?.data) || !response.data.length) return null;
+    const latest = response.data
+        .filter((entry) => numberOr(entry?.SplyCur) !== null && entry?.time)
+        .sort((left, right) => new Date(right.time) - new Date(left.time))[0];
+    if (!latest) return null;
+    return { value: numberOr(latest.SplyCur), asOf: latest.time };
 }
 
 function makeNetworkEvents(metrics, generatedAt) {
@@ -242,6 +329,7 @@ function makeNetworkEvents(metrics, generatedAt) {
 }
 
 const previous = await readPreviousSnapshot();
+const satoshiSupplemental = JSON.parse(await readFile(SATOSHI_SUPPLEMENTAL_PATH, "utf8"));
 const githubHeaders = process.env.GITHUB_TOKEN
     ? { authorization: `Bearer ${process.env.GITHUB_TOKEN}`, "x-github-api-version": "2022-11-28" }
     : {};
@@ -255,10 +343,15 @@ const requests = await Promise.allSettled([
     getJson("https://mempool.space/api/v1/blocks"),
     getText("https://bitcoinops.org/feed.xml"),
     getJson("https://api.github.com/repos/bitcoin/bitcoin/releases?per_page=3", { headers: githubHeaders }),
-    getJson("https://raw.githubusercontent.com/NakamotoInstitute/nakamotoinstitute.org/master/server/data/quotes.json")
+    getJson("https://raw.githubusercontent.com/NakamotoInstitute/nakamotoinstitute.org/master/server/data/quotes.json"),
+    getJson("https://raw.githubusercontent.com/NakamotoInstitute/nakamotoinstitute.org/master/server/data/forum_posts.json"),
+    getJson("https://raw.githubusercontent.com/NakamotoInstitute/nakamotoinstitute.org/master/server/data/forum_threads.json"),
+    getJson("https://raw.githubusercontent.com/NakamotoInstitute/nakamotoinstitute.org/master/server/data/emails.json"),
+    getJson("https://raw.githubusercontent.com/NakamotoInstitute/nakamotoinstitute.org/master/server/data/email_threads.json"),
+    getJson("https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=SplyCur&frequency=1d&limit_per_asset=1&page_size=1&paging_from=end")
 ]);
 
-const [feesResult, mempoolResult, heightResult, difficultyResult, pricesResult, blocksResult, optechResult, releasesResult, satoshiQuotesResult] = requests;
+const [feesResult, mempoolResult, heightResult, difficultyResult, pricesResult, blocksResult, optechResult, releasesResult, satoshiQuotesResult, satoshiPostsResult, satoshiPostThreadsResult, satoshiEmailsResult, satoshiEmailThreadsResult, coinMetricsResult] = requests;
 const fees = settledValue(feesResult);
 const mempool = settledValue(mempoolResult);
 const height = settledValue(heightResult);
@@ -268,6 +361,11 @@ const blocks = settledValue(blocksResult);
 const optechXml = settledValue(optechResult);
 const releases = settledValue(releasesResult);
 const satoshiQuotes = settledValue(satoshiQuotesResult);
+const satoshiPosts = settledValue(satoshiPostsResult);
+const satoshiPostThreads = settledValue(satoshiPostThreadsResult);
+const satoshiEmails = settledValue(satoshiEmailsResult);
+const satoshiEmailThreads = settledValue(satoshiEmailThreadsResult);
+const coinMetricsSupply = latestCoinMetricsSupply(settledValue(coinMetricsResult));
 const generatedAt = new Date().toISOString();
 const successfulRequests = requests.filter((request) => request.status === "fulfilled").length;
 
@@ -289,7 +387,9 @@ const metrics = {
     remainingBlocks: numberOr(difficulty?.remainingBlocks, fallbackMetrics.remainingBlocks ?? null),
     estimatedRetargetDate: difficulty?.estimatedRetargetDate
         ? new Date(Number(difficulty.estimatedRetargetDate)).toISOString()
-        : fallbackMetrics.estimatedRetargetDate ?? null
+        : fallbackMetrics.estimatedRetargetDate ?? null,
+    ledgerVisibleSupply: coinMetricsSupply?.value ?? fallbackMetrics.ledgerVisibleSupply ?? null,
+    ledgerVisibleSupplyAsOf: coinMetricsSupply?.asOf ?? fallbackMetrics.ledgerVisibleSupplyAsOf ?? null
 };
 
 const optechUpdates = parseOptechFeed(optechXml);
@@ -309,12 +409,21 @@ const snapshot = {
     metrics,
     events: makeNetworkEvents(metrics, generatedAt),
     updates,
-    satoshiHistory: makeSatoshiHistory(satoshiQuotes, previous?.satoshiHistory),
+    satoshiHistory: makeSatoshiHistory({
+        quotes: satoshiQuotes,
+        posts: satoshiPosts,
+        postThreads: satoshiPostThreads,
+        emails: satoshiEmails,
+        emailThreads: satoshiEmailThreads,
+        supplemental: satoshiSupplemental
+    }, previous?.satoshiHistory),
     sourceHealth: {
         mempool: [feesResult, mempoolResult, heightResult, difficultyResult, pricesResult, blocksResult].some((result) => result.status === "fulfilled"),
         optech: optechResult.status === "fulfilled",
         bitcoinCore: releasesResult.status === "fulfilled",
-        satoshiArchive: satoshiQuotesResult.status === "fulfilled"
+        satoshiArchive: [satoshiPostsResult, satoshiPostThreadsResult, satoshiEmailsResult, satoshiEmailThreadsResult]
+            .every((result) => result.status === "fulfilled"),
+        coinMetrics: coinMetricsResult.status === "fulfilled" && coinMetricsSupply !== null
     }
 };
 
