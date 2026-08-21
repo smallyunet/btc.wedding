@@ -216,7 +216,7 @@ main { padding: 28px 0 48px; }
 .satoshi-provenance span { padding: 4px 7px; border: 1px solid #4a463e; }
 .satoshi-provenance #satoshi-disputed { border-color: #9b6a29; color: #ffc476; }
 .satoshi-provenance [hidden] { display: none; }
-.satoshi-quote-panel blockquote { max-width: 920px; margin: 22px 0 30px; color: var(--paper-bright); font-size: clamp(22px,2.4vw,34px); font-weight: 600; line-height: 1.35; letter-spacing: -.035em; text-wrap: balance; overflow-wrap: anywhere; }
+.satoshi-quote-panel blockquote { max-width: 820px; margin: 22px 0 30px; color: var(--paper-bright); font-size: clamp(19px,1.8vw,27px); font-weight: 600; line-height: 1.5; letter-spacing: -.025em; text-wrap: pretty; overflow-wrap: anywhere; }
 .satoshi-quote-panel blockquote::before { color: var(--bitcoin); content: "“"; }
 .satoshi-quote-panel blockquote::after { color: var(--bitcoin); content: "”"; }
 .satoshi-quote-footer { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding-top: 20px; border-top: 1px solid #3d3932; }
@@ -411,7 +411,7 @@ main { padding: 28px 0 48px; }
     .satoshi-calendar strong { margin-top: 0; font-size: 56px; }
     .satoshi-date-panel > p { max-width: none; margin-top: 18px; }
     .satoshi-quote-panel { padding: 24px 22px; }
-    .satoshi-quote-panel blockquote { margin-block: 24px; font-size: clamp(21px,6vw,28px); text-wrap: pretty; }
+    .satoshi-quote-panel blockquote { margin-block: 24px; font-size: clamp(18px,5vw,23px); }
     .satoshi-quote-footer { display: block; }
     .satoshi-actions { justify-content: flex-start; margin-top: 18px; }
     .feed-header { min-height: 0; display: block; padding: 26px 20px 18px; }
