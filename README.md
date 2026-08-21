@@ -2,7 +2,7 @@
 
 Bitcoin Changefeed gives you a ten-second answer to one question: **does Bitcoin need my attention right now?**
 
-It turns public network conditions and trusted protocol or software updates into a plain-language brief, while keeping the product account-free and low-maintenance.
+It turns public network conditions and trusted protocol or software updates into a plain-language brief, while keeping the product account-free and low-maintenance. A daily archive also surfaces what Satoshi said on the visitor's calendar date, or transparently shows the nearest indexed entry when that date is quiet.
 
 ## Product principles
 
@@ -14,12 +14,14 @@ It turns public network conditions and trusted protocol or software updates into
 
 ## Data flow
 
-1. `scripts/generate-data.mjs` fetches mempool.space, Bitcoin Optech Atom, and Bitcoin Core release data.
+1. `scripts/generate-data.mjs` fetches mempool.space, Bitcoin Optech Atom, Bitcoin Core release data, and the Satoshi Nakamoto Institute's curated quote index.
 2. It writes a bounded fallback snapshot to `data/snapshot.json`.
 3. The browser renders that snapshot immediately, then attempts a fresh mempool.space refresh.
 4. GitHub Actions rebuilds and publishes the site hourly and after every push to `main`.
 
 If an upstream source fails, the generator preserves the last known values and marks the snapshot as partial or fallback instead of inventing data.
+
+The daily archive uses the visitor's local month and day. Quote text remains attributed and links back to its category page in [The Quotable Satoshi](https://satoshi.nakamotoinstitute.org/quotes/); dates without an indexed quote are labeled instead of being filled with inferred text.
 
 ## Supply methodology
 

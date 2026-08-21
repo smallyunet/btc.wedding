@@ -130,6 +130,46 @@ function parseCoreReleases(releases) {
         }));
 }
 
+function normalizeQuoteText(value = "") {
+    const normalized = String(value).replace(/\s+/g, " ").trim();
+    if (normalized.length <= 560) return normalized;
+    const shortened = normalized.slice(0, 560);
+    const sentenceEnd = Math.max(shortened.lastIndexOf(". "), shortened.lastIndexOf("? "), shortened.lastIndexOf("! "));
+    return `${shortened.slice(0, sentenceEnd >= 180 ? sentenceEnd + 1 : 557).trim()}…`;
+}
+
+function makeSatoshiHistory(quotes, fallback) {
+    if (!Array.isArray(quotes) || !quotes.length) return fallback || { quotes: [] };
+    const grouped = new Map();
+
+    quotes.forEach((quote, sourceIndex) => {
+        if (!quote?.date || !quote?.text) return;
+        const monthDay = String(quote.date).slice(5);
+        const entry = {
+            id: `satoshi-${quote.date}-${sourceIndex}`,
+            date: quote.date,
+            text: normalizeQuoteText(quote.text),
+            category: quote.categories?.[0] || "general",
+            sourceUrl: `https://satoshi.nakamotoinstitute.org/quotes/${quote.categories?.[0] || "general"}/`
+        };
+        const current = grouped.get(monthDay) || [];
+        current.push(entry);
+        grouped.set(monthDay, current);
+    });
+
+    return {
+        source: "Satoshi Nakamoto Institute",
+        sourceUrl: "https://satoshi.nakamotoinstitute.org/quotes/",
+        quotes: [...grouped.values()].flatMap((entries) => entries
+            .sort((left, right) => {
+                const leftFit = left.text.length >= 70 && left.text.length <= 420 ? 0 : 1;
+                const rightFit = right.text.length >= 70 && right.text.length <= 420 ? 0 : 1;
+                return leftFit - rightFit || left.text.length - right.text.length;
+            })
+            .slice(0, 3))
+    };
+}
+
 function calculateAverageBlockMinutes(blocks) {
     if (!Array.isArray(blocks) || blocks.length < 2) return null;
     const intervals = [];
@@ -214,10 +254,11 @@ const requests = await Promise.allSettled([
     getJson("https://mempool.space/api/v1/prices"),
     getJson("https://mempool.space/api/v1/blocks"),
     getText("https://bitcoinops.org/feed.xml"),
-    getJson("https://api.github.com/repos/bitcoin/bitcoin/releases?per_page=3", { headers: githubHeaders })
+    getJson("https://api.github.com/repos/bitcoin/bitcoin/releases?per_page=3", { headers: githubHeaders }),
+    getJson("https://raw.githubusercontent.com/NakamotoInstitute/nakamotoinstitute.org/master/server/data/quotes.json")
 ]);
 
-const [feesResult, mempoolResult, heightResult, difficultyResult, pricesResult, blocksResult, optechResult, releasesResult] = requests;
+const [feesResult, mempoolResult, heightResult, difficultyResult, pricesResult, blocksResult, optechResult, releasesResult, satoshiQuotesResult] = requests;
 const fees = settledValue(feesResult);
 const mempool = settledValue(mempoolResult);
 const height = settledValue(heightResult);
@@ -226,6 +267,7 @@ const prices = settledValue(pricesResult);
 const blocks = settledValue(blocksResult);
 const optechXml = settledValue(optechResult);
 const releases = settledValue(releasesResult);
+const satoshiQuotes = settledValue(satoshiQuotesResult);
 const generatedAt = new Date().toISOString();
 const successfulRequests = requests.filter((request) => request.status === "fulfilled").length;
 
@@ -267,10 +309,12 @@ const snapshot = {
     metrics,
     events: makeNetworkEvents(metrics, generatedAt),
     updates,
+    satoshiHistory: makeSatoshiHistory(satoshiQuotes, previous?.satoshiHistory),
     sourceHealth: {
         mempool: [feesResult, mempoolResult, heightResult, difficultyResult, pricesResult, blocksResult].some((result) => result.status === "fulfilled"),
         optech: optechResult.status === "fulfilled",
-        bitcoinCore: releasesResult.status === "fulfilled"
+        bitcoinCore: releasesResult.status === "fulfilled",
+        satoshiArchive: satoshiQuotesResult.status === "fulfilled"
     }
 };
 

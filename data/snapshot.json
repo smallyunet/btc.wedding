@@ -1,60 +1,70 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-17T09:37:58.734Z",
-  "status": "live",
+  "generatedAt": "2026-08-21T13:12:16.415Z",
+  "status": "partial",
   "successfulSources": 8,
-  "totalSources": 8,
+  "totalSources": 9,
   "metrics": {
-    "priceUsd": 63308,
-    "feeFast": 1,
-    "feeHalfHour": 1,
+    "priceUsd": 77227,
+    "feeFast": 3,
+    "feeHalfHour": 3,
     "feeHour": 1,
     "feeEconomy": 1,
-    "mempoolVsizeMB": 43.014146,
-    "mempoolCount": 77435,
-    "blockHeight": 962868,
-    "avgBlockTimeMinutes": 9.908333333333333,
-    "difficultyChange": 0.06430972209301444,
-    "difficultyProgress": 61.30952380952381,
-    "remainingBlocks": 780,
-    "estimatedRetargetDate": "2026-08-22T19:39:15.220Z"
+    "mempoolVsizeMB": 45.288139,
+    "mempoolCount": 85626,
+    "blockHeight": 963443,
+    "avgBlockTimeMinutes": 11.553333333333333,
+    "difficultyChange": -1.1798069406824263,
+    "difficultyProgress": 89.83134920634922,
+    "remainingBlocks": 205,
+    "estimatedRetargetDate": "2026-08-22T23:47:52.090Z"
   },
   "events": [
     {
-      "id": "fees-2026-08-17T09:37:58.734Z",
+      "id": "fees-2026-08-21T13:12:16.415Z",
       "category": "Fees",
       "level": "routine",
       "title": "Fees remain calm",
-      "summary": "High-priority estimates are 1 sat/vB and economy estimates are 1 sat/vB.",
-      "value": "1 sat/vB",
-      "publishedAt": "2026-08-17T09:37:58.734Z",
+      "summary": "High-priority estimates are 3 sat/vB and economy estimates are 1 sat/vB.",
+      "value": "3 sat/vB",
+      "publishedAt": "2026-08-21T13:12:16.415Z",
       "source": "mempool.space",
       "sourceUrl": "https://mempool.space/"
     },
     {
-      "id": "mempool-2026-08-17T09:37:58.734Z",
+      "id": "mempool-2026-08-21T13:12:16.415Z",
       "category": "Mempool",
       "level": "notable",
       "title": "The queue is building",
-      "summary": "77,435 transactions occupy 43.0 virtual MB, roughly 44 blocks of space.",
-      "value": "43.0 MvB",
-      "publishedAt": "2026-08-17T09:37:58.734Z",
+      "summary": "85,626 transactions occupy 45.3 virtual MB, roughly 46 blocks of space.",
+      "value": "45.3 MvB",
+      "publishedAt": "2026-08-21T13:12:16.415Z",
       "source": "mempool.space",
       "sourceUrl": "https://mempool.space/"
     },
     {
-      "id": "pace-2026-08-17T09:37:58.734Z",
+      "id": "pace-2026-08-21T13:12:16.415Z",
       "category": "Blocks",
       "level": "routine",
       "title": "Block production is near target",
-      "summary": "The latest observed block intervals average 9.9 minutes. Short windows are noisy; Bitcoin targets about 10 minutes over time.",
-      "value": "9.9 min",
-      "publishedAt": "2026-08-17T09:37:58.734Z",
+      "summary": "The latest observed block intervals average 11.6 minutes. Short windows are noisy; Bitcoin targets about 10 minutes over time.",
+      "value": "11.6 min",
+      "publishedAt": "2026-08-21T13:12:16.415Z",
       "source": "mempool.space",
       "sourceUrl": "https://mempool.space/blocks"
     }
   ],
   "updates": [
+    {
+      "id": "optech-2026-08-18T00:00:00+00:00",
+      "category": "Protocol",
+      "level": "routine",
+      "title": "Bitcoin Optech Newsletter #418 Recap Podcast",
+      "summary": "Mark “Murch” Erhardt, Gustavo Flores Echaiz, and Mike Schmidt are joined by Michael Ford (fanquake) and Martin Zumsande to discuss Newsletter #418 . The Bitcoin Optech Podcast and transcription content is licensed Creat…",
+      "publishedAt": "2026-08-18T00:00:00+00:00",
+      "source": "Bitcoin Optech",
+      "sourceUrl": "https://bitcoinops.org/en/podcast/2026/08/18/"
+    },
     {
       "id": "optech-2026-08-14T00:00:00+00:00",
       "category": "Protocol",
@@ -106,9 +116,758 @@
       "sourceUrl": "https://github.com/bitcoin/bitcoin/releases/tag/v31.1"
     }
   ],
+  "satoshiHistory": {
+    "source": "Satoshi Nakamoto Institute",
+    "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/",
+    "quotes": [
+      {
+        "id": "satoshi-2010-12-11-0",
+        "date": "2010-12-11",
+        "text": "It would have been nice to get this attention in any other context. WikiLeaks has kicked the hornet's nest, and the swarm is headed towards us.",
+        "category": "general",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/general/"
+      },
+      {
+        "id": "satoshi-2010-12-05-1",
+        "date": "2010-12-05",
+        "text": "The project needs to grow gradually so the software can be strengthened along the way. I make this appeal to WikiLeaks not to try to use Bitcoin. Bitcoin is a small beta community in its infancy.",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2008-11-13-112",
+        "date": "2008-11-13",
+        "text": "It's very attractive to the libertarian viewpoint if we can explain it properly. I'm better with code than with words though.",
+        "category": "motives",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/motives/"
+      },
+      {
+        "id": "satoshi-2010-11-13-2",
+        "date": "2010-11-13",
+        "text": "I'm happy if someone with artistic skill wants to contribute alternatives. The icon/logo was meant to be good as an icon at the 16x16 and 20x20 pixel sizes. I think it's the best program icon, but there's room for improvement at larger sizes for a graphic for use on websites. It'll be a lot simpler if authors could make their graphics public domain.",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2008-11-13-110",
+        "date": "2008-11-13",
+        "text": "The proof-of-work chain is a solution to the Byzantine Generals' Problem. I'll try to rephrase it in that context. A number of Byzantine Generals each have a computer and want to attack the King's wi-fi by brute forcing the password, which they've learned is a certain number of characters in length. Once they stimulate the network to generate a packet, they must crack the password within a limited time to break in and erase the logs, otherwise they will be discovered and get in trouble.…",
+        "category": "proof-of-work",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/proof-of-work/"
+      },
+      {
+        "id": "satoshi-2010-09-30-3",
+        "date": "2010-09-30",
+        "text": "I wish rather than deleting the article, they put a length restriction. If something is not famous enough, there could at least be a stub article identifying what it is. I often come across annoying red links of things that Wiki ought to at least have heard of.…",
+        "category": "general",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/general/"
+      },
+      {
+        "id": "satoshi-2010-09-30-4",
+        "date": "2010-09-30",
+        "text": "As you figured out, the root problem is we shouldn't be counting or spending transactions until they have at least 1 confirmation. 0/unconfirmed transactions are very much second class citizens. At most, they are advice that something has been received, but counting them as balance or spending them is premature.",
+        "category": "transactions",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/transactions/"
+      },
+      {
+        "id": "satoshi-2010-09-23-5",
+        "date": "2010-09-23",
+        "text": "Bitcoin would be convenient for people who don't have a credit card or don't want to use the cards they have, either don't want the spouse to see it on the bill or don't trust giving their number to \"porn guys\", or afraid of recurring billing.",
+        "category": "general",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/general/"
+      },
+      {
+        "id": "satoshi-2010-09-19-6",
+        "date": "2010-09-19",
+        "text": "I don't know anything about any of the bug trackers. If we were to have one, we would have to make a thoroughly researched choice. We're managing pretty well just using the forum. I'm more likely to see bugs posted in the forum, and I think other users are much more likely to help resolve and ask follow up questions here than if they were in a bug tracker. A key step is other users helping resolve the simple stuff that's not really a bug but some misunderstanding or confusion. I keep a list of all unresolved bugs I've seen on the forum.…",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2010-09-08-8",
+        "date": "2010-09-08",
+        "text": "Currently, paying a fee is controlled manually with the -paytxfee switch. It would be very easy to make the software automatically check the size of recent blocks to see if it should pay a fee. We're so far from reaching the threshold, we don't need that yet. It's a good idea to see how things go with controlling it manually first anyway.",
+        "category": "fees",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/fees/"
+      },
+      {
+        "id": "satoshi-2010-09-08-7",
+        "date": "2010-09-08",
+        "text": "The threshold can easily be changed in the future. We can decide to increase it when the time comes. It's a good idea to keep it lower as a circuit breaker and increase it as needed. If we hit the threshold now, it would almost certainly be some kind of flood and not actual use. Keeping the threshold lower would help limit the amount of wasted disk space in that event.",
+        "category": "scalability",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/scalability/"
+      },
+      {
+        "id": "satoshi-2010-09-07-9",
+        "date": "2010-09-07",
+        "text": "Another option is to reduce the number of free transactions allowed per block before transaction fees are required. Nodes only take so many KB of free transactions per block before they start requiring at least 0.01 transaction fee. The threshold should probably be lower than it currently is. I don't think the threshold should ever be 0. We should always allow at least some free transactions.",
+        "category": "fees",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/fees/"
+      },
+      {
+        "id": "satoshi-2010-08-27-11",
+        "date": "2010-08-27",
+        "text": "Bitcoins have no dividend or potential future dividend, therefore not like a stock. More like a collectible or commodity.",
+        "category": "bitcoin-economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-economics/"
+      },
+      {
+        "id": "satoshi-2010-08-27-10",
+        "date": "2010-08-27",
+        "text": "As a thought experiment, imagine there was a base metal as scarce as gold but with the following properties: - boring grey in colour - not a good conductor of electricity - not particularly strong, but not ductile or easily malleable either - not useful for any practical or ornamental purpose and one special, magical property: - can be transported over a communications channel If it somehow acquired any value at all for whatever reason, then anyone wanting to transfer wealth over a long distance could buy some, transmit it, and have the recipient sell…",
+        "category": "economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/economics/"
+      },
+      {
+        "id": "satoshi-2010-08-16-12",
+        "date": "2010-08-16",
+        "text": "There is no way for the software to automatically know if one chain is better than another except by the greatest proof-of-work. In the design it was necessary for it to switch to a longer chain no matter how far back it has to go.",
+        "category": "proof-of-work",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/proof-of-work/"
+      },
+      {
+        "id": "satoshi-2010-08-15-13",
+        "date": "2010-08-15",
+        "text": "Some places where generation will gravitate to: 1) places where it's cheapest or free 2) people who want to help for idealogical reasons 3) people who want to get some coins without the inconvenience of doing a transaction to buy them There are legitimate places where it's free. Generation is basically free anywhere that has electric heat, since your computer's heat is offsetting your baseboard electric heating. Many small flats have electric heat out of convenience.",
+        "category": "mining",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/mining/"
+      },
+      {
+        "id": "satoshi-2010-08-11-15",
+        "date": "2010-08-11",
+        "text": "It's hard to think of how to apply zero-knowledge-proofs in this case.",
+        "category": "privacy",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/privacy/"
+      },
+      {
+        "id": "satoshi-2010-08-11-14",
+        "date": "2010-08-11",
+        "text": "Then you must also be against the common system of payment up front, where the customer loses. Payment up front: customer loses, and the thief gets the money. Simple escrow: customer loses, but the thief doesn't get the money either. Are you guys saying payment up front is better, because at least the thief gets the money, so at least someone gets it? Imagine someone stole something from you. You can't get it back, but if you could, if it had a kill switch that could be remote triggered, would you do it?…",
+        "category": "general",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/general/"
+      },
+      {
+        "id": "satoshi-2010-08-09-16",
+        "date": "2010-08-09",
+        "text": "The heat from your computer is not wasted if you need to heat your home. If you're using electric heat where you live, then your computer's heat isn't a waste. It's equal cost if you generate the heat with your computer. If you have other cheaper heating than electric, then the waste is only the difference in cost. If it's summer and you're using A/C, then it's twice. Bitcoin generation should end up where it's cheapest. Maybe that will be in cold climates where there's electric heat, where it would be essentially free.",
+        "category": "mining",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/mining/"
+      },
+      {
+        "id": "satoshi-2010-08-07-18",
+        "date": "2010-08-07",
+        "text": "Proof-of-work has the nice property that it can be relayed through untrusted middlemen. We don't have to worry about a chain of custody of communication. It doesn't matter who tells you a longest chain, the proof-of-work speaks for itself.",
+        "category": "proof-of-work",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/proof-of-work/"
+      },
+      {
+        "id": "satoshi-2010-08-07-17",
+        "date": "2010-08-07",
+        "text": "It's the same situation as gold and gold mining. The marginal cost of gold mining tends to stay near the price of gold. Gold mining is a waste, but that waste is far less than the utility of having gold available as a medium of exchange. I think the case will be the same for Bitcoin. The utility of the exchanges made possible by Bitcoin will far exceed the cost of electricity used. Therefore, not having Bitcoin would be the net waste.",
+        "category": "bitcoin-economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-economics/"
+      },
+      {
+        "id": "satoshi-2010-08-05-19",
+        "date": "2010-08-05",
+        "text": "Forgot to add the good part about micropayments. While I don't think Bitcoin is practical for smaller micropayments right now, it will eventually be as storage and bandwidth costs continue to fall. If Bitcoin catches on on a big scale, it may already be the case by that time. Another way they can become more practical is if I implement client-only mode and the number of network nodes consolidates into a smaller number of professional server farms. Whatever size micropayments you need will eventually be practical.…",
+        "category": "micropayments",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/micropayments/"
+      },
+      {
+        "id": "satoshi-2010-08-04-20",
+        "date": "2010-08-04",
+        "text": "Bitcoin isn't currently practical for very small micropayments. Not for things like pay per search or per page view without an aggregating mechanism, not things needing to pay less than 0.01. The dust spam limit is a first try at intentionally trying to prevent overly small micropayments like that. Bitcoin is practical for smaller transactions than are practical with existing payment methods. Small enough to include what you might call the top of the micropayment range. But it doesn't claim to be practical for arbitrarily small micropayments.",
+        "category": "micropayments",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/micropayments/"
+      },
+      {
+        "id": "satoshi-2010-07-29-21",
+        "date": "2010-07-29",
+        "text": "Actually, it works well to just PM me. I'm the one who's going to be fixing it. If you find a security flaw, I would definitely like to hear from you privately to fix it before it goes public.",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2010-07-29-22",
+        "date": "2010-07-29",
+        "text": "The current system where every user is a network node is not the intended configuration for large scale. That would be like every Usenet user runs their own NNTP server. The design supports letting users just be users. The more burden it is to run a node, the fewer nodes there will be. Those few nodes will be big server farms. The rest will be client nodes that only do transactions and don't generate.",
+        "category": "nodes",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/nodes/"
+      },
+      {
+        "id": "satoshi-2010-07-25-23",
+        "date": "2010-07-25",
+        "text": "For future reference, here's my public key. It's the same one that's been there since the bitcoin.org site first went up in 2008. Grab it now in case you need it later. http://www.bitcoin.org/Satoshi_Nakamoto.asc",
+        "category": "general",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/general/"
+      },
+      {
+        "id": "satoshi-2010-07-23-24",
+        "date": "2010-07-23",
+        "text": "By making some adjustments to the database settings, I was able to make the initial block download about 5 times faster. It downloads in about 30 minutes. The database default had it writing each block to disk synchronously, which is not necessary. I changed the settings to let it cache the changes in memory and write them out in a batch. Blocks are still written transactionally, so either the complete change occurs or none of it does, in either case the data is left in a valid state. I only enabled this change during the initial block download.…",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2010-07-10-25",
+        "date": "2010-07-10",
+        "text": "The timing is strange, just as we are getting a rapid increase in 3rd party coverage after getting slashdotted. I hope there's not a big hurry to wrap the discussion and decide. How long does Wikipedia typically leave a question like that open for comment? It would help to condense the article and make it less promotional sounding as soon as possible. Just letting people know what it is, where it fits into the electronic money space, not trying to convince them that it's good.…",
+        "category": "general",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/general/"
+      },
+      {
+        "id": "satoshi-2010-07-16-27",
+        "date": "2010-07-16",
+        "text": "Difficulty just increased by 4 times, so now your cost is US$0.02/BTC.",
+        "category": "difficulty",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/difficulty/"
+      },
+      {
+        "id": "satoshi-2010-07-16-26",
+        "date": "2010-07-16",
+        "text": "Right, the difficulty adjustment is trying to keep it so the network as a whole generates an average of 6 blocks per hour. The time for your block to mature will always be around 20 hours.",
+        "category": "difficulty",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/difficulty/"
+      },
+      {
+        "id": "satoshi-2010-07-14-30",
+        "date": "2010-07-14",
+        "text": "At equilibrium size, many nodes will be server farms with one or two network nodes that feed the rest of the farm over a LAN.",
+        "category": "nodes",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/nodes/"
+      },
+      {
+        "id": "satoshi-2010-07-14-29",
+        "date": "2010-07-14",
+        "text": "I anticipate there will never be more than 100K nodes, probably less. It will reach an equilibrium where it's not worth it for more nodes to join in. The rest will be lightweight clients, which could be millions.",
+        "category": "scalability",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/scalability/"
+      },
+      {
+        "id": "satoshi-2010-07-14-28",
+        "date": "2010-07-14",
+        "text": "The design outlines a lightweight client that does not need the full block chain. In the design PDF it's called Simplified Payment Verification. The lightweight client can send and receive transactions, it just can't generate blocks. It does not need to trust a node to verify payments, it can still verify them itself. The lightweight client is not implemented yet, but the plan is to implement it when it's needed. For now, everyone just runs a full network node.",
+        "category": "scalability",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/scalability/"
+      },
+      {
+        "id": "satoshi-2010-07-09-31",
+        "date": "2010-07-09",
+        "text": "When someone tries to buy all the world's supply of a scarce asset, the more they buy the higher the price goes. At some point, it gets too expensive for them to buy any more. It's great for the people who owned it beforehand because they get to sell it to the corner at crazy high prices. As the price keeps going up and up, some people keep holding out for yet higher prices and refuse to sell.",
+        "category": "economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/economics/"
+      },
+      {
+        "id": "satoshi-2010-07-06-32",
+        "date": "2010-07-06",
+        "text": "Announcing version 0.3 of Bitcoin, the P2P cryptocurrency! Bitcoin is a digital currency using cryptography and a distributed network to replace the need for a trusted central server. Escape the arbitrary inflation risk of centrally managed currencies! Bitcoin's total circulation is limited to 21 million coins. The coins are gradually released to the network's nodes based on the CPU power they contribute, so you can get a share of them by contributing your idle CPU time.",
+        "category": "releases",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/releases/"
+      },
+      {
+        "id": "satoshi-2010-07-05-33",
+        "date": "2010-07-05",
+        "text": "Writing a description for this thing for general audiences is bloody hard. There's nothing to relate it to.",
+        "category": "general",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/general/"
+      },
+      {
+        "id": "satoshi-2010-06-21-34",
+        "date": "2010-06-21",
+        "text": "Lost coins only make everyone else's coins worth slightly more. Think of it as a donation to everyone.",
+        "category": "bitcoin-economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-economics/"
+      },
+      {
+        "id": "satoshi-2010-06-18-36",
+        "date": "2010-06-18",
+        "text": "Since 2007. At some point I became convinced there was a way to do this without any trust required at all and couldn't resist to keep thinking about it. Much more of the work was designing than coding. Fortunately, so far all the issues raised have been things I previously considered and planned for.",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2010-06-18-35",
+        "date": "2010-06-18",
+        "text": "Excellent choice of a first project, nice work. I had planned to do this exact thing if someone else didn't do it, so when it gets too hard for mortals to generate 50BTC, new users could get some coins to play with right away. Donations should be able to keep it filled. The display showing the balance in the dispenser encourages people to top it up. You should put a donation bitcoin address on the page for those who want to add funds to it, which ideally should update to a new address whenever it receives something.",
+        "category": "general",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/general/"
+      },
+      {
+        "id": "satoshi-2010-06-17-38",
+        "date": "2010-06-17",
+        "text": "The design supports a tremendous variety of possible transaction types that I designed years ago. Escrow transactions, bonded contracts, third party arbitration, multi-party signature, etc. If Bitcoin catches on in a big way, these are things we'll want to explore in the future, but they all had to be designed at the beginning to make sure they would be possible later.",
+        "category": "transactions",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/transactions/"
+      },
+      {
+        "id": "satoshi-2010-06-17-37",
+        "date": "2010-06-17",
+        "text": "The nature of Bitcoin is such that once version 0.1 was released, the core design was set in stone for the rest of its lifetime. Because of that, I wanted to design it to support every possible transaction type I could think of. The problem was, each thing required special support code and data fields whether it was used or not, and only covered one special case at a time. It would have been an explosion of special cases.…",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2010-06-14-39",
+        "date": "2010-06-14",
+        "text": "SHA-256 is very strong. It's not like the incremental step from MD5 to SHA1. It can last several decades unless there's some massive breakthrough attack.",
+        "category": "encryption",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/encryption/"
+      },
+      {
+        "id": "satoshi-2010-06-14-40",
+        "date": "2010-06-14",
+        "text": "If SHA-256 became completely broken, I think we could come to some agreement about what the honest block chain was before the trouble started, lock that in and continue from there with a new hash function.",
+        "category": "encryption",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/encryption/"
+      },
+      {
+        "id": "satoshi-2010-05-26-41",
+        "date": "2010-05-26",
+        "text": "Does anyone want to translate the Bitcoin client itself? It would be great to have at least one other language in the 0.3 release.",
+        "category": "releases",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/releases/"
+      },
+      {
+        "id": "satoshi-2010-05-18-42",
+        "date": "2010-05-18",
+        "text": "Simplified Payment Verification is for lightweight client-only users who only do transactions and don't generate and don't participate in the node network. They wouldn't need to download blocks, just the hash chain, which is currently about 2MB and very quick to verify (less than a second to verify the whole chain). If the network becomes very large, like over 100,000 nodes, this is what we'll use to allow common users to do transactions without being full blown nodes.…",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2010-05-16-43",
+        "date": "2010-05-16",
+        "text": "Bitcoin addresses you generate are kept forever. A bitcoin address must be kept to show ownership of anything sent to it. If you were able to delete a bitcoin address and someone sent to it, the money would be lost. They're only about 500 bytes.",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2010-05-16-44",
+        "date": "2010-05-16",
+        "text": "When you generate a new bitcoin address, it only takes disk space on your own computer (like 500 bytes). It's like generating a new PGP private key, but less CPU intensive because it's ECC. The address space is effectively unlimited. It doesn't hurt anyone, so generate all you want.",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2010-03-23-45",
+        "date": "2010-03-23",
+        "text": "The price of .com registrations is lower than it should be, therefore any good name you might think of is always already taken by some domain name speculator. Fortunately, it's standard for open source projects to be .org.",
+        "category": "general",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/general/"
+      },
+      {
+        "id": "satoshi-2010-02-26-46",
+        "date": "2010-02-26",
+        "text": "How does everyone feel about the B symbol with the two lines through the outside? Can we live with that as our logo?",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2010-02-24-47",
+        "date": "2010-02-24",
+        "text": "That would be nice at point-of-sale. The cash register displays a QR-code encoding a bitcoin address and amount on a screen and you photo it with your mobile.",
+        "category": "transactions",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/transactions/"
+      },
+      {
+        "id": "satoshi-2010-02-21-50",
+        "date": "2010-02-21",
+        "text": "At the moment, generation effort is rapidly increasing, suggesting people are estimating the present value to be higher than the current cost of production.",
+        "category": "bitcoin-economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-economics/"
+      },
+      {
+        "id": "satoshi-2010-02-21-48",
+        "date": "2010-02-21",
+        "text": "A rational market price for something that is expected to increase in value will already reflect the present value of the expected future increases. In your head, you do a probability estimate balancing the odds that it keeps increasing.",
+        "category": "economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/economics/"
+      },
+      {
+        "id": "satoshi-2010-02-21-49",
+        "date": "2010-02-21",
+        "text": "The price of any commodity tends to gravitate toward the production cost. If the price is below cost, then production slows down. If the price is above cost, profit can be made by generating and selling more. At the same time, the increased production would increase the difficulty, pushing the cost of generating towards the price.",
+        "category": "economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/economics/"
+      },
+      {
+        "id": "satoshi-2010-02-14-51",
+        "date": "2010-02-14",
+        "text": "I'm sure that in 20 years there will either be very large transaction volume or no volume.",
+        "category": "bitcoin-economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-economics/"
+      },
+      {
+        "id": "satoshi-2010-02-14-52",
+        "date": "2010-02-14",
+        "text": "In a few decades when the reward gets too small, the transaction fee will become the main compensation for nodes.",
+        "category": "bitcoin-economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-economics/"
+      },
+      {
+        "id": "satoshi-2010-02-14-53",
+        "date": "2010-02-14",
+        "text": "If you're sad about paying the fee, you could always turn the tables and run a node yourself and maybe someday rake in a 0.44 fee yourself.",
+        "category": "nodes",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/nodes/"
+      },
+      {
+        "id": "satoshi-2010-02-06-57",
+        "date": "2010-02-06",
+        "text": "You could use TOR if you don't want anyone to know you're even using Bitcoin.",
+        "category": "privacy",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/privacy/"
+      },
+      {
+        "id": "satoshi-2010-02-06-56",
+        "date": "2010-02-06",
+        "text": "Bitcoin is still very new and has not been independently analysed. If you're serious about privacy, TOR is an advisable precaution.",
+        "category": "privacy",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/privacy/"
+      },
+      {
+        "id": "satoshi-2010-02-06-55",
+        "date": "2010-02-06",
+        "text": "If it gets tiresome working with small numbers, we could change where the display shows the decimal point. Same amount of money, just different convention for where the \",\"'s and \".\"'s go. e.g. moving the decimal place 3 places would mean if you had 1.00000 before, now it shows it as 1,000.00.",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2010-01-28-58",
+        "date": "2010-01-28",
+        "text": "I very much wanted to find some way to include a short message, but the problem is, the whole world would be able to see the message. As much as you may keep reminding people that the message is completely non-private, it would be an accident waiting to happen.",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2009-12-12-59",
+        "date": "2009-12-12",
+        "text": "The average total coins generated across the network per day stays the same. Faster machines just get a larger share than slower machines. If everyone bought faster machines, they wouldn't get more coins than before.",
+        "category": "mining",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/mining/"
+      },
+      {
+        "id": "satoshi-2009-12-12-60",
+        "date": "2009-12-12",
+        "text": "We should have a gentleman's agreement to postpone the GPU arms race as long as we can for the good of the network. It's much easer to get new users up to speed if they don't have to worry about GPU drivers and compatibility. It's nice how anyone with just a CPU can compete fairly equally right now.",
+        "category": "mining",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/mining/"
+      },
+      {
+        "id": "satoshi-2009-12-10-62",
+        "date": "2009-12-10",
+        "text": "Being open source means anyone can independently review the code. If it was closed source, nobody could verify the security. I think it's essential for a program of this nature to be open source.",
+        "category": "trusted-third-parties",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/trusted-third-parties/"
+      },
+      {
+        "id": "satoshi-2009-12-10-61",
+        "date": "2009-12-10",
+        "text": "Those coins can never be recovered, and the total circulation is less. Since the effective circulation is reduced, all the remaining coins are worth slightly more. It's the opposite of when a government prints money and the value of existing money goes down.",
+        "category": "bitcoin-economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-economics/"
+      },
+      {
+        "id": "satoshi-2009-11-25-63",
+        "date": "2009-11-25",
+        "text": "For greater privacy, it's best to use bitcoin addresses only once.",
+        "category": "privacy",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/privacy/"
+      },
+      {
+        "id": "satoshi-2009-11-22-64",
+        "date": "2009-11-22",
+        "text": "Think of it as a cooperative effort to make a chain. When you add a link, you must first find the current end of the chain. If you were to locate the last link, then go off for an hour and forge your link, come back and link it to the link that was the end an hour ago, others may have added several links since then and they're not going to want to use your link that now branches off the middle.",
+        "category": "mining",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/mining/"
+      },
+      {
+        "id": "satoshi-2009-02-18-66",
+        "date": "2009-02-18",
+        "text": "You could say coins are issued by the majority. They are issued in a limited, predetermined amount.",
+        "category": "bitcoin-economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-economics/"
+      },
+      {
+        "id": "satoshi-2009-02-18-67",
+        "date": "2009-02-18",
+        "text": "To Sepp's question, indeed there is nobody to act as central bank or federal reserve to adjust the money supply as the population of users grows. That would have required a trusted party to determine the value, because I don't know a way for software to know the real world value of things.",
+        "category": "bitcoin-economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-economics/"
+      },
+      {
+        "id": "satoshi-2009-02-18-68",
+        "date": "2009-02-18",
+        "text": "In this sense, it's more typical of a precious metal. Instead of the supply changing to keep the value the same, the supply is predetermined and the value changes. As the number of users grows, the value per coin increases. It has the potential for a positive feedback loop; as users increase, the value goes up, which could attract more users to take advantage of the increasing value.",
+        "category": "bitcoin-economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-economics/"
+      },
+      {
+        "id": "satoshi-2009-02-15-69",
+        "date": "2009-02-15",
+        "text": "A lot of people automatically dismiss e-currency as a lost cause because of all the companies that failed since the 1990's. I hope it's obvious it was only the centrally controlled nature of those systems that doomed them. I think this is the first time we're trying a decentralized, non-trust-based system.",
+        "category": "cryptocurrency",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/cryptocurrency/"
+      },
+      {
+        "id": "satoshi-2009-02-11-74",
+        "date": "2009-02-11",
+        "text": "With e-currency based on cryptographic proof, without the need to trust a third party middleman, money can be secure and transactions effortless.",
+        "category": "cryptocurrency",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/cryptocurrency/"
+      },
+      {
+        "id": "satoshi-2009-02-11-75",
+        "date": "2009-02-11",
+        "text": "A digital coin contains the public key of its owner. To transfer it, the owner signs the coin together with the public key of the next owner. Anyone can check the signatures to verify the chain of ownership.",
+        "category": "transactions",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/transactions/"
+      },
+      {
+        "id": "satoshi-2009-02-11-77",
+        "date": "2009-02-11",
+        "text": "The result is a distributed system with no single point of failure. Users hold the crypto keys to their own money and transact directly with each other, with the help of the P2P network to check for double-spending.",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2014-03-07-78",
+        "date": "2014-03-07",
+        "text": "I am not Dorian Nakamoto.",
+        "category": "identity",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/identity/"
+      },
+      {
+        "id": "satoshi-2008-11-01-79",
+        "date": "2008-11-01",
+        "text": "I've been working on a new electronic cash system that's fully peer-to-peer, with no trusted third party.",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2008-11-01-80",
+        "date": "2008-11-01",
+        "text": "The main properties: Double-spending is prevented with a peer-to-peer network. No mint or other trusted parties. Participants can be anonymous. New coins are made from Hashcash style proof-of-work. The proof-of-work for new coin generation also powers the network to prevent double-spending.",
+        "category": "bitcoin-design",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-design/"
+      },
+      {
+        "id": "satoshi-2008-11-02-82",
+        "date": "2008-11-02",
+        "text": "Only people trying to create new coins would need to run network nodes.",
+        "category": "nodes",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/nodes/"
+      },
+      {
+        "id": "satoshi-2008-11-02-81",
+        "date": "2008-11-02",
+        "text": "Long before the network gets anywhere near as large as that, it would be safe for users to use Simplified Payment Verification (section 8) to check for double spending, which only requires having the chain of block headers, or about 12KB per day.",
+        "category": "double-spending",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/double-spending/"
+      },
+      {
+        "id": "satoshi-2008-11-02-83",
+        "date": "2008-11-02",
+        "text": "At first, most users would run network nodes, but as the network grows beyond a certain point, it would be left more and more to specialists with server farms of specialized hardware. A server farm would only need to have one node on the network and the rest of the LAN connects with that one node.",
+        "category": "nodes",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/nodes/"
+      },
+      {
+        "id": "satoshi-2008-11-03-84",
+        "date": "2008-11-03",
+        "text": "The requirement is that the good guys collectively have more CPU power than any single attacker.",
+        "category": "mining",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/mining/"
+      },
+      {
+        "id": "satoshi-2008-11-03-87",
+        "date": "2008-11-03",
+        "text": "The Bitcoin network might actually reduce spam by diverting zombie farms to generating bitcoins instead.",
+        "category": "mining",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/mining/"
+      },
+      {
+        "id": "satoshi-2008-11-03-85",
+        "date": "2008-11-03",
+        "text": "There would be many smaller zombie farms that are not big enough to overpower the network, and they could still make money by generating bitcoins. The smaller farms are then the \"honest nodes\". (I need a better term than \"honest\") The more smaller farms resort to generating bitcoins, the higher the bar gets to overpower the network, making larger farms also too small to overpower it so that they may as well generate bitcoins too.…",
+        "category": "mining",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/mining/"
+      },
+      {
+        "id": "satoshi-2008-11-07-88",
+        "date": "2008-11-07",
+        "text": "Yes, but we can win a major battle in the arms race and gain a new territory of freedom for several years.",
+        "category": "motives",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/motives/"
+      },
+      {
+        "id": "satoshi-2008-11-07-89",
+        "date": "2008-11-07",
+        "text": "Governments are good at cutting off the heads of a centrally controlled networks like Napster, but pure P2P networks like Gnutella and Tor seem to be holding their own.",
+        "category": "p2p-networks",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/p2p-networks/"
+      },
+      {
+        "id": "satoshi-2008-11-08-90",
+        "date": "2008-11-08",
+        "text": "As computers get faster and the total computing power applied to creating bitcoins increases, the difficulty increases proportionally to keep the total new production constant. Thus, it is known in advance how many new bitcoins will be created every year in the future.",
+        "category": "mining",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/mining/"
+      },
+      {
+        "id": "satoshi-2008-11-08-91",
+        "date": "2008-11-08",
+        "text": "The fact that new coins are produced means the money supply increases by a planned amount, but this does not necessarily result in inflation. If the supply of money increases at the same rate that the number of people using it increases, prices remain stable. If it does not increase as fast as demand, there will be deflation and early holders of money will see its value increase. Coins have to get initially distributed somehow, and a constant rate seems like the best formula.",
+        "category": "bitcoin-economics",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/bitcoin-economics/"
+      },
+      {
+        "id": "satoshi-2008-11-09-98",
+        "date": "2008-11-09",
+        "text": "It's not a problem if transactions have to wait one or a few extra cycles to get into a block.",
+        "category": "transactions",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/transactions/"
+      },
+      {
+        "id": "satoshi-2008-11-09-99",
+        "date": "2008-11-09",
+        "text": "The proof-of-work chain is the solution to the synchronisation problem, and to knowing what the globally shared view is without having to trust anyone.",
+        "category": "proof-of-work",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/proof-of-work/"
+      },
+      {
+        "id": "satoshi-2008-11-09-92",
+        "date": "2008-11-09",
+        "text": "Right, nodes keep transactions in their working set until they get into a block. If a transaction reaches 90% of nodes, then each time a new block is found, it has a 90% chance of being in it.",
+        "category": "nodes",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/nodes/"
+      },
+      {
+        "id": "satoshi-2008-11-10-103",
+        "date": "2008-11-10",
+        "text": "If you're having trouble with the inflation issue, it's easy to tweak it for transaction fees instead. It's as simple as this: let the output value from any transaction be 1 cent less than the input value. Either the client software automatically writes transactions for 1 cent more than the intended payment value, or it could come out of the payee's side. The incentive value when a node finds a proof-of-work for a block could be the total of the fees in the block.",
+        "category": "fees",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/fees/"
+      },
+      {
+        "id": "satoshi-2008-11-11-104",
+        "date": "2008-11-11",
+        "text": "When there are multiple double-spent versions of the same transaction, one and only one will become valid.",
+        "category": "double-spending",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/double-spending/"
+      },
+      {
+        "id": "satoshi-2008-11-11-105",
+        "date": "2008-11-11",
+        "text": "The receiver of a payment must wait an hour or so before believing that it's valid. The network will resolve any possible double-spend races by then.",
+        "category": "double-spending",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/double-spending/"
+      },
+      {
+        "id": "satoshi-2008-11-11-109",
+        "date": "2008-11-11",
+        "text": "With the transaction fee based incentive system I recently posted, nodes would have an incentive to include all the paying transactions they receive.",
+        "category": "nodes",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/nodes/"
+      },
+      {
+        "id": "satoshi-2008-11-14-111",
+        "date": "2008-11-14",
+        "text": "Broadcasts will probably be almost completely reliable. TCP transmissions are rarely ever dropped these days, and the broadcast protocol has a retry mechanism to get the data from other nodes after a while. If broadcasts turn out to be slower in practice than expected, the target time between blocks may have to be increased to avoid wasting resources. We want blocks to usually propagate in much less time than it takes to generate them, otherwise nodes would spend too much time working on obsolete blocks.",
+        "category": "nodes",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/nodes/"
+      },
+      {
+        "id": "satoshi-2008-11-17-119",
+        "date": "2008-11-17",
+        "text": "The credential that establishes someone as real is the ability to supply CPU power.",
+        "category": "proof-of-work",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/proof-of-work/"
+      },
+      {
+        "id": "satoshi-2008-11-17-113",
+        "date": "2008-11-17",
+        "text": "I'll try and hurry up and release the sourcecode as soon as possible to serve as a reference to help clear up all these implementation questions.",
+        "category": "releases",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/releases/"
+      },
+      {
+        "id": "satoshi-2008-11-17-114",
+        "date": "2008-11-17",
+        "text": "A basic transaction is just what you see in the figure in section 2. A signature (of the buyer) satisfying the public key of the previous transaction, and a new public key (of the seller) that must be satisfied to spend it the next time.",
+        "category": "transactions",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/transactions/"
+      },
+      {
+        "id": "satoshi-2009-01-09-124",
+        "date": "2009-01-09",
+        "text": "If you can keep a node running that accepts incoming connections, you'll really be helping the network a lot. Port 8333 on your firewall needs to be open to receive incoming connections.",
+        "category": "nodes",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/nodes/"
+      },
+      {
+        "id": "satoshi-2009-01-09-123",
+        "date": "2009-01-09",
+        "text": "Announcing the first release of Bitcoin, a new electronic cash system that uses a peer-to-peer network to prevent double-spending. It's completely decentralized with no server or central authority.",
+        "category": "releases",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/releases/"
+      },
+      {
+        "id": "satoshi-2009-01-09-126",
+        "date": "2009-01-09",
+        "text": "There are two ways to send money. If the recipient is online, you can enter their IP address and it will connect, get a new public key and send the transaction with comments. If the recipient is not online, it is possible to send to their Bitcoin address, which is a hash of their public key that they give you. They'll receive the transaction the next time they connect and get the block it's in.…",
+        "category": "transactions",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/transactions/"
+      },
+      {
+        "id": "satoshi-2009-01-17-130",
+        "date": "2009-01-17",
+        "text": "Subscription sites that need some extra proof-of-work for their free trial so it doesn't cannibalize subscriptions could charge bitcoins for the trial.",
+        "category": "micropayments",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/micropayments/"
+      },
+      {
+        "id": "satoshi-2009-01-17-128",
+        "date": "2009-01-17",
+        "text": "I would be surprised if 10 years from now we're not using electronic currency in some way, now that we know a way to do it that won't inevitably get dumbed down when the trusted third party gets cold feet.",
+        "category": "cryptocurrency",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/cryptocurrency/"
+      },
+      {
+        "id": "satoshi-2009-01-17-131",
+        "date": "2009-01-17",
+        "text": "It might make sense just to get some in case it catches on. If enough people think the same way, that becomes a self fulfilling prophecy. Once it gets bootstrapped, there are so many applications if you could effortlessly pay a few cents to a website as easily as dropping coins in a vending machine.",
+        "category": "micropayments",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/micropayments/"
+      },
+      {
+        "id": "satoshi-2008-10-31-132",
+        "date": "2008-10-31",
+        "text": "A purely peer-to-peer version of electronic cash would allow online payments to be sent directly from one party to another without going through a financial institution.",
+        "category": "cryptocurrency",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/cryptocurrency/"
+      },
+      {
+        "id": "satoshi-2008-10-31-156",
+        "date": "2008-10-31",
+        "text": "It should be noted that fan-out, where a transaction depends on several transactions, and those transactions depend on many more, is not a problem here. There is never the need to extract a complete standalone copy of a transaction's history.",
+        "category": "transactions",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/transactions/"
+      },
+      {
+        "id": "satoshi-2008-10-31-145",
+        "date": "2008-10-31",
+        "text": "To compensate for increasing hardware speed and varying interest in running nodes over time, the proof-of-work difficulty is determined by a moving average targeting an average number of blocks per hour. If they're generated too fast, the difficulty increases.",
+        "category": "proof-of-work",
+        "sourceUrl": "https://satoshi.nakamotoinstitute.org/quotes/proof-of-work/"
+      }
+    ]
+  },
   "sourceHealth": {
     "mempool": true,
     "optech": true,
-    "bitcoinCore": true
+    "bitcoinCore": false,
+    "satoshiArchive": true
   }
 }

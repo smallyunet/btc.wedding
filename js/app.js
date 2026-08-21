@@ -13,6 +13,8 @@ const state = {
     activeFilter: "all",
     current: null,
     feed: [],
+    satoshiQuoteIndex: 0,
+    satoshiQuotes: [],
     previous: readPreviousVisit(),
     saveTimer: 0
 };
@@ -57,6 +59,16 @@ const elements = {
     pageTitle: document.getElementById("page-title"),
     refreshButton: document.getElementById("refresh-data"),
     signalSummary: document.getElementById("signal-summary"),
+    satoshiCalendar: document.getElementById("satoshi-calendar"),
+    satoshiDateStatus: document.getElementById("satoshi-date-status"),
+    satoshiDay: document.getElementById("satoshi-day"),
+    satoshiMonth: document.getElementById("satoshi-month"),
+    satoshiNext: document.getElementById("satoshi-next"),
+    satoshiQuote: document.getElementById("satoshi-quote"),
+    satoshiQuoteCount: document.getElementById("satoshi-quote-count"),
+    satoshiQuoteDate: document.getElementById("satoshi-quote-date"),
+    satoshiQuoteLabel: document.getElementById("satoshi-quote-label"),
+    satoshiSource: document.getElementById("satoshi-source"),
     snapshotTime: document.getElementById("snapshot-time"),
     summaryWindow: document.getElementById("summary-window"),
     unminedSupply: document.getElementById("unmined-supply"),
@@ -155,6 +167,27 @@ function formatDate(value) {
         month: "short",
         day: "numeric"
     }).format(date);
+}
+
+function formatArchiveDate(value) {
+    const [year, month, day] = String(value || "").split("-").map(Number);
+    if (!year || !month || !day) return "Date unavailable";
+    return new Intl.DateTimeFormat("en", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        timeZone: "UTC"
+    }).format(new Date(Date.UTC(year, month - 1, day)));
+}
+
+function calendarDistance(left, right) {
+    const referenceYear = 2000;
+    const toDay = (value) => {
+        const [month, day] = value.split("-").map(Number);
+        return Math.round((Date.UTC(referenceYear, month - 1, day) - Date.UTC(referenceYear, 0, 1)) / 86_400_000);
+    };
+    const distance = Math.abs(toDay(left) - toDay(right));
+    return Math.min(distance, 366 - distance);
 }
 
 function formatBitcoinAmount(value) {
@@ -662,6 +695,62 @@ function renderFeed() {
     elements.feedEmpty.hidden = visibleItems.length > 0;
 }
 
+function renderSatoshiQuote() {
+    const quote = state.satoshiQuotes[state.satoshiQuoteIndex];
+    if (!quote) return;
+
+    setText(elements.satoshiQuote, quote.text);
+    setText(elements.satoshiQuoteDate, formatArchiveDate(quote.date));
+    elements.satoshiQuoteDate.dateTime = quote.date;
+    elements.satoshiSource.href = quote.sourceUrl || "https://satoshi.nakamotoinstitute.org/quotes/";
+    elements.satoshiSource.setAttribute("aria-label", `Open the archived source for Satoshi Nakamoto on ${formatArchiveDate(quote.date)}`);
+    elements.satoshiNext.hidden = state.satoshiQuotes.length < 2;
+    elements.satoshiQuoteCount.hidden = state.satoshiQuotes.length < 2;
+    setText(elements.satoshiQuoteCount, `${state.satoshiQuoteIndex + 1} / ${state.satoshiQuotes.length}`);
+}
+
+function renderSatoshiToday(history) {
+    const today = new Date();
+    const monthDay = `${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const monthLabel = new Intl.DateTimeFormat("en", { month: "short" }).format(today);
+    const quotes = Array.isArray(history?.quotes) ? history.quotes : [];
+    const exact = quotes.filter((quote) => String(quote.date).slice(5) === monthDay);
+    const nearestMonthDay = exact.length || !quotes.length
+        ? monthDay
+        : [...new Set(quotes.map((quote) => String(quote.date).slice(5)))]
+            .sort((left, right) => calendarDistance(left, monthDay) - calendarDistance(right, monthDay))[0];
+
+    state.satoshiQuotes = exact.length
+        ? exact
+        : quotes.filter((quote) => String(quote.date).slice(5) === nearestMonthDay);
+    state.satoshiQuoteIndex = 0;
+
+    elements.satoshiCalendar.dateTime = `${today.getFullYear()}-${monthDay}`;
+    setText(elements.satoshiMonth, monthLabel);
+    setText(elements.satoshiDay, String(today.getDate()).padStart(2, "0"));
+
+    if (!state.satoshiQuotes.length) {
+        setText(elements.satoshiDateStatus, "The archive is temporarily unavailable.");
+        setText(elements.satoshiQuoteLabel, "Archive unavailable");
+        setText(elements.satoshiQuote, "Today’s historical entry could not be loaded. The live Bitcoin brief above is unaffected.");
+        setText(elements.satoshiQuoteDate, "");
+        elements.satoshiNext.hidden = true;
+        elements.satoshiQuoteCount.hidden = true;
+        return;
+    }
+
+    if (exact.length) {
+        setText(elements.satoshiDateStatus, `${exact.length} indexed ${exact.length === 1 ? "quote" : "quotes"} on this calendar date.`);
+        setText(elements.satoshiQuoteLabel, "Satoshi, on this day");
+    } else {
+        const nearestDate = formatArchiveDate(state.satoshiQuotes[0].date);
+        setText(elements.satoshiDateStatus, "No indexed quote is preserved for this calendar date.");
+        setText(elements.satoshiQuoteLabel, `Nearest archive entry · ${nearestDate}`);
+    }
+
+    renderSatoshiQuote();
+}
+
 function render(current) {
     state.current = current;
     const comparisonEvents = buildComparisonEvents(current, state.previous);
@@ -688,6 +777,7 @@ function render(current) {
     renderVisitSummary();
     renderSignalSummary();
     renderFeed();
+    renderSatoshiToday(current.satoshiHistory);
     scheduleSave();
 }
 
@@ -731,6 +821,10 @@ document.querySelectorAll(".filter-button").forEach((button) => {
 });
 
 elements.refreshButton.addEventListener("click", () => refresh());
+elements.satoshiNext.addEventListener("click", () => {
+    state.satoshiQuoteIndex = (state.satoshiQuoteIndex + 1) % state.satoshiQuotes.length;
+    renderSatoshiQuote();
+});
 window.addEventListener("pagehide", saveCurrentVisit);
 
 refresh({ initial: true });
