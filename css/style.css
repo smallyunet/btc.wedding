@@ -182,8 +182,8 @@ main { padding: 28px 0 48px; }
 .signal-summary li { position: relative; min-height: 68px; display: flex; align-items: center; padding: 14px 0 14px 36px; border-bottom: 1px solid var(--line-dark); color: var(--ink); font-size: var(--text-body); line-height: 1.45; counter-increment: signal; }
 .signal-summary li::before { position: absolute; left: 0; color: var(--bitcoin-pale); font-family: var(--mono); font-size: var(--text-label); font-weight: 700; content: "0" counter(signal); }
 .visit-meta { padding: 26px 30px; display: flex; justify-content: space-between; gap: 18px; border-top: 1px solid var(--line-dark); }
-.last-visit span, .last-visit strong { display: block; }
-.last-visit strong { margin-top: 3px; color: var(--ink); font-family: var(--mono); font-size: var(--text-meta); font-weight: 500; }
+.public-scope span, .public-scope strong { display: block; }
+.public-scope strong { margin-top: 3px; color: var(--ink); font-family: var(--mono); font-size: var(--text-meta); font-weight: 500; }
 .snapshot-time { text-align: right; white-space: nowrap; }
 
 .network-tape { display: grid; grid-template-columns: 180px minmax(0,1fr); border: 1px solid var(--line-dark); border-top: 0; background: var(--paper-bright); }

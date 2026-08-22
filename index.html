@@ -59,7 +59,7 @@
                 <a class="briefing-link" href="#changefeed"><span id="briefing-link-label">View current brief</span><span aria-hidden="true">↓</span></a>
             </div>
             <div class="visit-summary" aria-labelledby="visit-title">
-                <span class="visit-index" id="summary-window">Right now</span>
+                <span class="visit-index" id="summary-window">Current snapshot</span>
                 <div class="visit-count">
                     <strong id="change-count">—</strong>
                     <div>
@@ -67,13 +67,13 @@
                         <p id="visit-context">Reading current conditions and trusted updates.</p>
                     </div>
                 </div>
-                <ol class="signal-summary" id="signal-summary" aria-label="Today’s Bitcoin brief" aria-live="polite">
+                <ol class="signal-summary" id="signal-summary" aria-label="Current public Bitcoin brief" aria-live="polite">
                     <li>Reading the network</li>
                     <li>Comparing trusted updates</li>
                     <li>Removing the noise</li>
                 </ol>
                 <div class="visit-meta">
-                    <p class="last-visit"><span>Last checked</span><strong id="last-visit">First visit</strong></p>
+                    <p class="public-scope"><span>Scope</span><strong>Shared public brief</strong></p>
                     <p class="snapshot-time" id="snapshot-time">Snapshot time unavailable</p>
                 </div>
             </div>
@@ -92,7 +92,7 @@
         <div class="content-layout">
             <section class="feed-section" id="changefeed" aria-labelledby="feed-title">
                 <div class="feed-header">
-                    <div><span class="section-number">01 / Your brief</span><h2 id="feed-title">What matters now</h2><p>Plain-language signals first. Every item links to its original source.</p></div>
+                    <div><span class="section-number">01 / Public brief</span><h2 id="feed-title">What matters now</h2><p>Plain-language signals first. Every item links to its original source.</p></div>
                     <div class="feed-filters" role="group" aria-label="Filter changes">
                         <button type="button" class="filter-button active" data-filter="all" aria-pressed="true">All</button>
                         <button type="button" class="filter-button" data-filter="action" aria-pressed="false">Need action</button>
@@ -130,13 +130,13 @@
 
         <section class="satoshi-today" id="satoshi-today" aria-labelledby="satoshi-today-title">
             <div class="satoshi-date-panel">
-                <h2 class="section-number" id="satoshi-today-title">Archive / On this day</h2>
+                <h2 class="section-number" id="satoshi-today-title">Archive / Snapshot date</h2>
                 <time class="satoshi-calendar" id="satoshi-calendar" datetime="">
-                    <span id="satoshi-month">Today</span>
+                    <span id="satoshi-month">UTC</span>
                     <strong id="satoshi-day">—</strong>
                 </time>
                 <p id="satoshi-date-status">Looking through Satoshi’s archived words.</p>
-                <button class="archive-toggle" id="archive-toggle" type="button" aria-controls="satoshi-quote-panel" aria-expanded="false">Read today’s message <span aria-hidden="true">↓</span></button>
+                <button class="archive-toggle" id="archive-toggle" type="button" aria-controls="satoshi-quote-panel" aria-expanded="false">Read archived message <span aria-hidden="true">↓</span></button>
             </div>
             <div class="satoshi-quote-panel" id="satoshi-quote-panel" aria-live="polite">
                 <div class="satoshi-quote-meta">
@@ -144,7 +144,7 @@
                     <span id="satoshi-quote-count" hidden></span>
                 </div>
                 <p class="satoshi-provenance"><span id="satoshi-source-type">Verified archive record</span><span id="satoshi-disputed" hidden>Disputed attribution</span></p>
-                <blockquote id="satoshi-quote">Loading today’s archive entry…</blockquote>
+                <blockquote id="satoshi-quote">Loading the snapshot-date archive entry…</blockquote>
                 <div class="satoshi-quote-footer">
                     <p><strong>Satoshi Nakamoto</strong><time id="satoshi-quote-date" datetime=""></time><span id="satoshi-subject"></span></p>
                     <div class="satoshi-actions">
@@ -190,7 +190,7 @@
 
         <details class="about-details">
             <summary>Sources and methodology</summary>
-            <div class="about-content"><p>Bitcoin Changefeed by btc.wedding is a low-noise network brief. Need action means conditions may affect a transaction or upgrade decision. Worth knowing means a measurable shift deserves a closer look. Normal means no response is expected. The daily archive uses the visitor’s local calendar date and clearly labels the nearest entry when no quote is indexed for that day.</p><nav aria-label="Data sources"><a href="https://mempool.space/" target="_blank" rel="noopener noreferrer">mempool.space</a><a href="https://docs.coinmetrics.io/asset-metrics/supply/ser" target="_blank" rel="noopener noreferrer">Coin Metrics</a><a href="https://bitcoinops.org/" target="_blank" rel="noopener noreferrer">Bitcoin Optech</a><a href="https://github.com/bitcoin/bitcoin/releases" target="_blank" rel="noopener noreferrer">Bitcoin Core</a><a href="https://satoshi.nakamotoinstitute.org/quotes/" target="_blank" rel="noopener noreferrer">Satoshi Nakamoto Institute</a></nav></div>
+            <div class="about-content"><p>Bitcoin Changefeed by btc.wedding is a low-noise public network brief. Need action means conditions may affect a transaction or upgrade decision. Worth knowing means a measurable shift deserves a closer look. Normal means no response is expected. Every visitor receives the same public feed; no previous-visit state is used. The archive follows the snapshot’s UTC date and clearly labels the nearest entry when no quote is indexed for that date.</p><nav aria-label="Data sources"><a href="https://mempool.space/" target="_blank" rel="noopener noreferrer">mempool.space</a><a href="https://docs.coinmetrics.io/asset-metrics/supply/ser" target="_blank" rel="noopener noreferrer">Coin Metrics</a><a href="https://bitcoinops.org/" target="_blank" rel="noopener noreferrer">Bitcoin Optech</a><a href="https://github.com/bitcoin/bitcoin/releases" target="_blank" rel="noopener noreferrer">Bitcoin Core</a><a href="https://satoshi.nakamotoinstitute.org/quotes/" target="_blank" rel="noopener noreferrer">Satoshi Nakamoto Institute</a></nav></div>
         </details>
     </main>
 

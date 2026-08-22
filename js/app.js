@@ -1,4 +1,3 @@
-const STORAGE_KEY = "btc_changefeed_last_seen_v1";
 const SNAPSHOT_URL = "data/snapshot.json";
 const LIVE_ENDPOINTS = {
     fees: "https://mempool.space/api/v1/fees/recommended",
@@ -15,9 +14,7 @@ const state = {
     feed: [],
     feedExpanded: false,
     satoshiQuoteIndex: 0,
-    satoshiQuotes: [],
-    previous: readPreviousVisit(),
-    saveTimer: 0
+    satoshiQuotes: []
 };
 
 const elements = {
@@ -49,7 +46,6 @@ const elements = {
     feedEmpty: document.getElementById("feed-empty"),
     feedList: document.getElementById("feed-list"),
     feedMore: document.getElementById("feed-more"),
-    lastVisit: document.getElementById("last-visit"),
     ledgerSupply: document.getElementById("ledger-supply"),
     ledgerSupplyDetail: document.getElementById("ledger-supply-detail"),
     dailyIssuance: document.getElementById("daily-issuance"),
@@ -84,28 +80,6 @@ const elements = {
     visitContext: document.getElementById("visit-context"),
     visitTitle: document.getElementById("visit-title")
 };
-
-function readPreviousVisit() {
-    try {
-        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-        return parsed && parsed.metrics ? parsed : null;
-    } catch {
-        return null;
-    }
-}
-
-function saveCurrentVisit() {
-    if (!state.current?.metrics) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        seenAt: new Date().toISOString(),
-        metrics: state.current.metrics
-    }));
-}
-
-function scheduleSave() {
-    window.clearTimeout(state.saveTimer);
-    state.saveTimer = window.setTimeout(saveCurrentVisit, 5_000);
-}
 
 function isFiniteNumber(value) {
     if (value === null || value === undefined || value === "") return false;
@@ -372,70 +346,6 @@ function buildCurrentEvents(metrics, publishedAt) {
     return events;
 }
 
-function percentChange(current, previous) {
-    if (!isFiniteNumber(current) || !isFiniteNumber(previous) || Number(previous) === 0) return null;
-    return ((Number(current) - Number(previous)) / Math.abs(Number(previous))) * 100;
-}
-
-function buildComparisonEvents(current, previousVisit) {
-    if (!previousVisit?.metrics) return [];
-    const previous = previousVisit.metrics;
-    const events = [];
-    const publishedAt = current.generatedAt;
-    const feeDelta = percentChange(current.metrics.feeFast, previous.feeFast);
-
-    if (feeDelta !== null && (Math.abs(feeDelta) >= 50 || Math.abs(current.metrics.feeFast - previous.feeFast) >= 5)) {
-        const rising = feeDelta > 0;
-        events.push({
-            id: `visit-fee-${current.metrics.feeFast}`,
-            category: "Since last visit",
-            level: rising && current.metrics.feeFast >= 10 ? "notable" : "routine",
-            title: `Priority fees ${rising ? "rose" : "fell"} ${Math.abs(feeDelta).toFixed(0)}%`,
-            summary: `The high-priority estimate moved from ${previous.feeFast} to ${current.metrics.feeFast} sat/vB since this browser last checked.`,
-            value: `${current.metrics.feeFast} sat/vB`,
-            publishedAt,
-            source: "mempool.space",
-            sourceUrl: "https://mempool.space/"
-        });
-    }
-
-    const mempoolDelta = percentChange(current.metrics.mempoolVsizeMB, previous.mempoolVsizeMB);
-    if (mempoolDelta !== null && (Math.abs(mempoolDelta) >= 40 || Math.abs(current.metrics.mempoolVsizeMB - previous.mempoolVsizeMB) >= 10)) {
-        const rising = mempoolDelta > 0;
-        events.push({
-            id: `visit-mempool-${current.metrics.mempoolVsizeMB}`,
-            category: "Since last visit",
-            level: rising && (
-                current.metrics.mempoolVsizeMB >= 50
-                || (current.metrics.mempoolVsizeMB >= 20 && Number(current.metrics.feeFast) >= 5)
-            ) ? "notable" : "routine",
-            title: `Mempool pressure ${rising ? "increased" : "cleared"}`,
-            summary: `Queued virtual size moved from ${Number(previous.mempoolVsizeMB).toFixed(1)} to ${Number(current.metrics.mempoolVsizeMB).toFixed(1)} MvB.`,
-            value: `${mempoolDelta > 0 ? "+" : ""}${mempoolDelta.toFixed(0)}%`,
-            publishedAt,
-            source: "mempool.space",
-            sourceUrl: "https://mempool.space/"
-        });
-    }
-
-    const priceDelta = percentChange(current.metrics.priceUsd, previous.priceUsd);
-    if (priceDelta !== null && Math.abs(priceDelta) >= 5) {
-        events.push({
-            id: `visit-price-${current.metrics.priceUsd}`,
-            category: "Since last visit",
-            level: "notable",
-            title: `Bitcoin’s USD reference moved ${Math.abs(priceDelta).toFixed(1)}%`,
-            summary: `The reference price moved from ${formatCurrency(previous.priceUsd)} to ${formatCurrency(current.metrics.priceUsd)}. Price is context, not a recommendation.`,
-            value: `${priceDelta > 0 ? "+" : ""}${priceDelta.toFixed(1)}%`,
-            publishedAt,
-            source: "mempool.space",
-            sourceUrl: "https://mempool.space/"
-        });
-    }
-
-    return events;
-}
-
 function deduplicateFeed(items) {
     const seen = new Set();
     return items.filter((item) => {
@@ -629,9 +539,8 @@ function renderBriefing(current) {
 
     panel.classList.remove("hero-calm", "hero-notable", "hero-action", "hero-unknown");
     panel.classList.add(`hero-${stateName}`);
-    const returningVisitor = Boolean(state.previous?.seenAt);
-    setText(elements.briefingEyebrow, returningVisitor ? "Since your last visit" : "Current network brief");
-    setText(elements.briefingLinkLabel, returningVisitor ? "View changes since last visit" : "View current brief");
+    setText(elements.briefingEyebrow, "Current network brief");
+    setText(elements.briefingLinkLabel, "View current brief");
     setText(elements.pageTitle, title);
     setText(elements.briefingCopy, copy);
 }
@@ -641,13 +550,7 @@ function renderVisitSummary() {
     const actionCount = attentionItems.filter((item) => item.level === "action").length;
     const meaningful = attentionItems.length;
     setText(elements.changeCount, String(meaningful));
-    setText(elements.summaryWindow, state.previous?.seenAt ? "Since last visit" : "Right now");
-
-    if (state.previous?.seenAt) {
-        setText(elements.lastVisit, formatRelativeTime(state.previous.seenAt));
-    } else {
-        setText(elements.lastVisit, "First visit");
-    }
+    setText(elements.summaryWindow, "Current snapshot");
 
     setText(elements.visitTitle, actionCount ? "Need attention" : meaningful ? "Worth knowing" : "All clear");
     setText(elements.visitContext, actionCount
@@ -752,10 +655,11 @@ function renderSatoshiQuote() {
     setText(elements.satoshiQuoteCount, `${state.satoshiQuoteIndex + 1} / ${state.satoshiQuotes.length}`);
 }
 
-function renderSatoshiToday(history) {
-    const today = new Date();
-    const monthDay = `${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-    const monthLabel = new Intl.DateTimeFormat("en", { month: "short" }).format(today);
+function renderSatoshiForSnapshot(history, generatedAt) {
+    const snapshotDate = new Date(generatedAt || 0);
+    const validSnapshotDate = Number.isNaN(snapshotDate.getTime()) ? new Date(0) : snapshotDate;
+    const monthDay = `${String(validSnapshotDate.getUTCMonth() + 1).padStart(2, "0")}-${String(validSnapshotDate.getUTCDate()).padStart(2, "0")}`;
+    const monthLabel = new Intl.DateTimeFormat("en", { month: "short", timeZone: "UTC" }).format(validSnapshotDate);
     const quotes = Array.isArray(history?.entries) ? history.entries : Array.isArray(history?.quotes) ? history.quotes : [];
     const exact = quotes.filter((quote) => String(quote.date).slice(5, 10) === monthDay);
     const nearestMonthDay = exact.length || !quotes.length
@@ -768,9 +672,9 @@ function renderSatoshiToday(history) {
         : quotes.filter((quote) => String(quote.date).slice(5, 10) === nearestMonthDay);
     state.satoshiQuoteIndex = 0;
 
-    elements.satoshiCalendar.dateTime = `${today.getFullYear()}-${monthDay}`;
+    elements.satoshiCalendar.dateTime = `${validSnapshotDate.getUTCFullYear()}-${monthDay}`;
     setText(elements.satoshiMonth, monthLabel);
-    setText(elements.satoshiDay, String(today.getDate()).padStart(2, "0"));
+    setText(elements.satoshiDay, String(validSnapshotDate.getUTCDate()).padStart(2, "0"));
 
     if (!state.satoshiQuotes.length) {
         setText(elements.satoshiDateStatus, "The archive is temporarily unavailable.");
@@ -783,11 +687,11 @@ function renderSatoshiToday(history) {
     }
 
     if (exact.length) {
-        setText(elements.satoshiDateStatus, `${exact.length} archived ${exact.length === 1 ? "message" : "messages"} on this calendar date.`);
-        setText(elements.satoshiQuoteLabel, "Satoshi, on this day");
+        setText(elements.satoshiDateStatus, `${exact.length} archived ${exact.length === 1 ? "message" : "messages"} on the snapshot date.`);
+        setText(elements.satoshiQuoteLabel, "Satoshi, on this UTC date");
     } else {
         const nearestDate = formatArchiveDate(state.satoshiQuotes[0].date);
-        setText(elements.satoshiDateStatus, "No indexed message is preserved for this calendar date.");
+        setText(elements.satoshiDateStatus, "No indexed message is preserved for the snapshot date.");
         setText(elements.satoshiQuoteLabel, `Nearest archive entry · ${nearestDate}`);
     }
 
@@ -796,11 +700,10 @@ function renderSatoshiToday(history) {
 
 function render(current) {
     state.current = current;
-    const comparisonEvents = buildComparisonEvents(current, state.previous);
     const liveEvents = buildCurrentEvents(current.metrics, current.generatedAt);
     const updates = Array.isArray(current.updates) ? current.updates : [];
     const priority = { action: 0, notable: 1, routine: 2 };
-    state.feed = deduplicateFeed([...comparisonEvents, ...liveEvents, ...updates])
+    state.feed = deduplicateFeed([...liveEvents, ...updates])
         .sort((left, right) => {
             const priorityDelta = (priority[left.level] ?? 2) - (priority[right.level] ?? 2);
             if (priorityDelta !== 0) return priorityDelta;
@@ -820,8 +723,7 @@ function render(current) {
     renderVisitSummary();
     renderSignalSummary();
     renderFeed();
-    renderSatoshiToday(current.satoshiHistory);
-    scheduleSave();
+    renderSatoshiForSnapshot(current.satoshiHistory, current.generatedAt);
 }
 
 async function refresh({ initial = false } = {}) {
@@ -873,7 +775,7 @@ elements.archiveToggle.addEventListener("click", () => {
     const archive = document.getElementById("satoshi-today");
     const expanded = archive.classList.toggle("expanded");
     elements.archiveToggle.setAttribute("aria-expanded", String(expanded));
-    elements.archiveToggle.firstChild.textContent = expanded ? "Hide today’s message " : "Read today’s message ";
+    elements.archiveToggle.firstChild.textContent = expanded ? "Hide archived message " : "Read archived message ";
 });
 
 elements.refreshButton.addEventListener("click", () => refresh());
@@ -881,6 +783,4 @@ elements.satoshiNext.addEventListener("click", () => {
     state.satoshiQuoteIndex = (state.satoshiQuoteIndex + 1) % state.satoshiQuotes.length;
     renderSatoshiQuote();
 });
-window.addEventListener("pagehide", saveCurrentVisit);
-
 refresh({ initial: true });
